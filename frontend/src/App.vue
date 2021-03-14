@@ -1,17 +1,29 @@
 <template>
-  <div id="app">
+  <div>
+    <div id="nav">
+      <router-link to="/">Home</router-link> |
+      <router-link to="/login">Login</router-link>
+    </div>
     <router-view/>
   </div>
 </template>
 
 <script>
+import '@fontsource/lato/index.css' /* weight 400 */
+
 export default {
-  name: 'App'
+  created () {
+    this.dispatchFetchAuth()
+  },
+  methods: {
+    dispatchFetchAuth () {
+      this.$store.dispatch('fetchAuth')
+    }
+  }
 }
 </script>
 
-<style>
-@import "@fontsource/lato/index.css"; /* weight 400 */
+<style lang="scss">
 
 :root {
   --sky-blue-crayola: #66d2e3ff;
@@ -30,5 +42,20 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   color: var(--dark-jungle-green);
+  margin: 0 auto;
+  max-width: 600px;
+}
+
+#nav {
+  padding: 30px;
+
+  a {
+    font-weight: bold;
+    color: var(--dark-jungle-green);
+
+    &.router-link-exact-active {
+      color: var(--midnight-green-eagle-green);
+    }
+  }
 }
 </style>

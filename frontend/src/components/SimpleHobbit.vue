@@ -2,7 +2,7 @@
   <div class="card">
     <div class="header">
       <div>
-        <h1>{{hobbit.name}}</h1>
+        <h1><router-link :to="`/hobbits/${hobbit.id}`">{{hobbit.name}}</router-link></h1>
         <div class="by">by {{hobbit.user.username}}</div>
         <div>
         {{hobbit.description}}
@@ -12,16 +12,72 @@
         <img :src="hobbit.image" />
       </div>
     </div>
+    <div>
+      <Loading v-if="loading" />
+      <Heatmap v-if="!loading" :data="getRecordsForHeatmap" class="heatmap"/>
+    </div>
   </div>
 </template>
 
 <script lang="ts">
-import { Hobbit } from '../models/index'
+import { Hobbit, NumericRecord } from '../models/index'
 import { defineComponent, PropType } from 'vue'
+import Loading from './Loading.vue'
+import { useStore } from '../store/index'
+import moment from 'moment'
+import Heatmap from './Heatmap.vue'
 
 export default defineComponent({
   props: {
     hobbit: Object as PropType<Hobbit>
+  },
+  components: {
+    Loading,
+    Heatmap
+  },
+  data () {
+    return {
+      loading: true,
+      calHeatMap: undefined as any
+    }
+  },
+  created () {
+    this.dispatchFetchRecords()
+  },
+  computed: {
+    getRecords (): NumericRecord[] {
+      return this?.hobbit?.records as NumericRecord[] || []
+    },
+    getRecordsForHeatmap (): object[] {
+      console.log('getRecordsForHeatmap')
+      const result = {}
+      const records = this?.hobbit?.records as NumericRecord[] || [{
+        timestamp: new Date(),
+        value: 0
+      }]
+      for (const record of records) {
+        console.log(record)
+        const thisTime = moment(record.timestamp)
+        const key = thisTime.format('YYYY-MM-DD')
+        if (!result[key]) {
+          result[key] = {
+            date: new Date(key),
+            count: 0
+          }
+        }
+        result[key].count += record.value
+      }
+      console.log('result', result)
+      return Object.values(result)
+    }
+  },
+  methods: {
+    dispatchFetchRecords () {
+      const store = useStore()
+      store.dispatch('fetchRecords', this.$props.hobbit?.id).then(() => {
+        this.$data.loading = false
+      })
+    }
   }
 })
 </script>
@@ -32,7 +88,7 @@ export default defineComponent({
   border-radius: 0.5rem;
   box-shadow: 0px 0px 5px -2px #000000;
   padding: 1rem;
-  margin: 0.5rem 0;
+  margin: 0.5rem 0.5rem;
 
   h1 {
     margin: 0;
@@ -51,6 +107,10 @@ export default defineComponent({
       width: 2rem;
       height: 2rem;
     }
+  }
+  .heatmap {
+    max-width: 600px;
+    margin: 1rem auto;
   }
 }
 

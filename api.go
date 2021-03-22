@@ -266,6 +266,5 @@ func BuildHandleApiGetRecords(db *gorm.DB, log *logrus.Logger) http.HandlerFunc 
 		}
 
 		json.NewEncoder(w).Encode(records)
-
 	}
 }

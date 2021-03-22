@@ -4,10 +4,12 @@
   </div>
 </template>
 
-<script>
-import SimpleHobbit from '../components/SimpleHobbit'
+<script lang="ts">
+import { useStore } from '../store'
+import { defineComponent } from 'vue'
+import SimpleHobbit from '../components/SimpleHobbit.vue'
 
-export default {
+export default defineComponent({
   name: 'Overview',
   components: { SimpleHobbit },
   created () {
@@ -15,8 +17,8 @@ export default {
   },
   methods: {
     dispatchFetchHobbits () {
-      this.$store.dispatch('fetchHobbits')
+      useStore().dispatch('fetchHobbits')
     }
   }
-}
+})
 </script>

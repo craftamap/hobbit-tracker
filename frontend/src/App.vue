@@ -2,25 +2,36 @@
   <div>
     <div id="nav">
       <router-link to="/">Home</router-link> |
-      <router-link to="/login">Login</router-link>
+      <template v-if="isAuthenticated">
+        <router-link to="/profile">Profile</router-link> |
+        <a href="/auth/logout">Logout</a>
+      </template>
+      <router-link v-if="!isAuthenticated" to="/login">Login</router-link>
     </div>
     <router-view/>
   </div>
 </template>
 
-<script>
+<script lang="ts">
 import '@fontsource/lato/index.css' /* weight 400 */
 
-export default {
+import { defineComponent } from 'vue'
+import { useStore } from './store'
+export default defineComponent({
   created () {
     this.dispatchFetchAuth()
   },
+  computed: {
+    isAuthenticated () {
+      return useStore().state.auth.authenticated
+    }
+  },
   methods: {
     dispatchFetchAuth () {
-      this.$store.dispatch('fetchAuth')
+      useStore().dispatch('fetchAuth')
     }
   }
-}
+})
 </script>
 
 <style lang="scss">
@@ -43,7 +54,7 @@ body {
   -moz-osx-font-smoothing: grayscale;
   color: var(--dark-jungle-green);
   margin: 0 auto;
-  max-width: 600px;
+  max-width: 1000px;
 }
 
 #nav {

@@ -2,9 +2,11 @@ package main
 
 import (
 	"embed"
+	"flag"
 	"fmt"
 	"io/fs"
 	"net/http"
+	"os"
 
 	"github.com/craftamap/hobbit-tracker/models"
 	"github.com/gorilla/mux"
@@ -12,6 +14,8 @@ import (
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
+
+var DiskMode bool
 
 //go:embed frontend/dist
 var content embed.FS
@@ -23,6 +27,9 @@ func init() {
 	log.SetFormatter(&logrus.TextFormatter{
 		FullTimestamp: true,
 	})
+
+	flag.BoolVar(&DiskMode, "disk-mode", false, "disk mode")
+	flag.Parse()
 }
 
 func loggingMiddleware(next http.Handler) http.Handler {
@@ -33,10 +40,15 @@ func loggingMiddleware(next http.Handler) http.Handler {
 }
 
 func frontendHandler() (http.Handler, error) {
-	fsys := fs.FS(content)
+	var fsys fs.FS
+	fsys = fs.FS(content)
 	contentStatic, err := fs.Sub(fsys, "frontend/dist")
 	if err != nil {
 		return nil, err
+	}
+	if DiskMode {
+		log.Warn("Disk Mode")
+		contentStatic = os.DirFS("frontend/dist")
 	}
 	return http.FileServer(http.FS(contentStatic)), nil
 }

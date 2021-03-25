@@ -270,3 +270,33 @@ func BuildHandleApiGetRecords(db *gorm.DB, log *logrus.Logger) http.HandlerFunc 
 		json.NewEncoder(w).Encode(records)
 	}
 }
+
+func BuildHandleApiGetRecordsForHeatmap(db *gorm.DB, log *logrus.Logger) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		vars := mux.Vars(r)
+		hobbitId, ok := vars["hobbit_id"]
+		if !ok {
+			log.Error("Can't get id from mux")
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+		numericHobbitId, err := strconv.ParseUint(hobbitId, 10, 32)
+		if err != nil {
+			log.Error(err)
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+
+		var records []models.NumericRecord
+		err = db.Model(&models.NumericRecord{}).Select("hobbit_id, sum(value) as value, timestamp").Group("date(timestamp)").Where(models.NumericRecord{
+			HobbitID: uint(numericHobbitId),
+		}).Find(&records).Error
+		if err != nil {
+			log.Error(err)
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+
+		json.NewEncoder(w).Encode(records)
+	}
+}

@@ -18,11 +18,21 @@
           </div>
         </div>
         <div>
-          <router-link :to="`/hobbits/${$route.params.id}/add`" class="add-record">Add Record</router-link>
+          <div class="buttons">
+            <router-link :to="`/hobbits/${$route.params.id}/add`"
+              custom
+              v-slot="{ navigate }">
+              <VButton value="Add Record" type="primary" @click="navigate" />
+            </router-link>
+            <router-link :to="`/hobbits/${$route.params.id}/edit`"
+              custom
+              v-slot="{ navigate }">
+              <VButton value="Edit" @click="navigate" />
+            </router-link>
+          </div>
           <table>
             <thead>
               <tr>
-                <td>id</td>
                 <td>date</td>
                 <td>value</td>
                 <td>comment</td>
@@ -30,7 +40,6 @@
             </thead>
             <tbody>
               <tr v-for="record in (hobbit.records || []).slice().reverse()" :key="record.ID">
-                <td>{{record.ID}}</td>
                 <td>{{formatDate(record.timestamp)}}</td>
                 <td>{{record.value}}</td>
                 <td>{{record.comment}}</td>
@@ -47,12 +56,14 @@
 import { defineComponent } from 'vue'
 import { Hobbit } from '@/models'
 import Loading from '@/components/Loading.vue'
+import VButton from '@/components/form/Button.vue'
 import moment from 'moment'
 
 export default defineComponent({
   name: 'Hobbit',
   components: {
-    Loading
+    Loading,
+    VButton
   },
   computed: {
     hobbit (): Hobbit {
@@ -61,14 +72,19 @@ export default defineComponent({
   },
   created () {
     if (!this.hobbit) {
-      this.dispatchFetchHobbits()
+      this.dispatchFetchHobbits().then(() => {
+        this.dispathFetchRecords()
+      })
+    } else {
+      this.dispathFetchRecords()
     }
   },
   methods: {
     dispatchFetchHobbits () {
-      this.$store.dispatch('fetchHobbits').then(() => {
-        return this.$store.dispatch('fetchRecords', Number(this.$route.params.id))
-      })
+      return this.$store.dispatch('fetchHobbits')
+    },
+    dispathFetchRecords () {
+      return this.$store.dispatch('fetchRecords', Number(this.$route.params.id))
     },
     formatDate (date: string) {
       return moment(date).format('YYYY-MM-DD HH:mm')
@@ -78,6 +94,11 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
+
+  .buttons {
+    display: flex;
+  }
+
   table {
     width: 100%;
     thead {
@@ -103,25 +124,4 @@ export default defineComponent({
       height: 2rem;
     }
   }
-
-.add-record {
-  margin-bottom: 0.5rem;
-  margin-top: 0.5rem;
-  appearance: none;
-  &:focus {
-    outline: none;
-  }
-  border: none;
-  line-height: 2em;
-  padding: 5px;
-  border-radius: 3px;
-  display: block;
-  margin-left: auto;
-  margin-right: auto;
-  width: 95%;
-  background: var(--ming);
-  color: #fff;
-  width: 100%;
-  text-align: center;
-}
 </style>

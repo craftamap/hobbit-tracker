@@ -3,17 +3,19 @@
     <div class="welcome" v-if="isAuthenticated">
       Here there, <span class="username">{{username}}</span>!
     </div>
-    <SimpleHobbit v-for="hobbit in $store.state.hobbits" :key='hobbit.id' :hobbit="hobbit" />
+    <IconBar @reload="reload" />
+    <SimpleHobbit v-for="hobbit in $store.state.hobbits.hobbits" :key='hobbit.id' :hobbit="hobbit" />
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue'
 import SimpleHobbit from '../components/SimpleHobbit.vue'
+import IconBar from '@/components/IconBar.vue'
 
 export default defineComponent({
   name: 'Overview',
-  components: { SimpleHobbit },
+  components: { SimpleHobbit, IconBar },
   created () {
     this.dispatchFetchHobbits()
   },
@@ -27,7 +29,12 @@ export default defineComponent({
   },
   methods: {
     dispatchFetchHobbits () {
-      this.$store.dispatch('fetchHobbits')
+      if (!this.$store.state.hobbits.initialLoaded) {
+        this.$store.dispatch('fetchHobbits')
+      }
+    },
+    reload () {
+        this.$store.dispatch('fetchHobbits')
     }
   }
 })

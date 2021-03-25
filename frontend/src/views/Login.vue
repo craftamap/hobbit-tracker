@@ -1,6 +1,6 @@
 <template>
   <div class="form-wrapper">
-    <form method="POST" action="/auth/login">
+    <form ref="form" method="POST" action="/auth/login">
       <div class="welcome">
         Welcome back!
       </div>
@@ -21,15 +21,25 @@
         />
       </div>
       <div>
-        <input type="submit" class="submit" />
+        <VButton @click="submit" value="Login" type="primary"/>
       </div>
     </form>
   </div>
 </template>
 
 <script>
+import VButton from '../components/form/Button'
+
 export default {
-  name: 'Login'
+  name: 'Login',
+  components: {
+    VButton
+  },
+  methods: {
+    submit () {
+      this.$refs.form.submit()
+    }
+  }
 }
 </script>
 

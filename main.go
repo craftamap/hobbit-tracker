@@ -16,6 +16,7 @@ import (
 )
 
 var DiskMode bool
+var Port int
 
 //go:embed frontend/dist
 var content embed.FS
@@ -29,6 +30,7 @@ func init() {
 	})
 
 	flag.BoolVar(&DiskMode, "disk-mode", false, "disk mode")
+	flag.IntVar(&Port, "port", 8080, "port")
 	flag.Parse()
 }
 
@@ -92,6 +94,7 @@ func main() {
 
 	records := hobbits.PathPrefix("/{hobbit_id:[0-9]+}/records").Subrouter()
 	records.Handle("/", BuildHandleApiGetRecords(db, log)).Methods("GET")
+	records.Handle("/heatmap", BuildHandleApiGetRecordsForHeatmap(db, log)).Methods("GET")
 	records.Handle("/", AuthMiddlewareBuilder(log)(
 		http.HandlerFunc(BuildHandleApiPostRecord(db, log)),
 	)).Methods("POST")
@@ -102,6 +105,7 @@ func main() {
 		return
 	}
 	r.PathPrefix("/").Handler(frontend)
-	log.Info("Listening on :3000")
-	http.ListenAndServe(":3000", r)
+	listeningOn := fmt.Sprintf(":%d", Port)
+	log.Infof("Listening on %s", listeningOn)
+	http.ListenAndServe(listeningOn, r)
 }

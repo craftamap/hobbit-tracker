@@ -1,9 +1,11 @@
-import { InjectionKey } from 'vue'
-import { createStore, Store, useStore as vuexUseStore } from 'vuex'
+import { createStore } from 'vuex'
 import { Hobbit, NumericRecord } from '../models/index'
 
 export interface State {
-  hobbits: Hobbit[];
+  hobbits: {
+    hobbits: {[key: number]: Hobbit};
+    initialLoaded: boolean;
+  };
   auth: {
     authenticated: boolean;
     username?: string;
@@ -13,7 +15,10 @@ export interface State {
 
 export const store = createStore<State>({
   state: {
-    hobbits: [],
+    hobbits: {
+      hobbits: {},
+      initialLoaded: false
+    },
     auth: {
       authenticated: false,
       username: undefined,
@@ -22,7 +27,7 @@ export const store = createStore<State>({
   },
   getters: {
     getHobbitById: (state) => (id: number): Hobbit => {
-      return state.hobbits.filter((h) => h.id === id)[0]
+      return state.hobbits.hobbits[id]
     }
   },
   mutations: {
@@ -31,13 +36,22 @@ export const store = createStore<State>({
       state.auth = payload
       console.log(state)
     },
-    setHobbits (state, hobbits) {
-      state.hobbits = hobbits
+    setInitialLoaded (state, { load }) {
+      state.hobbits.initialLoaded = load
+    },
+    setHobbits (state, hobbits: Hobbit[]) {
+      state.hobbits.hobbits = Object.assign({}, ...hobbits.map((x: Hobbit) => ({ [x.id]: x })))
       console.log(state)
     },
     setRecordsForHobbit (state, { hobbitId, records }: {hobbitId: number; records: NumericRecord[]}) {
-      const selectedHobbit = state.hobbits.filter((h) => h.id === hobbitId)[0]
+      const selectedHobbit = state.hobbits.hobbits[hobbitId]
       selectedHobbit.records = records
+      console.log(state)
+    },
+    setRecordsForHeatmapForHobbit (state, { hobbitId, records }: {hobbitId: number; records: NumericRecord[]}) {
+      const selectedHobbit = state.hobbits.hobbits[hobbitId]
+      console.log('selectedHobbit', selectedHobbit.id)
+      selectedHobbit.heatmap = records
       console.log(state)
     }
   },
@@ -48,6 +62,7 @@ export const store = createStore<State>({
           return res.json()
         }).then(json => {
           commit('setHobbits', json)
+          commit('setInitialLoaded', { load: true })
         })
     },
     async fetchAuth ({ commit }) {
@@ -58,7 +73,16 @@ export const store = createStore<State>({
           commit('setAuth', json)
         })
     },
+    async fetchHeatmapData ({ commit }, payload) {
+      return fetch(`/api/hobbits/${payload}/records/heatmap`)
+        .then(res => {
+          return res.json()
+        }).then(json => {
+          return commit('setRecordsForHeatmapForHobbit', { hobbitId: payload, records: json })
+        })
+    },
     async fetchRecords ({ commit }, payload) {
+      console.log('fetchRecords')
       return fetch(`/api/hobbits/${payload}/records/`)
         .then(res => {
           return res.json()

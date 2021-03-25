@@ -32,7 +32,8 @@
               <textarea name="comment" id="comment" rows="5" v-model="data.comment"></textarea>
             </div>
             <div>
-              <input type="button" class="submit" value="Add record" @click="dispatchPostRecord()"/>
+              <Button value="Add record" @click="dispatchPostRecord()" type="primary" :loading="submitting"/>
+              <Button value="Go back" @click="goBack()"/>
             </div>
           </form>
         </div>
@@ -46,10 +47,12 @@ import { defineComponent } from 'vue'
 import { Hobbit } from '@/models'
 import Loading from '@/components/Loading.vue'
 import moment from 'moment'
+import Button from '@/components/form/Button.vue'
 
 export default defineComponent({
   components: {
-    Loading
+    Loading,
+    Button
   },
   computed: {
     id (): number {
@@ -74,12 +77,23 @@ export default defineComponent({
       return moment().format('YYYY-MM-DDTHH:mm')
     },
     dispatchPostRecord () {
+      this.submitting = true
       this.$store.dispatch('postRecord', {
         id: this.id,
         timestamp: moment(this.data.timestamp).toDate(),
         value: Number(this.data.value),
         comment: this.data.comment
+      }).then(() => {
+        return Promise.all([
+          this.$store.dispatch('fetchRecords', this.id),
+          this.$store.dispatch('fetchHeatmapData', this.id)
+        ])
+      }).then(() => {
+        this.submitting = false
       })
+    },
+    goBack () {
+      this.$router.push('/hobbits/' + this.id)
     }
   }
 })

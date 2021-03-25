@@ -1,6 +1,6 @@
 <template>
   <div>
-      <svg width="44" height="44" viewBox="0 0 44 44" xmlns="http://www.w3.org/2000/svg" stroke="#000">
+      <svg :width="width" :height="width" viewBox="0 0 44 44" xmlns="http://www.w3.org/2000/svg" :stroke="stroke">
           <g fill="none" fill-rule="evenodd" stroke-width="2">
               <circle cx="22" cy="22" r="1">
                   <animate attributeName="r"
@@ -41,7 +41,22 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue'
-export default defineComponent({})
+export default defineComponent({
+  props: {
+    width: {
+      type: Number,
+      default: 48
+    },
+    height: {
+      type: Number,
+      default: 48
+    },
+    stroke: {
+      type: String,
+      default: '#000'
+    }
+  }
+})
 </script>
 
 <style lang="scss" scoped>

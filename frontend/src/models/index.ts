@@ -4,7 +4,8 @@ export interface Hobbit {
   name: string;
   image: string;
   description: string;
-  records: object[];
+  records: NumericRecord[];
+  heatmap: NumericRecord[];
 };
 
 export interface User {

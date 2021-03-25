@@ -2,10 +2,14 @@
   <div class="card">
     <div class="header">
       <div>
-        <h1><router-link :to="`/hobbits/${hobbit.id}`">{{hobbit.name}}</router-link></h1>
-        <div class="by">by {{hobbit.user.username}}</div>
+        <h1>
+          <router-link :to="`/hobbits/${hobbit.id}`">{{
+            hobbit.name
+          }}</router-link>
+        </h1>
+        <div class="by">by {{ hobbit.user.username }}</div>
         <div>
-        {{hobbit.description}}
+          {{ hobbit.description }}
         </div>
       </div>
       <div>
@@ -14,7 +18,7 @@
     </div>
     <div>
       <Loading v-if="loading" />
-      <Heatmap v-if="!loading" :data="getRecordsForHeatmap" class="heatmap"/>
+      <Heatmap v-if="!loading" :data="getHeatmapData" class="heatmap" />
     </div>
   </div>
 </template>
@@ -41,47 +45,47 @@ export default defineComponent({
     }
   },
   created () {
-    this.dispatchFetchRecords()
+    console.log('created', this.loading)
+    this.dispatchFetchHeatmapData()
   },
   computed: {
     getRecords (): NumericRecord[] {
-      return this?.hobbit?.records as NumericRecord[] || []
+      return (this?.hobbit?.records as NumericRecord[]) || []
     },
-    getRecordsForHeatmap (): object[] {
-      console.log('getRecordsForHeatmap')
-      const result: {[key: string]: {date: Date; count: number}} = {}
-      const records = this?.hobbit?.records as NumericRecord[] || [{
-        timestamp: new Date(),
-        value: 0
-      }]
-      for (const record of records) {
-        console.log(record)
-        const thisTime = moment(record.timestamp)
-        const key = thisTime.format('YYYY-MM-DD')
-        if (!result[key]) {
-          result[key] = {
-            date: new Date(key),
-            count: 0
+    getHeatmapData (): object[] {
+      const result: { [key: string]: { date: Date; count: number } } = {}
+      return (
+        (this?.hobbit?.heatmap as NumericRecord[]) || [
+          {
+            timestamp: new Date(),
+            value: 0
           }
+        ]
+      ).map((record) => {
+        return {
+          date: new Date(record.timestamp),
+          count: record.value
         }
-        result[key].count += record.value
-      }
-      console.log('result', result)
-      return Object.values(result)
+      })
     }
   },
   methods: {
-    dispatchFetchRecords () {
-      this.$store.dispatch('fetchRecords', this.$props.hobbit?.id).then(() => {
+    dispatchFetchHeatmapData () {
+      if (!this.$props.hobbit?.heatmap) {
+        this.$store
+          .dispatch('fetchHeatmapData', this.$props.hobbit?.id)
+          .then(() => {
+            this.$data.loading = false
+          })
+      } else {
         this.$data.loading = false
-      })
+      }
     }
   }
 })
 </script>
 
 <style lang="scss" scoped>
-
 .card {
   border-radius: 0.5rem;
   box-shadow: 0px 0px 5px -2px #000000;
@@ -111,5 +115,4 @@ export default defineComponent({
     margin: 1rem auto;
   }
 }
-
 </style>

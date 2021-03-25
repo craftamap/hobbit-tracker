@@ -18,7 +18,7 @@
           </div>
         </div>
         <div>
-          <router-link :to="`/hobbits/${$route.params.id}/add`">Add Record</router-link>
+          <router-link :to="`/hobbits/${$route.params.id}/add`" class="add-record">Add Record</router-link>
           <table>
             <thead>
               <tr>
@@ -44,7 +44,6 @@
 </template>
 
 <script lang="ts">
-import { useStore } from '../store'
 import { defineComponent } from 'vue'
 import { Hobbit } from '@/models'
 import Loading from '@/components/Loading.vue'
@@ -57,7 +56,7 @@ export default defineComponent({
   },
   computed: {
     hobbit (): Hobbit {
-      return useStore().getters.getHobbitById(Number(this.$route.params.id))
+      return this.$store.getters.getHobbitById(Number(this.$route.params.id))
     }
   },
   created () {
@@ -67,9 +66,8 @@ export default defineComponent({
   },
   methods: {
     dispatchFetchHobbits () {
-      const store = useStore()
-      store.dispatch('fetchHobbits').then(() => {
-        return store.dispatch('fetchRecords', Number(this.$route.params.id))
+      this.$store.dispatch('fetchHobbits').then(() => {
+        return this.$store.dispatch('fetchRecords', Number(this.$route.params.id))
       })
     },
     formatDate (date: string) {
@@ -105,4 +103,25 @@ export default defineComponent({
       height: 2rem;
     }
   }
+
+.add-record {
+  margin-bottom: 0.5rem;
+  margin-top: 0.5rem;
+  appearance: none;
+  &:focus {
+    outline: none;
+  }
+  border: none;
+  line-height: 2em;
+  padding: 5px;
+  border-radius: 3px;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  width: 95%;
+  background: var(--ming);
+  color: #fff;
+  width: 100%;
+  text-align: center;
+}
 </style>

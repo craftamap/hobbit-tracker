@@ -17,19 +17,22 @@
             <img :src="hobbit.image" />
           </div>
         </div>
-        <div>
+        <div class="form-wrapper">
           <form>
             <div>
               <label for="timestamp">When:</label>
-              <input id="timestamp" name="timestamp" type="datetime-local" :value="getToday()" />
+              <input id="timestamp" name="timestamp" type="datetime-local" v-model="data.timestamp" />
             </div>
             <div>
               <label for="value">Value:</label>
-              <input type="number" name="number" id="number" value="10" />
+              <input type="number" name="number" id="number" v-model="data.value" />
             </div>
             <div>
               <label for="comment">Comment:</label>
-              <textarea name="comment" id="comment" rows="5"></textarea>
+              <textarea name="comment" id="comment" rows="5" v-model="data.comment"></textarea>
+            </div>
+            <div>
+              <input type="button" class="submit" value="Add record" @click="dispatchPostRecord()"/>
             </div>
           </form>
         </div>
@@ -40,7 +43,6 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue'
-import { useStore } from '../store'
 import { Hobbit } from '@/models'
 import Loading from '@/components/Loading.vue'
 import moment from 'moment'
@@ -50,22 +52,34 @@ export default defineComponent({
     Loading
   },
   computed: {
+    id (): number {
+      return Number(this.$route.params.id)
+    },
     hobbit (): Hobbit {
-      return useStore().getters.getHobbitById(Number(this.$route.params.id))
+      return this.$store.getters.getHobbitById(Number(this.$route.params.id))
     }
   },
-  created () {
-    if (!this.hobbit) {
-      this.dispatchFetchHobbits()
+  data () {
+    return {
+      submitting: false,
+      data: {
+        timestamp: this.getToday(),
+        value: 10,
+        comment: ''
+      }
     }
   },
   methods: {
-    dispatchFetchHobbits () {
-      const store = useStore()
-      store.dispatch('fetchHobbits')
-    },
     getToday () {
       return moment().format('YYYY-MM-DDTHH:mm')
+    },
+    dispatchPostRecord () {
+      this.$store.dispatch('postRecord', {
+        id: this.id,
+        timestamp: moment(this.data.timestamp).toDate(),
+        value: Number(this.data.value),
+        comment: this.data.comment
+      })
     }
   }
 })
@@ -102,4 +116,38 @@ export default defineComponent({
       height: 2rem;
     }
   }
+.form-wrapper {
+  display: flex;
+  justify-content: center;
+  justify-items: center;
+
+  form {
+    border-radius: 0.5rem;
+    padding: 2rem;
+    background: #eee;
+    width: 300px;
+
+    input, textarea {
+      margin-bottom: 0.25rem;
+      appearance: none;
+      &:focus {
+        outline: none;
+      }
+      border: none;
+      line-height: 2em;
+      padding: 5px;
+      border-radius: 3px;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+      width: 95%;
+
+      &.submit {
+        background: var(--ming);
+        color: #fff;
+        width: 100%;
+      }
+    }
+  }
+}
 </style>

@@ -9,7 +9,7 @@
         </div>
       </div>
       <div>
-        <img :src="hobbit.image" />
+        <img :src="hobbit.image" v-if="hobbit.image" />
       </div>
     </div>
     <div>
@@ -23,7 +23,6 @@
 import { Hobbit, NumericRecord } from '../models/index'
 import { defineComponent, PropType } from 'vue'
 import Loading from './Loading.vue'
-import { useStore } from '../store/index'
 import moment from 'moment'
 import Heatmap from './Heatmap.vue'
 
@@ -50,7 +49,7 @@ export default defineComponent({
     },
     getRecordsForHeatmap (): object[] {
       console.log('getRecordsForHeatmap')
-      const result = {}
+      const result: {[key: string]: {date: Date; count: number}} = {}
       const records = this?.hobbit?.records as NumericRecord[] || [{
         timestamp: new Date(),
         value: 0
@@ -73,8 +72,7 @@ export default defineComponent({
   },
   methods: {
     dispatchFetchRecords () {
-      const store = useStore()
-      store.dispatch('fetchRecords', this.$props.hobbit?.id).then(() => {
+      this.$store.dispatch('fetchRecords', this.$props.hobbit?.id).then(() => {
         this.$data.loading = false
       })
     }

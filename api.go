@@ -206,6 +206,7 @@ func BuildHandleApiPostRecord(db *gorm.DB, log *logrus.Logger) http.HandlerFunc 
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
+		log.Info("recievedRecord", recievedRecord)
 
 		// Are we allowed to create records for this hobbit?
 		// TODO: error handling
@@ -219,9 +220,10 @@ func BuildHandleApiPostRecord(db *gorm.DB, log *logrus.Logger) http.HandlerFunc 
 		}
 
 		sanitizedRecord := models.NumericRecord{
-			HobbitID: parentHobbit.ID,
-			Value:    recievedRecord.Value,
-			Comment:  recievedRecord.Comment,
+			HobbitID:  parentHobbit.ID,
+			Timestamp: recievedRecord.Timestamp,
+			Value:     recievedRecord.Value,
+			Comment:   recievedRecord.Comment,
 		}
 
 		err = db.Create(&sanitizedRecord).Error

@@ -16,19 +16,18 @@
 import '@fontsource/lato/index.css' /* weight 400 */
 
 import { defineComponent } from 'vue'
-import { useStore } from './store'
 export default defineComponent({
   created () {
     this.dispatchFetchAuth()
   },
   computed: {
     isAuthenticated () {
-      return useStore().state.auth.authenticated
+      return this.$store.state.auth.authenticated
     }
   },
   methods: {
     dispatchFetchAuth () {
-      useStore().dispatch('fetchAuth')
+      this.$store.dispatch('fetchAuth')
     }
   }
 })
@@ -65,8 +64,15 @@ body {
     color: var(--dark-jungle-green);
 
     &.router-link-exact-active {
-      color: var(--midnight-green-eagle-green);
+      color: var(--ming);
     }
+  }
+}
+
+a {
+  text-decoration: none;
+  &:visited {
+    color: inherit;
   }
 }
 </style>

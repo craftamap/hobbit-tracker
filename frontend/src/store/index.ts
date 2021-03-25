@@ -6,17 +6,18 @@ export interface State {
   hobbits: Hobbit[];
   auth: {
     authenticated: boolean;
+    username?: string;
+    userId?: number;
   };
 }
-
-// eslint-disable-next-line symbol-description
-export const key: InjectionKey<Store<State>> = Symbol()
 
 export const store = createStore<State>({
   state: {
     hobbits: [],
     auth: {
-      authenticated: false
+      authenticated: false,
+      username: undefined,
+      userId: undefined
     }
   },
   getters: {
@@ -26,6 +27,7 @@ export const store = createStore<State>({
   },
   mutations: {
     setAuth (state, payload) {
+      console.log(payload)
       state.auth = payload
       console.log(state)
     },
@@ -63,10 +65,23 @@ export const store = createStore<State>({
         }).then(json => {
           return commit('setRecordsForHobbit', { hobbitId: payload, records: json })
         })
+    },
+    async postRecord ({ commit }, { id, timestamp, value, comment }) {
+      return fetch(`/api/hobbits/${id}/records/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          timestamp,
+          value,
+          comment
+        })
+      }).then(res => {
+        return res.json()
+      }).then(json => {
+        console.log(json)
+      })
     }
   }
 })
-
-export function useStore (): Store<State> {
-  return vuexUseStore(key)
-}

@@ -1,5 +1,5 @@
 <template>
-  <button :class="[type, loading ? 'loading' : '']" @click="emitClick" type="button">
+  <button :class="[type, loading ? 'loading' : '']" type="button">
     <span>
       {{value}}
     </span>
@@ -20,11 +20,6 @@ export default defineComponent({
     type: String,
     value: String,
     loading: Boolean as PropType<boolean>
-  },
-  methods: {
-    emitClick (...args: any[]) {
-      // this.$emit('click', ...args)
-    }
   }
 })
 </script>
@@ -43,6 +38,7 @@ button {
   display: block;
   width: 95%;
   position: relative;
+  background: lightgray;
 
   &:focus {
     outline: none;

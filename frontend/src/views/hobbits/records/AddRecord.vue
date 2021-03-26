@@ -62,6 +62,11 @@ export default defineComponent({
       return this.$store.getters.getHobbitById(Number(this.$route.params.id))
     }
   },
+  created() {
+    if (!this.hobbit) {
+      this.dispatchFetchHobbit()
+    }
+  },
   data () {
     return {
       submitting: false,
@@ -91,6 +96,9 @@ export default defineComponent({
       }).then(() => {
         this.submitting = false
       })
+    },
+    dispatchFetchHobbit () {
+      this.$store.dispatch('fetchHobbit', { id: this.id })
     },
     goBack () {
       this.$router.push('/hobbits/' + this.id)

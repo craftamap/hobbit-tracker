@@ -18,8 +18,8 @@
           </div>
         </div>
         <div>
-          <div class="buttons">
-            <router-link :to="`/hobbits/${$route.params.id}/add`"
+          <div class="buttons" v-if="auth.authenticated && auth.userId === hobbit.user.id">
+            <router-link :to="`/hobbits/${$route.params.id}/records/add`"
               custom
               v-slot="{ navigate }">
               <VButton value="Add Record" type="primary" @click="navigate" />
@@ -58,6 +58,7 @@ import { Hobbit } from '@/models'
 import Loading from '@/components/Loading.vue'
 import VButton from '@/components/form/Button.vue'
 import moment from 'moment'
+import { State } from '@/store'
 
 export default defineComponent({
   name: 'Hobbit',
@@ -68,6 +69,9 @@ export default defineComponent({
   computed: {
     hobbit (): Hobbit {
       return this.$store.getters.getHobbitById(Number(this.$route.params.id))
+    },
+    auth (): State['auth'] {
+      return this.$store.state.auth
     }
   },
   created () {
@@ -122,6 +126,16 @@ export default defineComponent({
     img {
       width: 2rem;
       height: 2rem;
+    }
+  }
+
+  table {
+    border-collapse: collapse;
+    th, td {
+      padding: 16px 0px;
+    }
+    tr {
+      border-bottom: solid 1px lightgray;
     }
   }
 </style>

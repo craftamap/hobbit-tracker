@@ -34,7 +34,7 @@ export default defineComponent({
       }
     },
     reload () {
-        this.$store.dispatch('fetchHobbits')
+      this.$store.dispatch('fetchHobbits')
     }
   }
 })

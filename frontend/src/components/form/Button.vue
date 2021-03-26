@@ -23,7 +23,7 @@ export default defineComponent({
   },
   methods: {
     emitClick (...args: any[]) {
-      this.$emit('click', ...args)
+     // this.$emit('click', ...args)
     }
   }
 })

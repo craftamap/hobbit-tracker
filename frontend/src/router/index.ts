@@ -16,12 +16,16 @@ const routes: Array<RouteRecordRaw> = [
     component: () => import(/* webpackChunkName: "login" */ '../views/Login.vue')
   },
   {
-    path: '/hobbits/:id',
-    component: () => import(/* webpackChunkName: "hobbits" */ '../views/Hobbit.vue')
+    path: '/hobbits/add',
+    component: () => import(/* webpackChunkName: "hobbits" */ '../views/hobbits/AddHobbit.vue')
   },
   {
-    path: '/hobbits/:id/add',
-    component: () => import(/* webpackChunkName: "hobbits" */ '../views/Add.vue')
+    path: '/hobbits/:id',
+    component: () => import(/* webpackChunkName: "hobbits" */ '../views/hobbits/Hobbit.vue')
+  },
+  {
+    path: '/hobbits/:id/records/add',
+    component: () => import(/* webpackChunkName: "hobbits" */ '../views/hobbits/records/AddRecord.vue')
   }
 ]
 

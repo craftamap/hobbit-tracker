@@ -40,8 +40,11 @@ export const store = createStore<State>({
       state.hobbits.initialLoaded = load
     },
     setHobbits (state, hobbits: Hobbit[]) {
-      state.hobbits.hobbits = Object.assign({}, ...hobbits.map((x: Hobbit) => ({ [x.id]: x })))
+      state.hobbits.hobbits = Object.assign({}, ...hobbits.map((x: Hobbit) => ({ [x.id]: Object.assign({}, state.hobbits.hobbits[x.id], x) })))
       console.log(state)
+    },
+    setHobbit (state, hobbit: Hobbit) {
+      state.hobbits.hobbits[hobbit.id] = Object.assign({}, state.hobbits.hobbits[hobbit.id], hobbit)
     },
     setRecordsForHobbit (state, { hobbitId, records }: {hobbitId: number; records: NumericRecord[]}) {
       const selectedHobbit = state.hobbits.hobbits[hobbitId]
@@ -63,6 +66,14 @@ export const store = createStore<State>({
         }).then(json => {
           commit('setHobbits', json)
           commit('setInitialLoaded', { load: true })
+        })
+    },
+    async fetchHobbit ({ commit }, { id }) {
+      fetch(`/api/hobbits/${id}`)
+        .then(res => {
+          return res.json()
+        }).then(json => {
+          commit('setHobbit', json)
         })
     },
     async fetchAuth ({ commit }) {

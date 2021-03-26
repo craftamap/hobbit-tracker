@@ -62,7 +62,7 @@ export default defineComponent({
       return this.$store.getters.getHobbitById(Number(this.$route.params.id))
     }
   },
-  created() {
+  created () {
     if (!this.hobbit) {
       this.dispatchFetchHobbit()
     }

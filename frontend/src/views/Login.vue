@@ -1,6 +1,6 @@
 <template>
   <div class="form-wrapper">
-    <form ref="form" method="POST" action="/auth/login">
+    <form ref="form" method="POST" action="/auth/login" v-on:keyup.enter="submit">
       <div class="welcome">
         Welcome back!
       </div>

@@ -17,7 +17,7 @@ export default defineComponent({
       const calHeatMap = new CalendarHeatMap()
         .data(newVal)
         .selector(`[data-uid='${this.uid}']`)
-        .colorRange(['#D8E6E7', '#218380'])
+        .colorRange(['#e9f6f7', '#218380'])
         .tooltipEnabled(true)
         .onClick(function (data: any) {
           console.log('onClick callback. Data:', data)
@@ -30,7 +30,7 @@ export default defineComponent({
     const calHeatMap = new CalendarHeatMap()
       .data(this.data)
       .selector(`[data-uid='${this.uid}']`)
-      .colorRange(['#D8E6E7', '#218380'])
+      .colorRange(['#e9f6f7', '#218380'])
       .tooltipEnabled(true)
       .onClick(function (data: any) {
         console.log('onClick callback. Data:', data)

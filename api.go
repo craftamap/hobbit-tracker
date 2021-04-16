@@ -300,3 +300,18 @@ func BuildHandleApiGetRecordsForHeatmap(db *gorm.DB, log *logrus.Logger) http.Ha
 		json.NewEncoder(w).Encode(records)
 	}
 }
+
+func BuildHandleApiProfileGetHobbits(db *gorm.DB, log *logrus.Logger) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		hobbits := []models.Hobbit{}
+
+		err := db.Joins("User").Where(&models.Hobbit{UserID: r.Context().Value(AUTH_DETAILS).(AuthDetails).UserID}).Find(&hobbits).Error
+		if err != nil {
+			log.Error(err)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
+		json.NewEncoder(w).Encode(hobbits)
+	}
+}

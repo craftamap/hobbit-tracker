@@ -67,7 +67,7 @@ export const store = createStore<State>({
     async fetchHobbitsByUser ({ commit }, { userId }) {
       // TODO: Add endpoint for this
       console.log(userId)
-      fetch('/api/hobbits/')
+      fetch('/api/profile/me/hobbits/')
         .then(res => {
           return res.json()
         }).then(json => {

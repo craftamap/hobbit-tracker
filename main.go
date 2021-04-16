@@ -99,6 +99,13 @@ func main() {
 		http.HandlerFunc(BuildHandleApiPostRecord(db, log)),
 	)).Methods("POST")
 
+	profile := api.PathPrefix("/profile").Subrouter()
+	profileMe := profile.PathPrefix("/me").Subrouter()
+	profileMe.Handle("/", BuildHandleApiGetAuth(db, log))
+	profileMe.Handle("/hobbits", AuthMiddlewareBuilder(log)(
+		http.HandlerFunc(BuildHandleApiProfileGetHobbits(db, log)),
+	)).Methods("GET")
+
 	frontend, err := frontendHandler()
 	if err != nil {
 		fmt.Println(err)

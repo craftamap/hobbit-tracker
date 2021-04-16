@@ -22,6 +22,9 @@ export default defineComponent({
   components: {
     SimpleHobbit
   },
+  created () {
+    this.dispatchFetchHobbitsByUser()
+  },
   computed: {
     username (): string {
       return this.$store.state.auth.username as string
@@ -31,6 +34,11 @@ export default defineComponent({
     },
     hobbitsOfUser (): Hobbit[] {
       return this.$store.getters.getHobbitsByUser(this.userId)
+    }
+  },
+  methods: {
+    dispatchFetchHobbitsByUser () {
+      this.$store.dispatch('fetchHobbitsByUser', { userId: this.userId })
     }
   }
 })

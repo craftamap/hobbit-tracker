@@ -4,7 +4,7 @@
       Here there, <span class="username">{{username}}</span>!
     </div>
     <IconBar @reload="reload" />
-    <SimpleHobbit v-for="hobbit in $store.state.hobbits.hobbits" :key='hobbit.id' :hobbit="hobbit" />
+    <SimpleHobbit v-for="hobbit in hobbits" :key='hobbit.id' :hobbit="hobbit" />
   </div>
 </template>
 
@@ -12,6 +12,7 @@
 import { defineComponent } from 'vue'
 import SimpleHobbit from '../components/SimpleHobbit.vue'
 import IconBar from '@/components/IconBar.vue'
+import { Hobbit } from '@/models'
 
 export default defineComponent({
   name: 'Overview',
@@ -25,6 +26,9 @@ export default defineComponent({
     },
     isAuthenticated () {
       return this.$store.state.auth.authenticated
+    },
+    hobbits (): Hobbit[] {
+      return this.$store.getters.getHobbits()
     }
   },
   methods: {

@@ -26,6 +26,11 @@ export const store = createStore<State>({
     }
   },
   getters: {
+    getHobbits: (state) => (): Hobbit[] => {
+      return Object.values(state.hobbits.hobbits).sort((a, b) => {
+        return a.id - b.id
+      })
+    },
     getHobbitById: (state) => (id: number): Hobbit => {
       return state.hobbits.hobbits[id]
     },
@@ -131,6 +136,25 @@ export const store = createStore<State>({
         return res.json()
       }).then(json => {
         console.log(json)
+        // TODO: Store in store
+      })
+    },
+    async postHobbit ({ commit }, { name, description, image }) {
+      return fetch('/api/hobbits/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          name,
+          description,
+          image
+        })
+      }).then(res => {
+        return res.json()
+      }).then(json => {
+        console.log(json)
+        commit('setHobbit', json)
       })
     }
   }

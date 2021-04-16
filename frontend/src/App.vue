@@ -3,7 +3,7 @@
     <div id="nav">
       <router-link to="/">Home</router-link> |
       <template v-if="isAuthenticated">
-        <router-link to="/profile">Profile</router-link> |
+        <router-link to="/profile/me">Profile</router-link> |
         <a href="/auth/logout">Logout</a>
       </template>
       <router-link v-if="!isAuthenticated" to="/login">Login</router-link>

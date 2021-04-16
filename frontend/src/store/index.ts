@@ -156,6 +156,24 @@ export const store = createStore<State>({
         console.log(json)
         commit('setHobbit', json)
       })
+    },
+    async putHobbit ({ commit }, { id, name, description, image }) {
+      return fetch(`/api/hobbits/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          name,
+          description,
+          image
+        })
+      }).then(res => {
+        return res.json()
+      }).then(json => {
+        console.log(json)
+        commit('setHobbit', json)
+      })
     }
   }
 })

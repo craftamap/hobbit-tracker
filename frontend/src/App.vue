@@ -8,7 +8,11 @@
       </template>
       <router-link v-if="!isAuthenticated" to="/login">Login</router-link>
     </div>
-    <router-view/>
+    <router-view v-slot="{ Component }">
+      <transition name="fade" mode="out-in">
+        <component :is="Component" />
+      </transition>
+    </router-view>
   </div>
 </template>
 
@@ -47,6 +51,13 @@ body {
   margin: 0;
 }
 
+.fade-enter-active, .fade-leave-active {
+  transition: opacity .2s;
+}
+.fade-enter-from, .fade-leave-to {
+  opacity: 0;
+}
+
 #app {
   font-family: 'Lato', Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -75,4 +86,5 @@ a {
     color: inherit;
   }
 }
+
 </style>

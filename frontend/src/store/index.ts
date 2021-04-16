@@ -28,6 +28,11 @@ export const store = createStore<State>({
   getters: {
     getHobbitById: (state) => (id: number): Hobbit => {
       return state.hobbits.hobbits[id]
+    },
+    getHobbitsByUser: (state) => (userId: number): Hobbit[] => {
+      return Object.values(state.hobbits.hobbits).filter((value) => {
+        return value.user.id === userId
+      })
     }
   },
   mutations: {
@@ -59,6 +64,16 @@ export const store = createStore<State>({
     }
   },
   actions: {
+    async fetchHobbitsByUser ({ commit }, { userId }) {
+      // TODO: Add endpoint for this
+      console.log(userId)
+      fetch('/api/hobbits/')
+        .then(res => {
+          return res.json()
+        }).then(json => {
+          commit('setHobbits', json)
+        })
+    },
     async fetchHobbits ({ commit }) {
       fetch('/api/hobbits/')
         .then(res => {

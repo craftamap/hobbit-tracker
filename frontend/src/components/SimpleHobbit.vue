@@ -1,5 +1,5 @@
 <template>
-  <div class="card">
+  <div class="card" :data-id="hobbit.id">
     <div class="header">
       <div>
         <h1>

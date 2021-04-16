@@ -45,7 +45,7 @@ export const store = createStore<State>({
       state.hobbits.initialLoaded = load
     },
     setHobbits (state, hobbits: Hobbit[]) {
-      state.hobbits.hobbits = Object.assign({}, ...hobbits.map((x: Hobbit) => ({ [x.id]: Object.assign({}, state.hobbits.hobbits[x.id], x) })))
+      state.hobbits.hobbits = Object.assign({}, state.hobbits.hobbits, ...hobbits.map((x: Hobbit) => ({ [x.id]: Object.assign({}, state.hobbits.hobbits[x.id], x) })))
       console.log(state)
     },
     setHobbit (state, hobbit: Hobbit) {

@@ -7,7 +7,7 @@
         <Loading />
       </template>
       <template v-if="hobbit">
-        <div class="form-wrapper">
+        <FormWrapper>
           <form>
             <div>
               <label for="name">Hobbit name:</label>
@@ -26,7 +26,7 @@
               <Button value="Go back" @click="goBack()"/>
             </div>
           </form>
-        </div>
+        </FormWrapper>
       </template>
   </div>
 </template>
@@ -36,12 +36,14 @@ import { Hobbit } from '@/models'
 import { defineComponent } from 'vue'
 import Button from '../../components/form/Button.vue'
 import Loading from '../../components/Loading.vue'
+import FormWrapper from '@/components/form/FormWrapper.vue'
 
 export default defineComponent({
   name: 'AddHobbit',
   components: {
     Button,
-    Loading
+    Loading,
+    FormWrapper
   },
   created () {
     if (!this.hobbit) {
@@ -119,40 +121,3 @@ export default defineComponent({
   }
 })
 </script>
-
-<style lang="scss" scoped>
-.form-wrapper {
-  display: flex;
-  justify-content: center;
-  justify-items: center;
-
-  form {
-    border-radius: 0.5rem;
-    padding: 2rem;
-    background: #eee;
-    width: 300px;
-
-    input, textarea {
-      margin-bottom: 0.25rem;
-      appearance: none;
-      &:focus {
-        outline: none;
-      }
-      border: none;
-      line-height: 2em;
-      padding: 5px;
-      border-radius: 3px;
-      display: block;
-      margin-left: auto;
-      margin-right: auto;
-      width: 95%;
-
-      &.submit {
-        background: var(--ming);
-        color: #fff;
-        width: 100%;
-      }
-    }
-  }
-}
-</style>

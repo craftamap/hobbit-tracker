@@ -17,7 +17,7 @@
             <img :src="hobbit.image" />
           </div>
         </div>
-        <div class="form-wrapper">
+        <FormWrapper>
           <form>
             <div>
               <label for="timestamp">When:</label>
@@ -36,13 +36,14 @@
               <Button value="Go back" @click="goBack()"/>
             </div>
           </form>
-        </div>
+        </FormWrapper>
       </div>
     </template>
   </div>
 </template>
 
 <script lang="ts">
+import FormWrapper from '@/components/form/FormWrapper.vue'
 import { defineComponent } from 'vue'
 import { Hobbit } from '@/models'
 import Loading from '@/components/Loading.vue'
@@ -52,7 +53,8 @@ import Button from '@/components/form/Button.vue'
 export default defineComponent({
   components: {
     Loading,
-    Button
+    Button,
+    FormWrapper
   },
   computed: {
     id (): number {
@@ -138,38 +140,4 @@ export default defineComponent({
       height: 2rem;
     }
   }
-.form-wrapper {
-  display: flex;
-  justify-content: center;
-  justify-items: center;
-
-  form {
-    border-radius: 0.5rem;
-    padding: 2rem;
-    background: #eee;
-    width: 300px;
-
-    input, textarea {
-      margin-bottom: 0.25rem;
-      appearance: none;
-      &:focus {
-        outline: none;
-      }
-      border: none;
-      line-height: 2em;
-      padding: 5px;
-      border-radius: 3px;
-      display: block;
-      margin-left: auto;
-      margin-right: auto;
-      width: 95%;
-
-      &.submit {
-        background: var(--ming);
-        color: #fff;
-        width: 100%;
-      }
-    }
-  }
-}
 </style>

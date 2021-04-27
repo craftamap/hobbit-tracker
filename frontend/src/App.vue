@@ -38,7 +38,6 @@ export default defineComponent({
 </script>
 
 <style lang="scss">
-
 :root {
   --sky-blue-crayola: #66d2e3ff;
   --cadet-blue: #49a0abff;
@@ -47,24 +46,36 @@ export default defineComponent({
   --dark-jungle-green: #111d1fff;
 }
 
+@media (prefers-color-scheme: dark) {
+  body {
+    background: var(--dark-jungle-green);
+  }
+}
+
 body {
   margin: 0;
 }
 
-.fade-enter-active, .fade-leave-active {
-  transition: opacity .2s;
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.2s;
 }
-.fade-enter-from, .fade-leave-to {
+.fade-enter-from,
+.fade-leave-to {
   opacity: 0;
 }
 
 #app {
-  font-family: 'Lato', Helvetica, Arial, sans-serif;
+  font-family: "Lato", Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   color: var(--dark-jungle-green);
   margin: 0 auto;
   max-width: 1000px;
+
+  @media (prefers-color-scheme: dark) {
+    color: white;
+  }
 }
 
 #nav {
@@ -73,6 +84,10 @@ body {
   a {
     font-weight: bold;
     color: var(--dark-jungle-green);
+
+    @media (prefers-color-scheme: dark) {
+      color: white;
+    }
 
     &.router-link-exact-active {
       color: var(--ming);
@@ -86,5 +101,4 @@ a {
     color: inherit;
   }
 }
-
 </style>

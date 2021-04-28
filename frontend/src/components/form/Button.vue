@@ -14,13 +14,13 @@ import Loading from '../Loading.vue'
 export default defineComponent({
   name: 'VButton',
   components: {
-    Loading
+    Loading,
   },
   props: {
     type: String,
     value: String,
-    loading: Boolean as PropType<boolean>
-  }
+    loading: Boolean as PropType<boolean>,
+  },
 })
 </script>
 

@@ -29,7 +29,7 @@ export default defineComponent({
     },
     hobbits (): Hobbit[] {
       return this.$store.getters.getHobbits()
-    }
+    },
   },
   methods: {
     dispatchFetchHobbits () {
@@ -39,8 +39,8 @@ export default defineComponent({
     },
     reload () {
       this.$store.dispatch('fetchHobbits')
-    }
-  }
+    },
+  },
 })
 </script>
 

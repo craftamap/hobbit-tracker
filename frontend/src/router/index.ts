@@ -5,7 +5,7 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/',
     name: 'Overview',
-    component: Overview
+    component: Overview,
   },
   {
     path: '/login',
@@ -13,33 +13,33 @@ const routes: Array<RouteRecordRaw> = [
     // route level code-splitting
     // this generates a separate chunk (about.[hash].js) for this route
     // which is lazy-loaded when the route is visited.
-    component: () => import(/* webpackChunkName: "login" */ '../views/Login.vue')
+    component: () => import(/* webpackChunkName: "login" */ '../views/Login.vue'),
   },
   {
     path: '/hobbits/add',
-    component: () => import(/* webpackChunkName: "hobbits" */ '../views/hobbits/AddHobbit.vue')
+    component: () => import(/* webpackChunkName: "hobbits" */ '../views/hobbits/AddHobbit.vue'),
   },
   {
     path: '/hobbits/:id',
-    component: () => import(/* webpackChunkName: "hobbits" */ '../views/hobbits/Hobbit.vue')
+    component: () => import(/* webpackChunkName: "hobbits" */ '../views/hobbits/Hobbit.vue'),
   },
   {
     path: '/hobbits/:id/edit',
-    component: () => import(/* webpackChunkName: "hobbits" */ '../views/hobbits/EditHobbit.vue')
+    component: () => import(/* webpackChunkName: "hobbits" */ '../views/hobbits/EditHobbit.vue'),
   },
   {
     path: '/hobbits/:id/records/add',
-    component: () => import(/* webpackChunkName: "records" */ '../views/hobbits/records/AddRecord.vue')
+    component: () => import(/* webpackChunkName: "records" */ '../views/hobbits/records/AddRecord.vue'),
   },
   {
     path: '/profile/me',
-    component: () => import(/* webpackChunkName: "profile" */ '../views/Profile.vue')
-  }
+    component: () => import(/* webpackChunkName: "profile" */ '../views/Profile.vue'),
+  },
 ]
 
 const router = createRouter({
   history: createWebHashHistory(),
-  routes
+  routes,
 })
 
 export default router

@@ -33,13 +33,13 @@ import VButton from '../components/form/Button'
 export default {
   name: 'Login',
   components: {
-    VButton
+    VButton,
   },
   methods: {
     submit () {
       this.$refs.form.submit()
-    }
-  }
+    },
+  },
 }
 </script>
 

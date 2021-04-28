@@ -17,13 +17,13 @@ export const store = createStore<State>({
   state: {
     hobbits: {
       hobbits: {},
-      initialLoaded: false
+      initialLoaded: false,
     },
     auth: {
       authenticated: false,
       username: undefined,
-      userId: undefined
-    }
+      userId: undefined,
+    },
   },
   getters: {
     getHobbits: (state) => (): Hobbit[] => {
@@ -38,7 +38,7 @@ export const store = createStore<State>({
       return Object.values(state.hobbits.hobbits).filter((value) => {
         return value.user.id === userId
       })
-    }
+    },
   },
   mutations: {
     setAuth (state, payload) {
@@ -66,7 +66,7 @@ export const store = createStore<State>({
       console.log('selectedHobbit', selectedHobbit.id)
       selectedHobbit.heatmap = records
       console.log(state)
-    }
+    },
   },
   actions: {
     async fetchHobbitsByUser ({ commit }, { userId }) {
@@ -125,13 +125,13 @@ export const store = createStore<State>({
       return fetch(`/api/hobbits/${id}/records/`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           timestamp,
           value,
-          comment
-        })
+          comment,
+        }),
       }).then(res => {
         return res.json()
       }).then(json => {
@@ -143,13 +143,13 @@ export const store = createStore<State>({
       return fetch('/api/hobbits/', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           name,
           description,
-          image
-        })
+          image,
+        }),
       }).then(res => {
         return res.json()
       }).then(json => {
@@ -161,19 +161,19 @@ export const store = createStore<State>({
       return fetch(`/api/hobbits/${id}`, {
         method: 'PUT',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           name,
           description,
-          image
-        })
+          image,
+        }),
       }).then(res => {
         return res.json()
       }).then(json => {
         console.log(json)
         commit('setHobbit', json)
       })
-    }
-  }
+    },
+  },
 })

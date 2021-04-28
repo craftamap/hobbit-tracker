@@ -45,17 +45,17 @@ export default defineComponent({
   props: {
     width: {
       type: Number,
-      default: 48
+      default: 48,
     },
     height: {
       type: Number,
-      default: 48
+      default: 48,
     },
     stroke: {
       type: String,
-      default: '#000'
-    }
-  }
+      default: '#000',
+    },
+  },
 })
 </script>
 

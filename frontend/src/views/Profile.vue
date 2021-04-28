@@ -20,7 +20,7 @@ import SimpleHobbit from '../components/SimpleHobbit.vue'
 export default defineComponent({
   name: 'Profile',
   components: {
-    SimpleHobbit
+    SimpleHobbit,
   },
   created () {
     this.dispatchFetchHobbitsByUser()
@@ -34,13 +34,13 @@ export default defineComponent({
     },
     hobbitsOfUser (): Hobbit[] {
       return this.$store.getters.getHobbitsByUser(this.userId)
-    }
+    },
   },
   methods: {
     dispatchFetchHobbitsByUser () {
       this.$store.dispatch('fetchHobbitsByUser', { userId: this.userId })
-    }
-  }
+    },
+  },
 })
 </script>
 

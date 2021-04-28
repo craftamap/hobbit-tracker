@@ -43,7 +43,7 @@ export default defineComponent({
   components: {
     Button,
     Loading,
-    FormWrapper
+    FormWrapper,
   },
   created () {
     if (!this.hobbit) {
@@ -56,8 +56,8 @@ export default defineComponent({
       form: {
         name: '',
         description: '',
-        image: ''
-      }
+        image: '',
+      },
     }
   },
   computed: {
@@ -66,7 +66,7 @@ export default defineComponent({
     },
     hobbit (): Hobbit {
       return this.$store.getters.getHobbitById(this.id)
-    }
+    },
   },
   watch: {
     hobbit: {
@@ -78,8 +78,8 @@ export default defineComponent({
           this.form.image = newValue.image
         }
       },
-      immediate: true
-    }
+      immediate: true,
+    },
   },
   methods: {
     goBack () {
@@ -113,11 +113,11 @@ export default defineComponent({
         id: this.id,
         name: this.form.name,
         description: this.form.description,
-        image: this.form.image
+        image: this.form.image,
       }).then(() => {
         this.submitting = false
       })
-    }
-  }
+    },
+  },
 })
 </script>

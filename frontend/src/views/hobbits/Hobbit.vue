@@ -64,7 +64,7 @@ export default defineComponent({
   name: 'Hobbit',
   components: {
     Loading,
-    VButton
+    VButton,
   },
   computed: {
     hobbit (): Hobbit {
@@ -72,7 +72,7 @@ export default defineComponent({
     },
     auth (): State['auth'] {
       return this.$store.state.auth
-    }
+    },
   },
   created () {
     if (!this.hobbit) {
@@ -92,8 +92,8 @@ export default defineComponent({
     },
     formatDate (date: string) {
       return moment(date).format('YYYY-MM-DD HH:mm')
-    }
-  }
+    },
+  },
 })
 </script>
 

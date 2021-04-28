@@ -32,16 +32,16 @@ import Heatmap from './Heatmap.vue'
 
 export default defineComponent({
   props: {
-    hobbit: Object as PropType<Hobbit>
+    hobbit: Object as PropType<Hobbit>,
   },
   components: {
     Loading,
-    Heatmap
+    Heatmap,
   },
   data () {
     return {
       loading: true,
-      calHeatMap: undefined as any
+      calHeatMap: undefined as any,
     }
   },
   created () {
@@ -58,16 +58,16 @@ export default defineComponent({
         (this?.hobbit?.heatmap as NumericRecord[]) || [
           {
             timestamp: new Date(),
-            value: 0
-          }
+            value: 0,
+          },
         ]
       ).map((record) => {
         return {
           date: new Date(record.timestamp),
-          count: record.value
+          count: record.value,
         }
       })
-    }
+    },
   },
   methods: {
     dispatchFetchHeatmapData () {
@@ -80,8 +80,8 @@ export default defineComponent({
       } else {
         this.$data.loading = false
       }
-    }
-  }
+    },
+  },
 })
 </script>
 

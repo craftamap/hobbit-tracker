@@ -10,24 +10,24 @@ import CalendarHeatMap from 'calendar-heatmap-mini'
 
 export default defineComponent({
   props: {
-    data: Array
+    data: Array,
   },
   watch: {
     data () {
       this.renderCalHeatMap()
-    }
+    },
   },
   computed: {
     prefersDark () {
       return window.matchMedia('(prefers-color-scheme: dark)')
-    }
+    },
   },
   mounted () {
     this.renderCalHeatMap()
   },
   data () {
     return {
-      uid: uuidv4()
+      uid: uuidv4(),
     }
   },
   methods: {
@@ -47,7 +47,7 @@ export default defineComponent({
       }
       calHeatMap()
       console.log('draw')
-    }
-  }
+    },
+  },
 })
 </script>

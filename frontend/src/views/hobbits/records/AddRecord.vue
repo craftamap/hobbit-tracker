@@ -54,7 +54,7 @@ export default defineComponent({
   components: {
     Loading,
     Button,
-    FormWrapper
+    FormWrapper,
   },
   computed: {
     id (): number {
@@ -62,7 +62,7 @@ export default defineComponent({
     },
     hobbit (): Hobbit {
       return this.$store.getters.getHobbitById(Number(this.$route.params.id))
-    }
+    },
   },
   created () {
     if (!this.hobbit) {
@@ -75,8 +75,8 @@ export default defineComponent({
       data: {
         timestamp: this.getToday(),
         value: 10,
-        comment: ''
-      }
+        comment: '',
+      },
     }
   },
   methods: {
@@ -89,11 +89,11 @@ export default defineComponent({
         id: this.id,
         timestamp: moment(this.data.timestamp).toDate(),
         value: Number(this.data.value),
-        comment: this.data.comment
+        comment: this.data.comment,
       }).then(() => {
         return Promise.all([
           this.$store.dispatch('fetchRecords', this.id),
-          this.$store.dispatch('fetchHeatmapData', this.id)
+          this.$store.dispatch('fetchHeatmapData', this.id),
         ])
       }).then(() => {
         this.submitting = false
@@ -104,8 +104,8 @@ export default defineComponent({
     },
     goBack () {
       this.$router.push('/hobbits/' + this.id)
-    }
-  }
+    },
+  },
 })
 </script>
 

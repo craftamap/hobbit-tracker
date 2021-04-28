@@ -27,13 +27,13 @@ export default defineComponent({
   computed: {
     isAuthenticated () {
       return this.$store.state.auth.authenticated
-    }
+    },
   },
   methods: {
     dispatchFetchAuth () {
       this.$store.dispatch('fetchAuth')
-    }
-  }
+    },
+  },
 })
 </script>
 

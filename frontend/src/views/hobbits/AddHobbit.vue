@@ -35,7 +35,7 @@ export default defineComponent({
   name: 'AddHobbit',
   components: {
     Button,
-    FormWrapper
+    FormWrapper,
   },
   data () {
     return {
@@ -43,8 +43,8 @@ export default defineComponent({
       form: {
         name: '',
         description: '',
-        image: ''
-      }
+        image: '',
+      },
     }
   },
   methods: {
@@ -78,11 +78,11 @@ export default defineComponent({
       this.$store.dispatch('postHobbit', {
         name: this.form.name,
         description: this.form.description,
-        image: this.form.image
+        image: this.form.image,
       }).then(() => {
         this.submitting = false
       })
-    }
-  }
+    },
+  },
 })
 </script>

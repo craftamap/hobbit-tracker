@@ -19,7 +19,7 @@ import Reload from './Icons/Reload.vue'
 export default defineComponent({
   components: {
     Add: Add,
-    Reload: Reload
+    Reload: Reload,
   },
   methods: {
     navigateAddHobbit () {
@@ -27,8 +27,8 @@ export default defineComponent({
     },
     reload () {
       this.$emit('reload')
-    }
-  }
+    },
+  },
 })
 </script>
 

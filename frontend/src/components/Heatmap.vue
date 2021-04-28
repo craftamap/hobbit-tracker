@@ -15,7 +15,7 @@ export default defineComponent({
   watch: {
     data () {
       this.renderCalHeatMap()
-    },
+    }
   },
   computed: {
     prefersDark () {

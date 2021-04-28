@@ -13,31 +13,31 @@ export default defineComponent({
     data: Array,
   },
   watch: {
-    data () {
+    data() {
       this.renderCalHeatMap()
     },
   },
   computed: {
-    prefersDark () {
+    prefersDark() {
       return window.matchMedia('(prefers-color-scheme: dark)')
     },
   },
-  mounted () {
+  mounted() {
     this.renderCalHeatMap()
   },
-  data () {
+  data() {
     return {
       uid: uuidv4(),
     }
   },
   methods: {
-    renderCalHeatMap () {
+    renderCalHeatMap() {
       const calHeatMap = new CalendarHeatMap()
         .data(this.data)
         .selector(`[data-uid='${this.uid}']`)
         .colorRange(['#e9f6f7', '#218380'])
         .tooltipEnabled(true)
-        .onClick(function (data: any) {
+        .onClick(function(data: any) {
           console.log('onClick callback. Data:', data)
         })
       if (this.prefersDark.matches) {

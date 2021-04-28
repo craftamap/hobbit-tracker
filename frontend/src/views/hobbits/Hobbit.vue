@@ -67,14 +67,14 @@ export default defineComponent({
     VButton,
   },
   computed: {
-    hobbit (): Hobbit {
+    hobbit(): Hobbit {
       return this.$store.getters.getHobbitById(Number(this.$route.params.id))
     },
-    auth (): State['auth'] {
+    auth(): State['auth'] {
       return this.$store.state.auth
     },
   },
-  created () {
+  created() {
     if (!this.hobbit) {
       this.dispatchFetchHobbits().then(() => {
         this.dispathFetchRecords()
@@ -84,13 +84,13 @@ export default defineComponent({
     }
   },
   methods: {
-    dispatchFetchHobbits () {
+    dispatchFetchHobbits() {
       return this.$store.dispatch('fetchHobbits')
     },
-    dispathFetchRecords () {
+    dispathFetchRecords() {
       return this.$store.dispatch('fetchRecords', Number(this.$route.params.id))
     },
-    formatDate (date: string) {
+    formatDate(date: string) {
       return moment(date).format('YYYY-MM-DD HH:mm')
     },
   },

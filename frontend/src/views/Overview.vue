@@ -17,27 +17,27 @@ import { Hobbit } from '@/models'
 export default defineComponent({
   name: 'Overview',
   components: { SimpleHobbit, IconBar },
-  created () {
+  created() {
     this.dispatchFetchHobbits()
   },
   computed: {
-    username (): string {
+    username(): string {
       return this.$store.state.auth.username as string
     },
-    isAuthenticated () {
+    isAuthenticated() {
       return this.$store.state.auth.authenticated
     },
-    hobbits (): Hobbit[] {
+    hobbits(): Hobbit[] {
       return this.$store.getters.getHobbits()
     },
   },
   methods: {
-    dispatchFetchHobbits () {
+    dispatchFetchHobbits() {
       if (!this.$store.state.hobbits.initialLoaded) {
         this.$store.dispatch('fetchHobbits')
       }
     },
-    reload () {
+    reload() {
       this.$store.dispatch('fetchHobbits')
     },
   },

@@ -37,7 +37,7 @@ export default defineComponent({
     Button,
     FormWrapper,
   },
-  data () {
+  data() {
     return {
       submitting: false,
       form: {
@@ -48,10 +48,10 @@ export default defineComponent({
     }
   },
   methods: {
-    goBack () {
+    goBack() {
       this.$router.push('/')
     },
-    readUploadedFileAsDataURL (inputFile: File): Promise<string> {
+    readUploadedFileAsDataURL(inputFile: File): Promise<string> {
       const temporaryFileReader = new FileReader()
 
       return new Promise((resolve, reject) => {
@@ -66,14 +66,14 @@ export default defineComponent({
         temporaryFileReader.readAsDataURL(inputFile)
       })
     },
-    async changeImage (event: Event) {
+    async changeImage(event: Event) {
       // TODO: Add validation
       const fileList = (event?.target as any).files as FileList
       const firstFile = fileList[0]
       this.form.image = await this.readUploadedFileAsDataURL(firstFile)
       console.log(this.form.image)
     },
-    dispatchPostHobbit () {
+    dispatchPostHobbit() {
       this.submitting = true
       this.$store.dispatch('postHobbit', {
         name: this.form.name,

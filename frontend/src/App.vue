@@ -21,16 +21,16 @@ import '@fontsource/lato/index.css' /* weight 400 */
 
 import { defineComponent } from 'vue'
 export default defineComponent({
-  created () {
+  created() {
     this.dispatchFetchAuth()
   },
   computed: {
-    isAuthenticated () {
+    isAuthenticated() {
       return this.$store.state.auth.authenticated
     },
   },
   methods: {
-    dispatchFetchAuth () {
+    dispatchFetchAuth() {
       this.$store.dispatch('fetchAuth')
     },
   },

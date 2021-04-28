@@ -22,10 +22,10 @@ export default defineComponent({
     Reload: Reload,
   },
   methods: {
-    navigateAddHobbit () {
+    navigateAddHobbit() {
       this.$router.push('/hobbits/add')
     },
-    reload () {
+    reload() {
       this.$emit('reload')
     },
   },

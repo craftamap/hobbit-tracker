@@ -22,22 +22,22 @@ export default defineComponent({
   components: {
     SimpleHobbit,
   },
-  created () {
+  created() {
     this.dispatchFetchHobbitsByUser()
   },
   computed: {
-    username (): string {
+    username(): string {
       return this.$store.state.auth.username as string
     },
-    userId (): number {
+    userId(): number {
       return this.$store.state.auth.userId as number
     },
-    hobbitsOfUser (): Hobbit[] {
+    hobbitsOfUser(): Hobbit[] {
       return this.$store.getters.getHobbitsByUser(this.userId)
     },
   },
   methods: {
-    dispatchFetchHobbitsByUser () {
+    dispatchFetchHobbitsByUser() {
       this.$store.dispatch('fetchHobbitsByUser', { userId: this.userId })
     },
   },

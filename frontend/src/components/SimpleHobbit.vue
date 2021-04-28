@@ -38,21 +38,21 @@ export default defineComponent({
     Loading,
     Heatmap,
   },
-  data () {
+  data() {
     return {
       loading: true,
       calHeatMap: undefined as any,
     }
   },
-  created () {
+  created() {
     console.log('created', this.loading)
     this.dispatchFetchHeatmapData()
   },
   computed: {
-    getRecords (): NumericRecord[] {
+    getRecords(): NumericRecord[] {
       return (this?.hobbit?.records as NumericRecord[]) || []
     },
-    getHeatmapData (): object[] {
+    getHeatmapData(): object[] {
       const result: { [key: string]: { date: Date; count: number } } = {}
       return (
         (this?.hobbit?.heatmap as NumericRecord[]) || [
@@ -70,7 +70,7 @@ export default defineComponent({
     },
   },
   methods: {
-    dispatchFetchHeatmapData () {
+    dispatchFetchHeatmapData() {
       if (!this.$props.hobbit?.heatmap) {
         this.$store
           .dispatch('fetchHeatmapData', this.$props.hobbit?.id)

@@ -36,7 +36,7 @@ export default {
     VButton,
   },
   methods: {
-    submit () {
+    submit() {
       this.$refs.form.submit()
     },
   },

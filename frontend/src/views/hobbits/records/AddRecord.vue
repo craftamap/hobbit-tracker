@@ -57,19 +57,19 @@ export default defineComponent({
     FormWrapper,
   },
   computed: {
-    id (): number {
+    id(): number {
       return Number(this.$route.params.id)
     },
-    hobbit (): Hobbit {
+    hobbit(): Hobbit {
       return this.$store.getters.getHobbitById(Number(this.$route.params.id))
     },
   },
-  created () {
+  created() {
     if (!this.hobbit) {
       this.dispatchFetchHobbit()
     }
   },
-  data () {
+  data() {
     return {
       submitting: false,
       data: {
@@ -80,10 +80,10 @@ export default defineComponent({
     }
   },
   methods: {
-    getToday () {
+    getToday() {
       return moment().format('YYYY-MM-DDTHH:mm')
     },
-    dispatchPostRecord () {
+    dispatchPostRecord() {
       this.submitting = true
       this.$store.dispatch('postRecord', {
         id: this.id,
@@ -99,10 +99,10 @@ export default defineComponent({
         this.submitting = false
       })
     },
-    dispatchFetchHobbit () {
+    dispatchFetchHobbit() {
       this.$store.dispatch('fetchHobbit', { id: this.id })
     },
-    goBack () {
+    goBack() {
       this.$router.push('/hobbits/' + this.id)
     },
   },

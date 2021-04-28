@@ -41,27 +41,27 @@ export const store = createStore<State>({
     },
   },
   mutations: {
-    setAuth (state, payload) {
+    setAuth(state, payload) {
       console.log(payload)
       state.auth = payload
       console.log(state)
     },
-    setInitialLoaded (state, { load }) {
+    setInitialLoaded(state, { load }) {
       state.hobbits.initialLoaded = load
     },
-    setHobbits (state, hobbits: Hobbit[]) {
+    setHobbits(state, hobbits: Hobbit[]) {
       state.hobbits.hobbits = Object.assign({}, state.hobbits.hobbits, ...hobbits.map((x: Hobbit) => ({ [x.id]: Object.assign({}, state.hobbits.hobbits[x.id], x) })))
       console.log(state)
     },
-    setHobbit (state, hobbit: Hobbit) {
+    setHobbit(state, hobbit: Hobbit) {
       state.hobbits.hobbits[hobbit.id] = Object.assign({}, state.hobbits.hobbits[hobbit.id], hobbit)
     },
-    setRecordsForHobbit (state, { hobbitId, records }: {hobbitId: number; records: NumericRecord[]}) {
+    setRecordsForHobbit(state, { hobbitId, records }: {hobbitId: number; records: NumericRecord[]}) {
       const selectedHobbit = state.hobbits.hobbits[hobbitId]
       selectedHobbit.records = records
       console.log(state)
     },
-    setRecordsForHeatmapForHobbit (state, { hobbitId, records }: {hobbitId: number; records: NumericRecord[]}) {
+    setRecordsForHeatmapForHobbit(state, { hobbitId, records }: {hobbitId: number; records: NumericRecord[]}) {
       const selectedHobbit = state.hobbits.hobbits[hobbitId]
       console.log('selectedHobbit', selectedHobbit.id)
       selectedHobbit.heatmap = records
@@ -69,7 +69,7 @@ export const store = createStore<State>({
     },
   },
   actions: {
-    async fetchHobbitsByUser ({ commit }, { userId }) {
+    async fetchHobbitsByUser({ commit }, { userId }) {
       // TODO: Add endpoint for this
       console.log(userId)
       fetch('/api/profile/me/hobbits/')
@@ -79,7 +79,7 @@ export const store = createStore<State>({
           commit('setHobbits', json)
         })
     },
-    async fetchHobbits ({ commit }) {
+    async fetchHobbits({ commit }) {
       fetch('/api/hobbits/')
         .then(res => {
           return res.json()
@@ -88,7 +88,7 @@ export const store = createStore<State>({
           commit('setInitialLoaded', { load: true })
         })
     },
-    async fetchHobbit ({ commit }, { id }) {
+    async fetchHobbit({ commit }, { id }) {
       fetch(`/api/hobbits/${id}`)
         .then(res => {
           return res.json()
@@ -96,7 +96,7 @@ export const store = createStore<State>({
           commit('setHobbit', json)
         })
     },
-    async fetchAuth ({ commit }) {
+    async fetchAuth({ commit }) {
       fetch('/api/auth')
         .then(res => {
           return res.json()
@@ -104,7 +104,7 @@ export const store = createStore<State>({
           commit('setAuth', json)
         })
     },
-    async fetchHeatmapData ({ commit }, payload) {
+    async fetchHeatmapData({ commit }, payload) {
       return fetch(`/api/hobbits/${payload}/records/heatmap`)
         .then(res => {
           return res.json()
@@ -112,7 +112,7 @@ export const store = createStore<State>({
           return commit('setRecordsForHeatmapForHobbit', { hobbitId: payload, records: json })
         })
     },
-    async fetchRecords ({ commit }, payload) {
+    async fetchRecords({ commit }, payload) {
       console.log('fetchRecords')
       return fetch(`/api/hobbits/${payload}/records/`)
         .then(res => {
@@ -121,7 +121,7 @@ export const store = createStore<State>({
           return commit('setRecordsForHobbit', { hobbitId: payload, records: json })
         })
     },
-    async postRecord ({ commit }, { id, timestamp, value, comment }) {
+    async postRecord({ commit }, { id, timestamp, value, comment }) {
       return fetch(`/api/hobbits/${id}/records/`, {
         method: 'POST',
         headers: {
@@ -139,7 +139,7 @@ export const store = createStore<State>({
         // TODO: Store in store
       })
     },
-    async postHobbit ({ commit }, { name, description, image }) {
+    async postHobbit({ commit }, { name, description, image }) {
       return fetch('/api/hobbits/', {
         method: 'POST',
         headers: {
@@ -157,7 +157,7 @@ export const store = createStore<State>({
         commit('setHobbit', json)
       })
     },
-    async putHobbit ({ commit }, { id, name, description, image }) {
+    async putHobbit({ commit }, { id, name, description, image }) {
       return fetch(`/api/hobbits/${id}`, {
         method: 'PUT',
         headers: {

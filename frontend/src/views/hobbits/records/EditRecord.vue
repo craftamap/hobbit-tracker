@@ -7,7 +7,7 @@
       <div>
       <div class="header">
           <div>
-            <h1>{{hobbit.name}} - Add record</h1>
+            <h1>{{hobbit.name}} - Edit record {{id}}</h1>
             <div class="by">by {{hobbit.user.username}}</div>
             <div>
             {{hobbit.description}}
@@ -32,7 +32,7 @@
               <textarea name="comment" id="comment" rows="5" v-model="data.comment"></textarea>
             </div>
             <div>
-              <Button value="Add record" @click="dispatchPostRecord()" type="primary" :loading="submitting"/>
+              <Button value="Edit record" @click="dispatchPutRecord()" type="primary" :loading="submitting"/>
               <Button value="Go back" @click="goBack()"/>
             </div>
           </form>
@@ -94,12 +94,13 @@ export default defineComponent({
   },
   methods: {
     parseAndFormatDate(date: string) {
-      return moment.utc(date).format('YYYY-MM-DDTHH:mmZ')
+      return moment(date).format('YYYY-MM-DDTHH:mm')
     },
-    dispatchPostRecord() {
+    dispatchPutRecord() {
       this.submitting = true
-      this.$store.dispatch('postRecord', {
+      this.$store.dispatch('putRecord', {
         id: this.id,
+        recordId: this.recordId,
         timestamp: moment(this.data.timestamp).toDate(),
         value: Number(this.data.value),
         comment: this.data.comment,

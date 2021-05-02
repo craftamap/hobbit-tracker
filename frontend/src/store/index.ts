@@ -145,6 +145,24 @@ export const store = createStore<State>({
         // TODO: Store in store
       })
     },
+    async putRecord(_, { id: hobbitId, recordId, timestamp, value, comment }) {
+      await fetch(`/api/hobbits/${hobbitId}/records/${recordId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          timestamp,
+          value,
+          comment,
+        }),
+      }).then(res => {
+        return res.json()
+      }).then(json => {
+        console.log(json)
+        // TODO: Store in store
+      })
+    },
     async postHobbit({ commit }, { name, description, image }) {
       await fetch('/api/hobbits/', {
         method: 'POST',

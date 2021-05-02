@@ -101,4 +101,16 @@ a {
     color: inherit;
   }
 }
+
+.h-16 {
+  height: 16px;
+}
+
+.h-20 {
+  height: 20px;
+}
+
+.cursor-pointer {
+  cursor: pointer;
+}
 </style>

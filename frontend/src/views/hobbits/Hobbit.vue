@@ -45,8 +45,8 @@
                 <td>{{record.value}}</td>
                 <td>{{record.comment}}</td>
                 <td class="table-actions">
-                  <Pencil class="Pencil" :record="record" v-on:click="editRecord" />
-                  <Trash class="Trash" :record="record" v-on:click="deleteRecord" />
+                  <Pencil class="h-20 cursor-pointer" v-on:click="editRecord($event, record)" tabindex="0" />
+                  <Trash class="h-20 cursor-pointer"  v-on:click="deleteRecord($event, record)" tabindex="0" />
                 </td>
               </tr>
             </tbody>
@@ -59,7 +59,7 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue'
-import { Hobbit } from '@/models'
+import { Hobbit, NumericRecord } from '@/models'
 import Loading from '@/components/Loading.vue'
 import VButton from '@/components/form/Button.vue'
 import moment from 'moment'
@@ -104,8 +104,9 @@ export default defineComponent({
     formatDate(date: string) {
       return moment(date).format('YYYY-MM-DD HH:mm')
     },
-    editRecord(event: Event) {
-      console.log(event)
+    editRecord(_: Event, record: NumericRecord) {
+      const recordId = record.id
+      return this.$router.push(`/hobbits/${this.id}/records/${recordId}/edit`)
     },
     deleteRecord(event: Event) {
       console.log(event)
@@ -154,11 +155,6 @@ export default defineComponent({
     tr {
       border-bottom: solid 1px lightgray;
     }
-  }
-
-  .Trash, .Pencil {
-    height: 1.25em;
-    cursor: pointer;
   }
 
   .table-actions {

@@ -44,11 +44,11 @@ import { defineComponent } from 'vue'
 export default defineComponent({
   props: {
     width: {
-      type: Number,
+      type: [Number, String],
       default: 48,
     },
     height: {
-      type: Number,
+      type: [Number, String],
       default: 48,
     },
     stroke: {

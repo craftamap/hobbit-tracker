@@ -36,13 +36,18 @@
                 <td>date</td>
                 <td>value</td>
                 <td>comment</td>
+                <td name="actions"></td>
               </tr>
             </thead>
             <tbody>
-              <tr v-for="record in (hobbit.records || []).slice().reverse()" :key="record.ID">
+              <tr v-for="record in (hobbit.records || []).slice().reverse()" :key="record.id">
                 <td>{{formatDate(record.timestamp)}}</td>
                 <td>{{record.value}}</td>
                 <td>{{record.comment}}</td>
+                <td class="table-actions">
+                  <Pencil class="Pencil" :record="record" v-on:click="editRecord" />
+                  <Trash class="Trash" :record="record" v-on:click="deleteRecord" />
+                </td>
               </tr>
             </tbody>
           </table>
@@ -59,16 +64,22 @@ import Loading from '@/components/Loading.vue'
 import VButton from '@/components/form/Button.vue'
 import moment from 'moment'
 import { State } from '@/store'
+import { TrashIcon as Trash, PencilIcon as Pencil } from '@heroicons/vue/outline'
 
 export default defineComponent({
   name: 'Hobbit',
   components: {
     Loading,
     VButton,
+    Trash,
+    Pencil,
   },
   computed: {
+    id(): number {
+      return Number(this.$route.params.id)
+    },
     hobbit(): Hobbit {
-      return this.$store.getters.getHobbitById(Number(this.$route.params.id))
+      return this.$store.getters.getHobbitById(Number(this.id))
     },
     auth(): State['auth'] {
       return this.$store.state.auth
@@ -77,21 +88,27 @@ export default defineComponent({
   created() {
     if (!this.hobbit) {
       this.dispatchFetchHobbits().then(() => {
-        this.dispathFetchRecords()
+        this.dispatchFetchRecords()
       })
     } else {
-      this.dispathFetchRecords()
+      this.dispatchFetchRecords()
     }
   },
   methods: {
     dispatchFetchHobbits() {
-      return this.$store.dispatch('fetchHobbits')
+      return this.$store.dispatch('fetchHobbit', { id: Number(this.id) })
     },
-    dispathFetchRecords() {
-      return this.$store.dispatch('fetchRecords', Number(this.$route.params.id))
+    dispatchFetchRecords() {
+      return this.$store.dispatch('fetchRecords', Number(this.id))
     },
     formatDate(date: string) {
       return moment(date).format('YYYY-MM-DD HH:mm')
+    },
+    editRecord(event: Event) {
+      console.log(event)
+    },
+    deleteRecord(event: Event) {
+      console.log(event)
     },
   },
 })
@@ -137,5 +154,15 @@ export default defineComponent({
     tr {
       border-bottom: solid 1px lightgray;
     }
+  }
+
+  .Trash, .Pencil {
+    height: 1.25em;
+    cursor: pointer;
+  }
+
+  .table-actions {
+    text-align: right;
+    width: 0%;
   }
 </style>

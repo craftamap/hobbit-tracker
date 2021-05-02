@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "@fontsource/lato": "^4.2.2",
+    "@heroicons/vue": "^1.0.1",
     "@types/cal-heatmap": "^3.5.35",
     "@types/uuid": "^8.3.0",
     "calendar-heatmap-mini": "^1.3.0",

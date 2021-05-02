@@ -240,6 +240,89 @@ func BuildHandleApiPostRecord(db *gorm.DB, log *logrus.Logger) http.HandlerFunc 
 		json.NewEncoder(w).Encode(returnedRecord)
 	}
 }
+func BuildHandleApiPutRecord(db *gorm.DB, log *logrus.Logger) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		user := models.User{}
+
+		// TODO: Add error handling here
+		err := db.Where("ID = ?", r.Context().Value(AUTH_DETAILS).(AuthDetails).UserID).First(&user).Error
+		if err != nil {
+			log.Error(err)
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+
+		// TODO: add error handling
+		vars := mux.Vars(r)
+		hobbitId, ok := vars["hobbit_id"]
+		if !ok {
+			log.Error("Can't get id from mux")
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+
+		recordId, ok := vars["record_id"]
+		if !ok {
+			log.Error("Can't get id from mux")
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+
+		numericHobbitId, err := strconv.ParseUint(hobbitId, 10, 32)
+		if err != nil {
+			log.Error(err)
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+
+		numericRecordId, err := strconv.ParseUint(recordId, 10, 32)
+		if err != nil {
+			log.Error(err)
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+
+		recievedRecord := models.NumericRecord{}
+		err = json.NewDecoder(r.Body).Decode(&recievedRecord)
+		if err != nil {
+			log.Error(err)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		log.Info("recievedRecord", recievedRecord)
+
+		// Are we allowed to create records for this hobbit?
+		// TODO: error handling
+		parentHobbit := models.Hobbit{}
+		db.Where(models.Hobbit{ID: uint(numericHobbitId)}).Joins("User").First(&parentHobbit)
+
+		if user.ID != parentHobbit.User.ID {
+			log.Error("User does not match -> unauthorized")
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+
+		sanitizedRecord := models.NumericRecord{
+			ID:        uint(numericRecordId),
+			HobbitID:  parentHobbit.ID,
+			Timestamp: recievedRecord.Timestamp,
+			Value:     recievedRecord.Value,
+			Comment:   recievedRecord.Comment,
+		}
+
+		err = db.Save(&sanitizedRecord).Error
+		if err != nil {
+			log.Error(err)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
+		returnedRecord := sanitizedRecord
+
+		json.NewEncoder(w).Encode(returnedRecord)
+
+	}
+}
 
 func BuildHandleApiGetRecords(db *gorm.DB, log *logrus.Logger) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {

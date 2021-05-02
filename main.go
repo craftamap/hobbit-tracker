@@ -94,10 +94,13 @@ func main() {
 
 	records := hobbits.PathPrefix("/{hobbit_id:[0-9]+}/records").Subrouter()
 	records.Handle("/", BuildHandleApiGetRecords(db, log)).Methods("GET")
-	records.Handle("/heatmap", BuildHandleApiGetRecordsForHeatmap(db, log)).Methods("GET")
 	records.Handle("/", AuthMiddlewareBuilder(log)(
 		http.HandlerFunc(BuildHandleApiPostRecord(db, log)),
 	)).Methods("POST")
+	records.Handle("/{record_id:[0-9]+}", AuthMiddlewareBuilder(log)(
+		http.HandlerFunc(BuildHandleApiPutRecord(db, log)),
+	)).Methods("PUT")
+	records.Handle("/heatmap", BuildHandleApiGetRecordsForHeatmap(db, log)).Methods("GET")
 
 	profile := api.PathPrefix("/profile").Subrouter()
 	profileMe := profile.PathPrefix("/me").Subrouter()

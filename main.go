@@ -15,8 +15,8 @@ import (
 	"gorm.io/gorm"
 )
 
-var DiskMode bool
-var Port int
+var diskMode bool
+var port int
 
 //go:embed frontend/dist
 var content embed.FS
@@ -29,8 +29,8 @@ func init() {
 		FullTimestamp: true,
 	})
 
-	flag.BoolVar(&DiskMode, "disk-mode", false, "disk mode")
-	flag.IntVar(&Port, "port", 8080, "port")
+	flag.BoolVar(&diskMode, "disk-mode", false, "disk mode")
+	flag.IntVar(&port, "port", 8080, "port")
 	flag.Parse()
 }
 
@@ -48,7 +48,7 @@ func frontendHandler() (http.Handler, error) {
 	if err != nil {
 		return nil, err
 	}
-	if DiskMode {
+	if diskMode {
 		log.Warn("Disk Mode")
 		contentStatic = os.DirFS("frontend/dist")
 	}
@@ -78,35 +78,35 @@ func main() {
 	auth.HandleFunc("/logout", BuildHandleLogout(log))
 
 	api := r.PathPrefix("/api").Subrouter()
-	api.HandleFunc("/auth", BuildHandleApiGetAuth(db, log)).Methods("GET")
+	api.HandleFunc("/auth", BuildHandleAPIGetAuth(db, log)).Methods("GET")
 	hobbits := api.PathPrefix("/hobbits").Subrouter()
 
 	hobbits.Handle("/", AuthMiddlewareBuilder(log)(
-		http.HandlerFunc(BuildHandleApiPostHobbit(db, log)),
+		http.HandlerFunc(BuildHandleAPIPostHobbit(db, log)),
 	)).Methods("POST")
 
 	hobbits.Handle("/{id:[0-9]+}", AuthMiddlewareBuilder(log)(
-		http.HandlerFunc(BuildHandleApiPutHobbit(db, log)),
+		http.HandlerFunc(BuildHandleAPIPutHobbit(db, log)),
 	)).Methods("PUT")
 
-	hobbits.Handle("/{id:[0-9]+}", BuildHandleApiGetHobbit(db, log)).Methods("GET")
-	hobbits.Handle("/", BuildHandleApiGetHobbits(db, log)).Methods("GET")
+	hobbits.Handle("/{id:[0-9]+}", BuildHandleAPIGetHobbit(db, log)).Methods("GET")
+	hobbits.Handle("/", BuildHandleAPIGetHobbits(db, log)).Methods("GET")
 
 	records := hobbits.PathPrefix("/{hobbit_id:[0-9]+}/records").Subrouter()
-	records.Handle("/", BuildHandleApiGetRecords(db, log)).Methods("GET")
+	records.Handle("/", BuildHandleAPIGetRecords(db, log)).Methods("GET")
 	records.Handle("/", AuthMiddlewareBuilder(log)(
-		http.HandlerFunc(BuildHandleApiPostRecord(db, log)),
+		http.HandlerFunc(BuildHandleAPIPostRecord(db, log)),
 	)).Methods("POST")
 	records.Handle("/{record_id:[0-9]+}", AuthMiddlewareBuilder(log)(
-		http.HandlerFunc(BuildHandleApiPutRecord(db, log)),
+		http.HandlerFunc(BuildHandleAPIPutRecord(db, log)),
 	)).Methods("PUT")
-	records.Handle("/heatmap", BuildHandleApiGetRecordsForHeatmap(db, log)).Methods("GET")
+	records.Handle("/heatmap", BuildHandleAPIGetRecordsForHeatmap(db, log)).Methods("GET")
 
 	profile := api.PathPrefix("/profile").Subrouter()
 	profileMe := profile.PathPrefix("/me").Subrouter()
-	profileMe.Handle("/", BuildHandleApiGetAuth(db, log))
+	profileMe.Handle("/", BuildHandleAPIGetAuth(db, log))
 	profileMe.Handle("/hobbits", AuthMiddlewareBuilder(log)(
-		http.HandlerFunc(BuildHandleApiProfileGetHobbits(db, log)),
+		http.HandlerFunc(BuildHandleAPIProfileGetHobbits(db, log)),
 	)).Methods("GET")
 
 	frontend, err := frontendHandler()
@@ -115,7 +115,7 @@ func main() {
 		return
 	}
 	r.PathPrefix("/").Handler(frontend)
-	listeningOn := fmt.Sprintf(":%d", Port)
+	listeningOn := fmt.Sprintf(":%d", port)
 	log.Infof("Listening on %s", listeningOn)
 	http.ListenAndServe(listeningOn, r)
 }

@@ -18,29 +18,37 @@ var (
 	store = sessions.NewCookieStore(key)
 )
 
+// AuthDetails is a struct used for storing authentication details within the cookie store
 type AuthDetails struct {
 	Authenticated bool   `json:"authenticated"`
 	Username      string `json:"username,omitempty"`
 	UserID        uint   `json:"userId,omitempty"`
 }
 
+// ContextKey is a string-alias used for safe-usage of the context method
 type ContextKey string
 
 const (
-	AUTH_DETAILS ContextKey = "authDetails"
+	// AuthDetailsContextKey is a key used to store and retrieve the authentication details to/from the http request
+	AuthDetailsContextKey ContextKey = "AuthDetails"
+	// AuthDetailsSessionKey is a key used to store and retrieve the authentication details to/from the http session
+	AuthDetailsSessionKey string = "AuthDetails"
 )
 
 func init() {
 	gob.Register(AuthDetails{})
 }
 
+// AuthMiddlewareBuilder creates a http.Handler which ensures that a user is authenticated.
+// If a user is not authenticated, a http.StatusUnauthorized is written to the request and the request is returned.
+// If a user is authenticated, the next handler is served.
 func AuthMiddlewareBuilder(log *logrus.Logger) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			session, _ := store.Get(r, "session")
-			authDetails, ok := session.Values["authDetails"].(AuthDetails)
+			authDetails, ok := session.Values[AuthDetailsSessionKey].(AuthDetails)
 			if !ok {
-				log.Infof("Could not type assert cookie to AuthDetails, %+T", session.Values["authDetails"])
+				log.Infof("Could not type assert cookie to AuthDetails, %+T", session.Values[AuthDetailsSessionKey])
 				w.WriteHeader(http.StatusUnauthorized)
 				return
 			}
@@ -53,7 +61,7 @@ func AuthMiddlewareBuilder(log *logrus.Logger) func(http.Handler) http.Handler {
 			}
 
 			ctx := r.Context()
-			ctx = context.WithValue(ctx, AUTH_DETAILS, authDetails)
+			ctx = context.WithValue(ctx, AuthDetailsContextKey, authDetails)
 			r = r.WithContext(ctx)
 
 			next.ServeHTTP(w, r)
@@ -61,13 +69,15 @@ func AuthMiddlewareBuilder(log *logrus.Logger) func(http.Handler) http.Handler {
 	}
 }
 
+// BuildHandleLogout is a function returning a http.HandlerFunc which logs out the current user.
+// Users are getting logged out by setting their authDetails
 func BuildHandleLogout(log *logrus.Logger) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		session, _ := store.Get(r, "session")
-		authDetails := session.Values["authDetails"].(AuthDetails)
+		authDetails := session.Values[AuthDetailsSessionKey].(AuthDetails)
 		username := authDetails.Username
 
-		session.Values["authDetails"] = AuthDetails{
+		session.Values[AuthDetailsSessionKey] = AuthDetails{
 			Authenticated: false,
 		}
 		session.Save(r, w)
@@ -84,6 +94,7 @@ func BuildHandleLogout(log *logrus.Logger) http.HandlerFunc {
 	}
 }
 
+// BuildHandleLogin is a function returning a http.HandlerFunc which logs in a user by their credentails.
 func BuildHandleLogin(db *gorm.DB, log *logrus.Logger) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		err := r.ParseForm()
@@ -127,7 +138,7 @@ func BuildHandleLogin(db *gorm.DB, log *logrus.Logger) http.HandlerFunc {
 		// Auth successful
 		session, _ := store.Get(r, "session")
 
-		session.Values["authDetails"] = AuthDetails{
+		session.Values[AuthDetailsSessionKey] = AuthDetails{
 			Authenticated: true,
 			Username:      user.Username,
 			UserID:        user.ID,

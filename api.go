@@ -12,7 +12,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func BuildHandleApiGetAuth(db *gorm.DB, log *logrus.Logger) http.HandlerFunc {
+func BuildHandleAPIGetAuth(db *gorm.DB, log *logrus.Logger) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		session, err := store.Get(r, "session")
 		if err != nil {
@@ -20,7 +20,7 @@ func BuildHandleApiGetAuth(db *gorm.DB, log *logrus.Logger) http.HandlerFunc {
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
-		authDetails, ok := session.Values["authDetails"].(AuthDetails)
+		authDetails, ok := session.Values[AuthDetailsSessionKey].(AuthDetails)
 		if !ok {
 			json.NewEncoder(w).Encode(AuthDetails{
 				Authenticated: false,
@@ -31,7 +31,7 @@ func BuildHandleApiGetAuth(db *gorm.DB, log *logrus.Logger) http.HandlerFunc {
 	}
 }
 
-func BuildHandleApiPostHobbit(db *gorm.DB, log *logrus.Logger) http.HandlerFunc {
+func BuildHandleAPIPostHobbit(db *gorm.DB, log *logrus.Logger) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		recievedHobbit := models.Hobbit{}
 		err := json.NewDecoder(r.Body).Decode(&recievedHobbit)
@@ -44,7 +44,7 @@ func BuildHandleApiPostHobbit(db *gorm.DB, log *logrus.Logger) http.HandlerFunc 
 		user := models.User{}
 
 		// TODO: Add error handling here
-		err = db.Where("ID = ?", r.Context().Value(AUTH_DETAILS).(AuthDetails).UserID).First(&user).Error
+		err = db.Where("ID = ?", r.Context().Value(AuthDetailsContextKey).(AuthDetails).UserID).First(&user).Error
 		if err != nil {
 			log.Error(err)
 			w.WriteHeader(http.StatusBadRequest)
@@ -70,7 +70,7 @@ func BuildHandleApiPostHobbit(db *gorm.DB, log *logrus.Logger) http.HandlerFunc 
 	}
 }
 
-func BuildHandleApiGetHobbits(db *gorm.DB, log *logrus.Logger) http.HandlerFunc {
+func BuildHandleAPIGetHobbits(db *gorm.DB, log *logrus.Logger) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		hobbits := []models.Hobbit{}
 		err := db.Joins("User").Find(&hobbits).Error
@@ -84,7 +84,7 @@ func BuildHandleApiGetHobbits(db *gorm.DB, log *logrus.Logger) http.HandlerFunc 
 	}
 }
 
-func BuildHandleApiGetHobbit(db *gorm.DB, log *logrus.Logger) http.HandlerFunc {
+func BuildHandleAPIGetHobbit(db *gorm.DB, log *logrus.Logger) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// TODO: add error handling
 		vars := mux.Vars(r)
@@ -113,12 +113,12 @@ func BuildHandleApiGetHobbit(db *gorm.DB, log *logrus.Logger) http.HandlerFunc {
 	}
 }
 
-func BuildHandleApiPutHobbit(db *gorm.DB, log *logrus.Logger) http.HandlerFunc {
+func BuildHandleAPIPutHobbit(db *gorm.DB, log *logrus.Logger) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		user := models.User{}
 
 		// TODO: Add error handling here
-		err := db.Where("ID = ?", r.Context().Value(AUTH_DETAILS).(AuthDetails).UserID).First(&user).Error
+		err := db.Where("ID = ?", r.Context().Value(AuthDetailsContextKey).(AuthDetails).UserID).First(&user).Error
 		if err != nil {
 			log.Error(err)
 			w.WriteHeader(http.StatusBadRequest)
@@ -172,12 +172,12 @@ func BuildHandleApiPutHobbit(db *gorm.DB, log *logrus.Logger) http.HandlerFunc {
 	}
 }
 
-func BuildHandleApiPostRecord(db *gorm.DB, log *logrus.Logger) http.HandlerFunc {
+func BuildHandleAPIPostRecord(db *gorm.DB, log *logrus.Logger) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		user := models.User{}
 
 		// TODO: Add error handling here
-		err := db.Where("ID = ?", r.Context().Value(AUTH_DETAILS).(AuthDetails).UserID).First(&user).Error
+		err := db.Where("ID = ?", r.Context().Value(AuthDetailsContextKey).(AuthDetails).UserID).First(&user).Error
 		if err != nil {
 			log.Error(err)
 			w.WriteHeader(http.StatusBadRequest)
@@ -186,13 +186,13 @@ func BuildHandleApiPostRecord(db *gorm.DB, log *logrus.Logger) http.HandlerFunc 
 
 		// TODO: add error handling
 		vars := mux.Vars(r)
-		hobbitId, ok := vars["hobbit_id"]
+		hobbitID, ok := vars["hobbit_id"]
 		if !ok {
 			log.Error("Can't get id from mux")
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
-		numericHobbitId, err := strconv.ParseUint(hobbitId, 10, 32)
+		numericHobbitID, err := strconv.ParseUint(hobbitID, 10, 32)
 		if err != nil {
 			log.Error(err)
 			w.WriteHeader(http.StatusBadRequest)
@@ -211,7 +211,7 @@ func BuildHandleApiPostRecord(db *gorm.DB, log *logrus.Logger) http.HandlerFunc 
 		// Are we allowed to create records for this hobbit?
 		// TODO: error handling
 		parentHobbit := models.Hobbit{}
-		db.Where(models.Hobbit{ID: uint(numericHobbitId)}).Joins("User").First(&parentHobbit)
+		db.Where(models.Hobbit{ID: uint(numericHobbitID)}).Joins("User").First(&parentHobbit)
 
 		if user.ID != parentHobbit.User.ID {
 			log.Error("User does not match -> unauthorized")
@@ -240,12 +240,13 @@ func BuildHandleApiPostRecord(db *gorm.DB, log *logrus.Logger) http.HandlerFunc 
 		json.NewEncoder(w).Encode(returnedRecord)
 	}
 }
-func BuildHandleApiPutRecord(db *gorm.DB, log *logrus.Logger) http.HandlerFunc {
+
+func BuildHandleAPIPutRecord(db *gorm.DB, log *logrus.Logger) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		user := models.User{}
 
 		// TODO: Add error handling here
-		err := db.Where("ID = ?", r.Context().Value(AUTH_DETAILS).(AuthDetails).UserID).First(&user).Error
+		err := db.Where("ID = ?", r.Context().Value(AuthDetailsContextKey).(AuthDetails).UserID).First(&user).Error
 		if err != nil {
 			log.Error(err)
 			w.WriteHeader(http.StatusBadRequest)
@@ -254,28 +255,28 @@ func BuildHandleApiPutRecord(db *gorm.DB, log *logrus.Logger) http.HandlerFunc {
 
 		// TODO: add error handling
 		vars := mux.Vars(r)
-		hobbitId, ok := vars["hobbit_id"]
+		hobbitID, ok := vars["hobbit_id"]
 		if !ok {
 			log.Error("Can't get id from mux")
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
 
-		recordId, ok := vars["record_id"]
+		recordID, ok := vars["record_id"]
 		if !ok {
 			log.Error("Can't get id from mux")
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
 
-		numericHobbitId, err := strconv.ParseUint(hobbitId, 10, 32)
+		numericHobbitID, err := strconv.ParseUint(hobbitID, 10, 32)
 		if err != nil {
 			log.Error(err)
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
 
-		numericRecordId, err := strconv.ParseUint(recordId, 10, 32)
+		numericRecordID, err := strconv.ParseUint(recordID, 10, 32)
 		if err != nil {
 			log.Error(err)
 			w.WriteHeader(http.StatusBadRequest)
@@ -294,7 +295,7 @@ func BuildHandleApiPutRecord(db *gorm.DB, log *logrus.Logger) http.HandlerFunc {
 		// Are we allowed to create records for this hobbit?
 		// TODO: error handling
 		parentHobbit := models.Hobbit{}
-		db.Where(models.Hobbit{ID: uint(numericHobbitId)}).Joins("User").First(&parentHobbit)
+		db.Where(models.Hobbit{ID: uint(numericHobbitID)}).Joins("User").First(&parentHobbit)
 
 		if user.ID != parentHobbit.User.ID {
 			log.Error("User does not match -> unauthorized")
@@ -303,7 +304,7 @@ func BuildHandleApiPutRecord(db *gorm.DB, log *logrus.Logger) http.HandlerFunc {
 		}
 
 		sanitizedRecord := models.NumericRecord{
-			ID:        uint(numericRecordId),
+			ID:        uint(numericRecordID),
 			HobbitID:  parentHobbit.ID,
 			Timestamp: recievedRecord.Timestamp,
 			Value:     recievedRecord.Value,
@@ -324,16 +325,16 @@ func BuildHandleApiPutRecord(db *gorm.DB, log *logrus.Logger) http.HandlerFunc {
 	}
 }
 
-func BuildHandleApiGetRecords(db *gorm.DB, log *logrus.Logger) http.HandlerFunc {
+func BuildHandleAPIGetRecords(db *gorm.DB, log *logrus.Logger) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
-		hobbitId, ok := vars["hobbit_id"]
+		hobbitID, ok := vars["hobbit_id"]
 		if !ok {
 			log.Error("Can't get id from mux")
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
-		numericHobbitId, err := strconv.ParseUint(hobbitId, 10, 32)
+		numericHobbitID, err := strconv.ParseUint(hobbitID, 10, 32)
 		if err != nil {
 			log.Error(err)
 			w.WriteHeader(http.StatusBadRequest)
@@ -342,7 +343,7 @@ func BuildHandleApiGetRecords(db *gorm.DB, log *logrus.Logger) http.HandlerFunc 
 
 		var records []models.NumericRecord
 		err = db.Where(models.NumericRecord{
-			HobbitID: uint(numericHobbitId),
+			HobbitID: uint(numericHobbitID),
 		}).Find(&records).Error
 		if err != nil {
 			log.Error(err)
@@ -354,16 +355,16 @@ func BuildHandleApiGetRecords(db *gorm.DB, log *logrus.Logger) http.HandlerFunc 
 	}
 }
 
-func BuildHandleApiGetRecordsForHeatmap(db *gorm.DB, log *logrus.Logger) http.HandlerFunc {
+func BuildHandleAPIGetRecordsForHeatmap(db *gorm.DB, log *logrus.Logger) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
-		hobbitId, ok := vars["hobbit_id"]
+		hobbitID, ok := vars["hobbit_id"]
 		if !ok {
 			log.Error("Can't get id from mux")
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
-		numericHobbitId, err := strconv.ParseUint(hobbitId, 10, 32)
+		numericHobbitID, err := strconv.ParseUint(hobbitID, 10, 32)
 		if err != nil {
 			log.Error(err)
 			w.WriteHeader(http.StatusBadRequest)
@@ -372,7 +373,7 @@ func BuildHandleApiGetRecordsForHeatmap(db *gorm.DB, log *logrus.Logger) http.Ha
 
 		var records []models.NumericRecord
 		err = db.Model(&models.NumericRecord{}).Select("hobbit_id, sum(value) as value, timestamp").Group("date(timestamp)").Where(models.NumericRecord{
-			HobbitID: uint(numericHobbitId),
+			HobbitID: uint(numericHobbitID),
 		}).Find(&records).Error
 		if err != nil {
 			log.Error(err)
@@ -384,11 +385,11 @@ func BuildHandleApiGetRecordsForHeatmap(db *gorm.DB, log *logrus.Logger) http.Ha
 	}
 }
 
-func BuildHandleApiProfileGetHobbits(db *gorm.DB, log *logrus.Logger) http.HandlerFunc {
+func BuildHandleAPIProfileGetHobbits(db *gorm.DB, log *logrus.Logger) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		hobbits := []models.Hobbit{}
 
-		err := db.Joins("User").Where(&models.Hobbit{UserID: r.Context().Value(AUTH_DETAILS).(AuthDetails).UserID}).Find(&hobbits).Error
+		err := db.Joins("User").Where(&models.Hobbit{UserID: r.Context().Value(AuthDetailsContextKey).(AuthDetails).UserID}).Find(&hobbits).Error
 		if err != nil {
 			log.Error(err)
 			w.WriteHeader(http.StatusInternalServerError)

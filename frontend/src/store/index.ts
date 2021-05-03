@@ -73,6 +73,12 @@ export const store = createStore<State>({
       selectedHobbit.heatmap = records
       console.log(state)
     },
+    deleteRecordForHobbit(state, { hobbitId, recordId }: {hobbitId: number; recordId: number}) {
+      const selectedHobbit = state.hobbits.hobbits[hobbitId]
+      selectedHobbit.records = selectedHobbit.records.filter((record) => {
+        return record.id !== recordId
+      })
+    },
   },
   actions: {
     async fetchHobbitsByUser({ commit }, { userId }) {
@@ -161,6 +167,16 @@ export const store = createStore<State>({
       }).then(json => {
         console.log(json)
         // TODO: Store in store
+      })
+    },
+    async deleteRecord({ commit }, { hobbitId, recordId }) {
+      await fetch(`/api/hobbits/${hobbitId}/records/${recordId}`, {
+        method: 'DELETE',
+      }).then(res => {
+        return res.json()
+      }).then(json => {
+        console.log(json)
+        commit('deleteRecordForHobbit', { hobbitId, recordId })
       })
     },
     async postHobbit({ commit }, { name, description, image }) {

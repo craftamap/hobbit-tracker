@@ -7,13 +7,15 @@
       <Teleport to="#dialog-target">
         <!-- TODO: refactor this into it's own component -->
         <DDialog :shown="deleteDialog.shown">
-          <form>
+          <FormWrapper>
+            <form>
             <p>Do you really want to delete this record?</p>
             <div>
               <VButton type="primary" value="delete" @click="deleteRecord" />
               <VButton value="cancel" @click="closeDeleteRecordDialog" />
             </div>
-          </form>
+            </form>
+          </FormWrapper>
         </DDialog>
       </Teleport>
       <div>
@@ -75,6 +77,7 @@ import { Hobbit, NumericRecord } from '@/models'
 import Loading from '@/components/Loading.vue'
 import VButton from '@/components/form/Button.vue'
 import DDialog from '@/components/Dialog.vue'
+import FormWrapper from '@/components/form/FormWrapper.vue'
 import moment from 'moment'
 import { State } from '@/store'
 import { TrashIcon as Trash, PencilIcon as Pencil } from '@heroicons/vue/outline'
@@ -87,6 +90,7 @@ export default defineComponent({
     Trash,
     Pencil,
     DDialog,
+    FormWrapper,
   },
   data(): {
     deleteDialog: {
@@ -135,8 +139,11 @@ export default defineComponent({
       const recordId = record.id
       return this.$router.push(`/hobbits/${this.id}/records/${recordId}/edit`)
     },
-    deleteRecord(event: Event) {
-      console.log(event)
+    deleteRecord() {
+      return this.$store.dispatch('deleteRecord', {
+        hobbitId: Number(this.id),
+        recordId: Number(this.deleteDialog.record?.id),
+      })
     },
     openDeleteRecordDialog(_: Event, record: NumericRecord) {
       this.deleteDialog.record = record

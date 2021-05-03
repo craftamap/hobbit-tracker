@@ -283,6 +283,17 @@ func BuildHandleAPIPutRecord(db *gorm.DB, log *logrus.Logger) http.HandlerFunc {
 			return
 		}
 
+		// Are we allowed to create records for this hobbit?
+		// TODO: error handling
+		parentHobbit := models.Hobbit{}
+		db.Where(models.Hobbit{ID: uint(numericHobbitID)}).Joins("User").First(&parentHobbit)
+
+		if user.ID != parentHobbit.User.ID {
+			log.Error("User does not match -> unauthorized")
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+
 		recievedRecord := models.NumericRecord{}
 		err = json.NewDecoder(r.Body).Decode(&recievedRecord)
 		if err != nil {
@@ -291,6 +302,69 @@ func BuildHandleAPIPutRecord(db *gorm.DB, log *logrus.Logger) http.HandlerFunc {
 			return
 		}
 		log.Info("recievedRecord", recievedRecord)
+
+		sanitizedRecord := models.NumericRecord{
+			ID:        uint(numericRecordID),
+			HobbitID:  parentHobbit.ID,
+			Timestamp: recievedRecord.Timestamp,
+			Value:     recievedRecord.Value,
+			Comment:   recievedRecord.Comment,
+		}
+		// TODO: I think we should actually check first if the record even exists...
+		err = db.Save(&sanitizedRecord).Error
+		if err != nil {
+			log.Error(err)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
+		returnedRecord := sanitizedRecord
+
+		json.NewEncoder(w).Encode(returnedRecord)
+
+	}
+}
+
+func BuildHandleAPIDeleteRecord(db *gorm.DB, log *logrus.Logger) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		user := models.User{}
+
+		err := db.Where("ID = ?", r.Context().Value(AuthDetailsContextKey).(AuthDetails).UserID).First(&user).Error
+		if err != nil {
+			log.Error(err)
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+
+		// TODO: add error handling
+		vars := mux.Vars(r)
+		hobbitID, ok := vars["hobbit_id"]
+		if !ok {
+			log.Error("Can't get id from mux")
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+
+		recordID, ok := vars["record_id"]
+		if !ok {
+			log.Error("Can't get id from mux")
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+
+		numericHobbitID, err := strconv.ParseUint(hobbitID, 10, 32)
+		if err != nil {
+			log.Error(err)
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+
+		numericRecordID, err := strconv.ParseUint(recordID, 10, 32)
+		if err != nil {
+			log.Error(err)
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
 
 		// Are we allowed to create records for this hobbit?
 		// TODO: error handling
@@ -303,25 +377,29 @@ func BuildHandleAPIPutRecord(db *gorm.DB, log *logrus.Logger) http.HandlerFunc {
 			return
 		}
 
-		sanitizedRecord := models.NumericRecord{
-			ID:        uint(numericRecordID),
-			HobbitID:  parentHobbit.ID,
-			Timestamp: recievedRecord.Timestamp,
-			Value:     recievedRecord.Value,
-			Comment:   recievedRecord.Comment,
+		// Fetch Record first in order to properly return it as response
+		deletedRecord := models.NumericRecord{
+			ID: uint(numericRecordID),
 		}
 
-		err = db.Save(&sanitizedRecord).Error
+		err = db.Where(&deletedRecord).First(&deletedRecord).Error
 		if err != nil {
 			log.Error(err)
-			w.WriteHeader(http.StatusInternalServerError)
+			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
 
-		returnedRecord := sanitizedRecord
+		recordToDelete := models.NumericRecord{
+			ID: uint(numericRecordID),
+		}
+		err = db.Delete(&recordToDelete).Error
+		if err != nil {
+			log.Error(err)
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
 
-		json.NewEncoder(w).Encode(returnedRecord)
-
+		json.NewEncoder(w).Encode(deletedRecord)
 	}
 }
 

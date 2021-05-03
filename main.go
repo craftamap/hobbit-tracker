@@ -100,6 +100,9 @@ func main() {
 	records.Handle("/{record_id:[0-9]+}", AuthMiddlewareBuilder(log)(
 		http.HandlerFunc(BuildHandleAPIPutRecord(db, log)),
 	)).Methods("PUT")
+	records.Handle("/{record_id:[0-9]+}", AuthMiddlewareBuilder(log)(
+		http.HandlerFunc(BuildHandleAPIDeleteRecord(db, log)),
+	)).Methods("DELETE")
 	records.Handle("/heatmap", BuildHandleAPIGetRecordsForHeatmap(db, log)).Methods("GET")
 
 	profile := api.PathPrefix("/profile").Subrouter()

@@ -4,6 +4,18 @@
       <Loading />
     </template>
     <template v-if="hobbit">
+      <Teleport to="#dialog-target">
+        <!-- TODO: refactor this into it's own component -->
+        <DDialog :shown="deleteDialog.shown">
+          <form>
+            <p>Do you really want to delete this record?</p>
+            <div>
+              <VButton type="primary" value="delete" @click="deleteRecord" />
+              <VButton value="cancel" @click="closeDeleteRecordDialog" />
+            </div>
+          </form>
+        </DDialog>
+      </Teleport>
       <div>
         <div class="header">
           <div>
@@ -46,7 +58,7 @@
                 <td>{{record.comment}}</td>
                 <td class="table-actions">
                   <Pencil class="h-20 cursor-pointer" v-on:click="editRecord($event, record)" tabindex="0" />
-                  <Trash class="h-20 cursor-pointer"  v-on:click="deleteRecord($event, record)" tabindex="0" />
+                  <Trash class="h-20 cursor-pointer"  v-on:click="openDeleteRecordDialog($event, record)" tabindex="0" />
                 </td>
               </tr>
             </tbody>
@@ -62,6 +74,7 @@ import { defineComponent } from 'vue'
 import { Hobbit, NumericRecord } from '@/models'
 import Loading from '@/components/Loading.vue'
 import VButton from '@/components/form/Button.vue'
+import DDialog from '@/components/Dialog.vue'
 import moment from 'moment'
 import { State } from '@/store'
 import { TrashIcon as Trash, PencilIcon as Pencil } from '@heroicons/vue/outline'
@@ -73,6 +86,20 @@ export default defineComponent({
     VButton,
     Trash,
     Pencil,
+    DDialog,
+  },
+  data(): {
+    deleteDialog: {
+      shown: boolean;
+      record: NumericRecord | null;
+    };
+    } {
+    return {
+      deleteDialog: {
+        shown: false,
+        record: null,
+      },
+    }
   },
   computed: {
     id(): number {
@@ -110,6 +137,14 @@ export default defineComponent({
     },
     deleteRecord(event: Event) {
       console.log(event)
+    },
+    openDeleteRecordDialog(_: Event, record: NumericRecord) {
+      this.deleteDialog.record = record
+      this.deleteDialog.shown = true
+    },
+    closeDeleteRecordDialog() {
+      this.deleteDialog.shown = false
+      this.deleteDialog.record = null
     },
   },
 })

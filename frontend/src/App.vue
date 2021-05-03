@@ -13,16 +13,24 @@
         <component :is="Component" />
       </transition>
     </router-view>
+    <div>
+      <div id="dialog-target">
+      </div>
+    </div>
   </div>
 </template>
 
 <script lang="ts">
 import '@fontsource/lato/index.css' /* weight 400 */
-
 import { defineComponent } from 'vue'
+import DialogWrapper from '@/components/DialogWrapper.vue'
+
 export default defineComponent({
   created() {
     this.dispatchFetchAuth()
+  },
+  components: {
+    DialogWrapper,
   },
   computed: {
     isAuthenticated() {

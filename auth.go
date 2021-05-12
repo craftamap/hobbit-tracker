@@ -40,32 +40,24 @@ func init() {
 	gob.Register(AuthDetails{})
 }
 
-// AuthMiddlewareBuilder creates a http.Handler which ensures that a user is authenticated.
-// If a user is not authenticated, a http.StatusUnauthorized is written to the request and the request is returned.
-// If a user is authenticated, the next handler is served.
-func AuthMiddlewareBuilder(log *logrus.Logger) func(http.Handler) http.Handler {
+func AuthToContextMiddleBuilder(db *gorm.DB, log *logrus.Logger) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			// Basic auth for app authentication
 			handleBasicAuth := func(username string, password string) (AuthDetails, error) {
-
 				user := &models.User{}
 				if err := db.Where("username = ?", username).First(user).Error; err != nil {
 					log.Warnf("found no user with username %s; %s ", username, err)
-					w.WriteHeader(http.StatusUnauthorized)
 					return AuthDetails{}, err
 				}
 
 				if user.Secret == "" {
 					log.Warnf("found user with username %s, but no secret was found ", username)
-					w.WriteHeader(http.StatusUnauthorized)
 					return AuthDetails{}, fmt.Errorf("found user with username %s, but no secret was found ", username)
 				}
 
 				err := bcrypt.CompareHashAndPassword([]byte(user.Secret), []byte(password))
 				if err != nil {
 					log.Warnf("invalid password for user %s", username)
-					w.WriteHeader(http.StatusUnauthorized)
 					return AuthDetails{}, err
 				}
 
@@ -77,20 +69,11 @@ func AuthMiddlewareBuilder(log *logrus.Logger) func(http.Handler) http.Handler {
 				}, nil
 			}
 
-			handleSessionAuth := func() (AuthDetails, error) {
-				session, _ := store.Get(r, "session")
+			handleSessionAuth := func(session *sessions.Session) (AuthDetails, error) {
 				authDetails, ok := session.Values[AuthDetailsSessionKey].(AuthDetails)
 				if !ok {
 					log.Infof("Could not type assert cookie to AuthDetails, %+T", session.Values[AuthDetailsSessionKey])
-					w.WriteHeader(http.StatusUnauthorized)
 					return AuthDetails{}, fmt.Errorf("Could not type assert cookie to AuthDetails, %+T", session.Values[AuthDetailsSessionKey])
-				}
-				auth := authDetails.Authenticated
-
-				if !auth {
-					log.Info("session contains valid AuthDetails, but AuthDetails.Authenticated is false")
-					w.WriteHeader(http.StatusUnauthorized)
-					return authDetails, fmt.Errorf("session contains valid AuthDetails, but AuthDetails.Authenticated is false")
 				}
 				return authDetails, nil
 			}
@@ -101,18 +84,37 @@ func AuthMiddlewareBuilder(log *logrus.Logger) func(http.Handler) http.Handler {
 			if username, password, ok := r.BasicAuth(); ok {
 				authDetails, err = handleBasicAuth(username, password)
 				if err != nil {
-					return
+					log.Infof("User could not be authenticated by basicAuth")
 				}
-			} else {
-				authDetails, err = handleSessionAuth()
+			} else if session, err := store.Get(r, "session"); err == nil && !session.IsNew {
+				authDetails, err = handleSessionAuth(session)
 				if err != nil {
-					return
+					log.Infof("User could not be authenticated by SessionAuth")
 				}
 			}
 
 			ctx := r.Context()
 			ctx = context.WithValue(ctx, AuthDetailsContextKey, authDetails)
 			r = r.WithContext(ctx)
+
+			next.ServeHTTP(w, r)
+		})
+	}
+}
+
+// AuthMiddlewareBuilder creates a http.Handler which ensures that a user is authenticated.
+// If a user is not authenticated, a http.StatusUnauthorized is written to the request and the request is returned.
+// If a user is authenticated, the next handler is served.
+func AuthMiddlewareBuilder(log *logrus.Logger) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			// Basic auth for app authentication
+			contextAuthDetails := r.Context().Value(AuthDetailsContextKey)
+			authDetails := contextAuthDetails.(AuthDetails)
+			if !authDetails.Authenticated {
+				w.WriteHeader(http.StatusUnauthorized)
+				return
+			}
 
 			next.ServeHTTP(w, r)
 		})

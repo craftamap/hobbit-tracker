@@ -72,6 +72,7 @@ func main() {
 	r := mux.NewRouter()
 	r.StrictSlash(true)
 	r.Use(loggingMiddleware)
+	r.Use(AuthToContextMiddleBuilder(db, log))
 
 	auth := r.PathPrefix("/auth").Subrouter()
 	auth.HandleFunc("/login", BuildHandleLogin(db, log)).Methods("POST")
@@ -79,16 +80,14 @@ func main() {
 
 	api := r.PathPrefix("/api").Subrouter()
 	api.HandleFunc("/auth", BuildHandleAPIGetAuth(db, log)).Methods("GET")
-	hobbits := api.PathPrefix("/hobbits").Subrouter()
 
+	hobbits := api.PathPrefix("/hobbits").Subrouter()
 	hobbits.Handle("/", AuthMiddlewareBuilder(log)(
 		http.HandlerFunc(BuildHandleAPIPostHobbit(db, log)),
 	)).Methods("POST")
-
 	hobbits.Handle("/{id:[0-9]+}", AuthMiddlewareBuilder(log)(
 		http.HandlerFunc(BuildHandleAPIPutHobbit(db, log)),
 	)).Methods("PUT")
-
 	hobbits.Handle("/{id:[0-9]+}", BuildHandleAPIGetHobbit(db, log)).Methods("GET")
 	hobbits.Handle("/", BuildHandleAPIGetHobbits(db, log)).Methods("GET")
 

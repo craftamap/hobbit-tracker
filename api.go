@@ -14,13 +14,9 @@ import (
 
 func BuildHandleAPIGetAuth(db *gorm.DB, log *logrus.Logger) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		session, err := store.Get(r, "session")
-		if err != nil {
-			log.Error(err)
-			w.WriteHeader(http.StatusBadRequest)
-			return
-		}
-		authDetails, ok := session.Values[AuthDetailsSessionKey].(AuthDetails)
+		c := r.Context()
+		contextAuthDetails := c.Value(AuthDetailsContextKey)
+		authDetails, ok := contextAuthDetails.(AuthDetails)
 		if !ok {
 			json.NewEncoder(w).Encode(AuthDetails{
 				Authenticated: false,

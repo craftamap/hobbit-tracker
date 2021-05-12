@@ -50,23 +50,30 @@ func AuthToContextMiddleBuilder(db *gorm.DB, log *logrus.Logger) func(http.Handl
 					return AuthDetails{}, err
 				}
 
-				if user.Secret == "" {
-					log.Warnf("found user with username %s, but no secret was found ", username)
-					return AuthDetails{}, fmt.Errorf("found user with username %s, but no secret was found ", username)
-				}
+				appPasswords := []models.AppPassword{}
 
-				err := bcrypt.CompareHashAndPassword([]byte(user.Secret), []byte(password))
-				if err != nil {
-					log.Warnf("invalid password for user %s", username)
+				if err := db.Joins("User").Where(models.AppPassword{UserID: user.ID}).Find(&appPasswords).Error; err != nil {
+					log.Warnf("failed to find app passwords for user %s; %s ", username, err)
 					return AuthDetails{}, err
 				}
-
-				log.Info("Password matched")
-				return AuthDetails{
-					Authenticated: true,
-					Username:      user.Username,
-					UserID:        user.ID,
-				}, nil
+				log.Info("appPasswords", appPasswords)
+				secretAndPasswordMatched := false
+				for _, appPassword := range appPasswords {
+					err := bcrypt.CompareHashAndPassword([]byte(appPassword.Secret), []byte(password))
+					if err == nil {
+						secretAndPasswordMatched = true
+						break
+					}
+				}
+				if secretAndPasswordMatched {
+					log.Info("Password matched")
+					return AuthDetails{
+						Authenticated: true,
+						Username:      user.Username,
+						UserID:        user.ID,
+					}, nil
+				}
+				return AuthDetails{Authenticated: false}, fmt.Errorf("Could not find a matching app password")
 			}
 
 			handleSessionAuth := func(session *sessions.Session) (AuthDetails, error) {

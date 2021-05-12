@@ -67,6 +67,7 @@ func main() {
 	db.AutoMigrate(&models.Hobbit{})
 	db.AutoMigrate(&models.User{})
 	db.AutoMigrate(&models.NumericRecord{})
+	db.AutoMigrate(&models.AppPassword{})
 	log.Info("AutoMigrated DB")
 
 	r := mux.NewRouter()

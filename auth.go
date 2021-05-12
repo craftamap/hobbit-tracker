@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"encoding/gob"
+	"fmt"
 	"net/http"
 
 	"github.com/craftamap/hobbit-tracker/models"
@@ -45,19 +46,68 @@ func init() {
 func AuthMiddlewareBuilder(log *logrus.Logger) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			session, _ := store.Get(r, "session")
-			authDetails, ok := session.Values[AuthDetailsSessionKey].(AuthDetails)
-			if !ok {
-				log.Infof("Could not type assert cookie to AuthDetails, %+T", session.Values[AuthDetailsSessionKey])
-				w.WriteHeader(http.StatusUnauthorized)
-				return
-			}
-			auth := authDetails.Authenticated
+			// Basic auth for app authentication
+			handleBasicAuth := func(username string, password string) (AuthDetails, error) {
 
-			if !auth {
-				log.Info("Could not type assert cookie to authDetails")
-				w.WriteHeader(http.StatusUnauthorized)
-				return
+				user := &models.User{}
+				if err := db.Where("username = ?", username).First(user).Error; err != nil {
+					log.Warnf("found no user with username %s; %s ", username, err)
+					w.WriteHeader(http.StatusUnauthorized)
+					return AuthDetails{}, err
+				}
+
+				if user.Secret == "" {
+					log.Warnf("found user with username %s, but no secret was found ", username)
+					w.WriteHeader(http.StatusUnauthorized)
+					return AuthDetails{}, fmt.Errorf("found user with username %s, but no secret was found ", username)
+				}
+
+				err := bcrypt.CompareHashAndPassword([]byte(user.Secret), []byte(password))
+				if err != nil {
+					log.Warnf("invalid password for user %s", username)
+					w.WriteHeader(http.StatusUnauthorized)
+					return AuthDetails{}, err
+				}
+
+				log.Info("Password matched")
+				return AuthDetails{
+					Authenticated: true,
+					Username:      user.Username,
+					UserID:        user.ID,
+				}, nil
+			}
+
+			handleSessionAuth := func() (AuthDetails, error) {
+				session, _ := store.Get(r, "session")
+				authDetails, ok := session.Values[AuthDetailsSessionKey].(AuthDetails)
+				if !ok {
+					log.Infof("Could not type assert cookie to AuthDetails, %+T", session.Values[AuthDetailsSessionKey])
+					w.WriteHeader(http.StatusUnauthorized)
+					return AuthDetails{}, fmt.Errorf("Could not type assert cookie to AuthDetails, %+T", session.Values[AuthDetailsSessionKey])
+				}
+				auth := authDetails.Authenticated
+
+				if !auth {
+					log.Info("session contains valid AuthDetails, but AuthDetails.Authenticated is false")
+					w.WriteHeader(http.StatusUnauthorized)
+					return authDetails, fmt.Errorf("session contains valid AuthDetails, but AuthDetails.Authenticated is false")
+				}
+				return authDetails, nil
+			}
+
+			var authDetails AuthDetails
+			var err error
+
+			if username, password, ok := r.BasicAuth(); ok {
+				authDetails, err = handleBasicAuth(username, password)
+				if err != nil {
+					return
+				}
+			} else {
+				authDetails, err = handleSessionAuth()
+				if err != nil {
+					return
+				}
 			}
 
 			ctx := r.Context()

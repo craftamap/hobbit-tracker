@@ -41,97 +41,133 @@ func init() {
 	gob.Register(AuthDetails{})
 }
 
-func AuthToContextMiddleBuilder(db *gorm.DB, log *logrus.Logger) func(http.Handler) http.Handler {
-	return func(next http.Handler) http.Handler {
-		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			handleBasicAuth := func(username string, password string) (AuthDetails, error) {
-				user := &models.User{}
-				if err := db.Where("username = ?", username).First(user).Error; err != nil {
-					log.Warnf("found no user with username %s; %s ", username, err)
-					return AuthDetails{}, err
-				}
+type AuthToContextMiddlewareHandler struct {
+	db   *gorm.DB
+	log  *logrus.Logger
+	next http.Handler
+}
 
-				appPasswords := []models.AppPassword{}
+func (m AuthToContextMiddlewareHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	handleBasicAuth := func(username string, password string) (AuthDetails, error) {
+		user := &models.User{}
+		if err := m.db.Where("username = ?", username).First(user).Error; err != nil {
+			m.log.Warnf("found no user with username %s; %s ", username, err)
+			return AuthDetails{}, err
+		}
 
-				if err := db.Joins("User").Where(models.AppPassword{UserID: user.ID}).Find(&appPasswords).Error; err != nil {
-					log.Warnf("failed to find app passwords for user %s; %s ", username, err)
-					return AuthDetails{}, err
-				}
-				secretAndPasswordMatched := false
-				var matchedAppPassword models.AppPassword
-				for _, appPassword := range appPasswords {
-					err := bcrypt.CompareHashAndPassword([]byte(appPassword.Secret), []byte(password))
-					if err == nil {
-						secretAndPasswordMatched = true
-						matchedAppPassword = appPassword
-						break
-					}
-				}
-				if secretAndPasswordMatched {
-					log.Info("Password matched")
-					if err := db.Model(&matchedAppPassword).Updates(models.AppPassword{LastUsedAt: time.Now()}).Error; err != nil {
-						log.Errorf("Failed to update LastUsedAt for app password %s", matchedAppPassword.ID)
-						return AuthDetails{}, err
-					}
-					return AuthDetails{
-						Authenticated: true,
-						Username:      user.Username,
-						UserID:        user.ID,
-					}, nil
-				}
-				return AuthDetails{Authenticated: false}, fmt.Errorf("Could not find a matching app password")
+		appPasswords := []models.AppPassword{}
+
+		if err := m.db.Joins("User").Where(models.AppPassword{UserID: user.ID}).Find(&appPasswords).Error; err != nil {
+			m.log.Warnf("failed to find app passwords for user %s; %s ", username, err)
+			return AuthDetails{}, err
+		}
+		secretAndPasswordMatched := false
+		var matchedAppPassword models.AppPassword
+		for _, appPassword := range appPasswords {
+			err := bcrypt.CompareHashAndPassword([]byte(appPassword.Secret), []byte(password))
+			if err == nil {
+				secretAndPasswordMatched = true
+				matchedAppPassword = appPassword
+				break
 			}
-
-			handleSessionAuth := func(session *sessions.Session) (AuthDetails, error) {
-				authDetails, ok := session.Values[AuthDetailsSessionKey].(AuthDetails)
-				if !ok {
-					log.Infof("Could not type assert cookie to AuthDetails, %+T", session.Values[AuthDetailsSessionKey])
-					return AuthDetails{}, fmt.Errorf("Could not type assert cookie to AuthDetails, %+T", session.Values[AuthDetailsSessionKey])
-				}
-				return authDetails, nil
+		}
+		if secretAndPasswordMatched {
+			m.log.Info("Password matched")
+			if err := m.db.Model(&models.AppPassword{ID: matchedAppPassword.ID}).Updates(models.AppPassword{LastUsedAt: time.Now()}).Error; err != nil {
+				m.log.Errorf("Failed to update LastUsedAt for app password %s", matchedAppPassword.ID)
+				return AuthDetails{}, err
 			}
-
-			var authDetails AuthDetails
-			var err error
-
-			if username, password, ok := r.BasicAuth(); ok {
-				authDetails, err = handleBasicAuth(username, password)
-				if err != nil {
-					log.Infof("User could not be authenticated by basicAuth")
-				}
-			} else if session, err := store.Get(r, "session"); err == nil && !session.IsNew {
-				authDetails, err = handleSessionAuth(session)
-				if err != nil {
-					log.Infof("User could not be authenticated by SessionAuth")
-				}
-			}
-
-			ctx := r.Context()
-			ctx = context.WithValue(ctx, AuthDetailsContextKey, authDetails)
-			r = r.WithContext(ctx)
-
-			next.ServeHTTP(w, r)
-		})
+			return AuthDetails{
+				Authenticated: true,
+				Username:      user.Username,
+				UserID:        user.ID,
+			}, nil
+		}
+		return AuthDetails{Authenticated: false}, fmt.Errorf("Could not find a matching app password")
 	}
+
+	handleSessionAuth := func(session *sessions.Session) (AuthDetails, error) {
+		authDetails, ok := session.Values[AuthDetailsSessionKey].(AuthDetails)
+		if !ok {
+			m.log.Infof("Could not type assert cookie to AuthDetails, %+T", session.Values[AuthDetailsSessionKey])
+			return AuthDetails{}, fmt.Errorf("Could not type assert cookie to AuthDetails, %+T", session.Values[AuthDetailsSessionKey])
+		}
+		return authDetails, nil
+	}
+
+	var authDetails AuthDetails
+	var err error
+
+	if username, password, ok := r.BasicAuth(); ok {
+		authDetails, err = handleBasicAuth(username, password)
+		if err != nil {
+			m.log.Infof("User could not be authenticated by basicAuth")
+		}
+	} else if session, err := store.Get(r, "session"); err == nil && !session.IsNew {
+		authDetails, err = handleSessionAuth(session)
+		if err != nil {
+			m.log.Infof("User could not be authenticated by SessionAuth")
+		}
+	}
+
+	ctx := r.Context()
+	ctx = context.WithValue(ctx, AuthDetailsContextKey, authDetails)
+	r = r.WithContext(ctx)
+
+	m.next.ServeHTTP(w, r)
+}
+
+func NewAuthToContextMiddlewareHandler(db *gorm.DB, log *logrus.Logger) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return AuthToContextMiddlewareHandler{
+			log:  log,
+			db:   db,
+			next: next,
+		}
+	}
+}
+
+type AuthMiddlewareHandler struct {
+	log                   *logrus.Logger
+	next                  http.Handler
+	permitSessionAuth     bool
+	permitAppPasswordAuth bool
+}
+
+func NewAuthMiddlewareHandler(log *logrus.Logger) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return AuthMiddlewareHandler{
+			log:                   log,
+			next:                  next,
+			permitAppPasswordAuth: true,
+			permitSessionAuth:     true,
+		}
+	}
+}
+
+func (m AuthMiddlewareHandler) PermitSessionAuth(permitSessionAuth bool) AuthMiddlewareHandler {
+	m.permitSessionAuth = permitSessionAuth
+	return m
+}
+
+func (m AuthMiddlewareHandler) PermitAppPasswordAuth(permitAppPasswordAuth bool) AuthMiddlewareHandler {
+	m.permitAppPasswordAuth = permitAppPasswordAuth
+	return m
 }
 
 // AuthMiddlewareBuilder creates a http.Handler which ensures that a user is authenticated.
 // If a user is not authenticated, a http.StatusUnauthorized is written to the request and the request is returned.
 // If a user is authenticated, the next handler is served.
-func AuthMiddlewareBuilder(log *logrus.Logger) func(http.Handler) http.Handler {
-	return func(next http.Handler) http.Handler {
-		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			// Basic auth for app authentication
-			contextAuthDetails := r.Context().Value(AuthDetailsContextKey)
-			authDetails := contextAuthDetails.(AuthDetails)
-			if !authDetails.Authenticated {
-				w.WriteHeader(http.StatusUnauthorized)
-				return
-			}
-
-			next.ServeHTTP(w, r)
-		})
+func (m AuthMiddlewareHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	// Basic auth for app authentication
+	contextAuthDetails := r.Context().Value(AuthDetailsContextKey)
+	authDetails := contextAuthDetails.(AuthDetails)
+	if !authDetails.Authenticated {
+		w.WriteHeader(http.StatusUnauthorized)
+		return
 	}
+
+	m.next.ServeHTTP(w, r)
 }
 
 // BuildHandleLogout is a function returning a http.HandlerFunc which logs out the current user.

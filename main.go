@@ -73,7 +73,9 @@ func main() {
 	r := mux.NewRouter()
 	r.StrictSlash(true)
 	r.Use(loggingMiddleware)
-	r.Use(AuthToContextMiddleBuilder(db, log))
+	r.Use(NewAuthToContextMiddlewareHandler(db, log))
+
+	authMiddleware := NewAuthMiddlewareHandler(log)
 
 	auth := r.PathPrefix("/auth").Subrouter()
 	auth.HandleFunc("/login", BuildHandleLogin(db, log)).Methods("POST")
@@ -83,10 +85,10 @@ func main() {
 	api.HandleFunc("/auth", BuildHandleAPIGetAuth(db, log)).Methods("GET")
 
 	hobbits := api.PathPrefix("/hobbits").Subrouter()
-	hobbits.Handle("/", AuthMiddlewareBuilder(log)(
+	hobbits.Handle("/", authMiddleware(
 		http.HandlerFunc(BuildHandleAPIPostHobbit(db, log)),
 	)).Methods("POST")
-	hobbits.Handle("/{id:[0-9]+}", AuthMiddlewareBuilder(log)(
+	hobbits.Handle("/{id:[0-9]+}", authMiddleware(
 		http.HandlerFunc(BuildHandleAPIPutHobbit(db, log)),
 	)).Methods("PUT")
 	hobbits.Handle("/{id:[0-9]+}", BuildHandleAPIGetHobbit(db, log)).Methods("GET")
@@ -94,24 +96,25 @@ func main() {
 
 	records := hobbits.PathPrefix("/{hobbit_id:[0-9]+}/records").Subrouter()
 	records.Handle("/", BuildHandleAPIGetRecords(db, log)).Methods("GET")
-	records.Handle("/", AuthMiddlewareBuilder(log)(
+	records.Handle("/", authMiddleware(
 		http.HandlerFunc(BuildHandleAPIPostRecord(db, log)),
 	)).Methods("POST")
-	records.Handle("/{record_id:[0-9]+}", AuthMiddlewareBuilder(log)(
+	records.Handle("/{record_id:[0-9]+}", authMiddleware(
 		http.HandlerFunc(BuildHandleAPIPutRecord(db, log)),
 	)).Methods("PUT")
-	records.Handle("/{record_id:[0-9]+}", AuthMiddlewareBuilder(log)(
+	records.Handle("/{record_id:[0-9]+}", authMiddleware(
 		http.HandlerFunc(BuildHandleAPIDeleteRecord(db, log)),
 	)).Methods("DELETE")
 	records.Handle("/heatmap", BuildHandleAPIGetRecordsForHeatmap(db, log)).Methods("GET")
 
 	profile := api.PathPrefix("/profile").Subrouter()
 	profileMe := profile.PathPrefix("/me").Subrouter()
-	profileMe.Use(AuthMiddlewareBuilder(log))
+	profileMe.Use(authMiddleware)
 	profileMe.Handle("/", BuildHandleAPIGetAuth(db, log))
 	profileMe.Handle("/hobbits", http.HandlerFunc(BuildHandleAPIProfileGetHobbits(db, log))).Methods("GET")
 	profileMeAppPassword := profileMe.PathPrefix("/apppassword").Subrouter()
 	profileMeAppPassword.HandleFunc("/", BuildHandleAPIProfileGetAppPasswords(db, log)).Methods("GET")
+	profileMeAppPassword.HandleFunc("/", BuildHandleAPIProfilePostAppPassword(db, log)).Methods("POST")
 
 	frontend, err := frontendHandler()
 	if err != nil {

@@ -20,11 +20,19 @@ var (
 	store = sessions.NewCookieStore(key)
 )
 
+type AuthType string
+
+const (
+	AuthTypeSession     AuthType = "Session"
+	AuthTypeAppPassword AuthType = "AppPassword"
+)
+
 // AuthDetails is a struct used for storing authentication details within the cookie store
 type AuthDetails struct {
-	Authenticated bool   `json:"authenticated"`
-	Username      string `json:"username,omitempty"`
-	UserID        uint   `json:"userId,omitempty"`
+	Authenticated bool     `json:"authenticated"`
+	Username      string   `json:"username,omitempty"`
+	UserID        uint     `json:"userId,omitempty"`
+	AuthType      AuthType `json:"authType,omitempty"`
 }
 
 // ContextKey is a string-alias used for safe-usage of the context method
@@ -81,6 +89,7 @@ func (m AuthToContextMiddlewareHandler) ServeHTTP(w http.ResponseWriter, r *http
 				Authenticated: true,
 				Username:      user.Username,
 				UserID:        user.ID,
+				AuthType:      AuthTypeAppPassword,
 			}, nil
 		}
 		return AuthDetails{Authenticated: false}, fmt.Errorf("Could not find a matching app password")
@@ -91,6 +100,9 @@ func (m AuthToContextMiddlewareHandler) ServeHTTP(w http.ResponseWriter, r *http
 		if !ok {
 			m.log.Infof("Could not type assert cookie to AuthDetails, %+T", session.Values[AuthDetailsSessionKey])
 			return AuthDetails{}, fmt.Errorf("Could not type assert cookie to AuthDetails, %+T", session.Values[AuthDetailsSessionKey])
+		}
+		if authDetails.AuthType != AuthTypeSession {
+			authDetails.AuthType = AuthTypeSession
 		}
 		return authDetails, nil
 	}
@@ -127,47 +139,61 @@ func NewAuthToContextMiddlewareHandler(db *gorm.DB, log *logrus.Logger) func(htt
 	}
 }
 
-type AuthMiddlewareHandler struct {
+type AuthMiddlewareHandlerBuilder struct {
 	log                   *logrus.Logger
-	next                  http.Handler
 	permitSessionAuth     bool
 	permitAppPasswordAuth bool
 }
 
-func NewAuthMiddlewareHandler(log *logrus.Logger) func(http.Handler) http.Handler {
-	return func(next http.Handler) http.Handler {
-		return AuthMiddlewareHandler{
-			log:                   log,
-			next:                  next,
-			permitAppPasswordAuth: true,
-			permitSessionAuth:     true,
-		}
+func NewAuthMiddlewareHandlerBuilder(log *logrus.Logger) AuthMiddlewareHandlerBuilder {
+	return AuthMiddlewareHandlerBuilder{
+		log: log,
 	}
 }
 
-func (m AuthMiddlewareHandler) PermitSessionAuth(permitSessionAuth bool) AuthMiddlewareHandler {
-	m.permitSessionAuth = permitSessionAuth
-	return m
+func (m AuthMiddlewareHandlerBuilder) WithPermitSessionAuth(permitSessionAuth bool) AuthMiddlewareHandlerBuilder {
+	return AuthMiddlewareHandlerBuilder{
+		log:                   m.log,
+		permitAppPasswordAuth: m.permitAppPasswordAuth,
+		permitSessionAuth:     permitSessionAuth,
+	}
 }
 
-func (m AuthMiddlewareHandler) PermitAppPasswordAuth(permitAppPasswordAuth bool) AuthMiddlewareHandler {
-	m.permitAppPasswordAuth = permitAppPasswordAuth
-	return m
+func (m AuthMiddlewareHandlerBuilder) WithPermitAppPasswordAuth(permitAppPasswordAuth bool) AuthMiddlewareHandlerBuilder {
+	return AuthMiddlewareHandlerBuilder{
+		log:                   m.log,
+		permitAppPasswordAuth: permitAppPasswordAuth,
+		permitSessionAuth:     m.permitSessionAuth,
+	}
 }
 
 // AuthMiddlewareBuilder creates a http.Handler which ensures that a user is authenticated.
 // If a user is not authenticated, a http.StatusUnauthorized is written to the request and the request is returned.
 // If a user is authenticated, the next handler is served.
-func (m AuthMiddlewareHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	// Basic auth for app authentication
-	contextAuthDetails := r.Context().Value(AuthDetailsContextKey)
-	authDetails := contextAuthDetails.(AuthDetails)
-	if !authDetails.Authenticated {
-		w.WriteHeader(http.StatusUnauthorized)
-		return
-	}
+func (m AuthMiddlewareHandlerBuilder) build(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		contextAuthDetails := r.Context().Value(AuthDetailsContextKey)
+		authDetails := contextAuthDetails.(AuthDetails)
 
-	m.next.ServeHTTP(w, r)
+		if !authDetails.Authenticated {
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+
+		if authDetails.AuthType == AuthTypeAppPassword && !m.permitAppPasswordAuth {
+			w.WriteHeader(http.StatusUnauthorized)
+			w.Write([]byte("AuthType AppPassword not allowed for this endpoint"))
+			return
+		}
+
+		if authDetails.AuthType == AuthTypeSession && !m.permitSessionAuth {
+			w.WriteHeader(http.StatusUnauthorized)
+			w.Write([]byte("AuthType Session not allowed for this endpoint"))
+			return
+		}
+
+		next.ServeHTTP(w, r)
+	})
 }
 
 // BuildHandleLogout is a function returning a http.HandlerFunc which logs out the current user.

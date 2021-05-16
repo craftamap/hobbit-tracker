@@ -15,7 +15,9 @@ type AuthMiddlewareHandlerBuilder struct {
 
 func Builder(log *logrus.Logger) AuthMiddlewareHandlerBuilder {
 	return AuthMiddlewareHandlerBuilder{
-		log: log,
+		log:                   log,
+		permitSessionAuth:     true,
+		permitAppPasswordAuth: true,
 	}
 }
 

@@ -8,8 +8,17 @@ import (
 	"net/http"
 	"os"
 
+	routesApiHobbits "github.com/craftamap/hobbit-tracker/routes/api/hobbits"
+	routesApiProfile "github.com/craftamap/hobbit-tracker/routes/api/profile"
+	routesApiRecords "github.com/craftamap/hobbit-tracker/routes/api/records"
+
+	middlewareAuth "github.com/craftamap/hobbit-tracker/middleware/auth"
+	"github.com/craftamap/hobbit-tracker/middleware/authToContext"
 	"github.com/craftamap/hobbit-tracker/models"
+	"github.com/craftamap/hobbit-tracker/routes"
+	routesApiAuth "github.com/craftamap/hobbit-tracker/routes/api/auth"
 	"github.com/gorilla/mux"
+	"github.com/gorilla/sessions"
 	"github.com/sirupsen/logrus"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
@@ -17,6 +26,12 @@ import (
 
 var diskMode bool
 var port int
+
+var (
+	// key must be 16, 24 or 32 bytes long (AES-128, AES-192 or AES-256)
+	key   = []byte("jMcBBEBKAzw89XNb")
+	Store = sessions.NewCookieStore(key)
+)
 
 //go:embed frontend/dist
 var content embed.FS
@@ -42,8 +57,7 @@ func loggingMiddleware(next http.Handler) http.Handler {
 }
 
 func frontendHandler() (http.Handler, error) {
-	var fsys fs.FS
-	fsys = fs.FS(content)
+	var fsys = fs.FS(content)
 	contentStatic, err := fs.Sub(fsys, "frontend/dist")
 	if err != nil {
 		return nil, err
@@ -73,49 +87,49 @@ func main() {
 	r := mux.NewRouter()
 	r.StrictSlash(true)
 	r.Use(loggingMiddleware)
-	r.Use(NewAuthToContextMiddlewareHandler(db, log))
+	r.Use(authToContext.New(db, log, Store))
 
-	authMiddlewareBuilder := NewAuthMiddlewareHandlerBuilder(log)
+	authMiddlewareBuilder := middlewareAuth.Builder(log)
 
 	auth := r.PathPrefix("/auth").Subrouter()
-	auth.HandleFunc("/login", BuildHandleLogin(db, log)).Methods("POST")
-	auth.HandleFunc("/logout", BuildHandleLogout(log))
+	auth.HandleFunc("/login", routes.BuildHandleLogin(db, log, Store)).Methods("POST")
+	auth.HandleFunc("/logout", routes.BuildHandleLogout(log, Store))
 
 	api := r.PathPrefix("/api").Subrouter()
-	api.HandleFunc("/auth", BuildHandleAPIGetAuth(db, log)).Methods("GET")
+	api.HandleFunc("/auth", routesApiAuth.BuildHandleAPIGetAuth(db, log)).Methods("GET")
 
 	hobbits := api.PathPrefix("/hobbits").Subrouter()
-	hobbits.Handle("/", authMiddlewareBuilder.build(
-		http.HandlerFunc(BuildHandleAPIPostHobbit(db, log)),
+	hobbits.Handle("/", authMiddlewareBuilder.Build(
+		http.HandlerFunc(routesApiHobbits.BuildHandleAPIPostHobbit(db, log)),
 	)).Methods("POST")
-	hobbits.Handle("/{id:[0-9]+}", authMiddlewareBuilder.build(
-		http.HandlerFunc(BuildHandleAPIPutHobbit(db, log)),
+	hobbits.Handle("/{id:[0-9]+}", authMiddlewareBuilder.Build(
+		http.HandlerFunc(routesApiHobbits.BuildHandleAPIPutHobbit(db, log)),
 	)).Methods("PUT")
-	hobbits.Handle("/{id:[0-9]+}", BuildHandleAPIGetHobbit(db, log)).Methods("GET")
-	hobbits.Handle("/", BuildHandleAPIGetHobbits(db, log)).Methods("GET")
+	hobbits.Handle("/{id:[0-9]+}", routesApiHobbits.BuildHandleAPIGetHobbit(db, log)).Methods("GET")
+	hobbits.Handle("/", routesApiHobbits.BuildHandleAPIGetHobbits(db, log)).Methods("GET")
 
 	records := hobbits.PathPrefix("/{hobbit_id:[0-9]+}/records").Subrouter()
-	records.Handle("/", BuildHandleAPIGetRecords(db, log)).Methods("GET")
-	records.Handle("/", authMiddlewareBuilder.build(
-		http.HandlerFunc(BuildHandleAPIPostRecord(db, log)),
+	records.Handle("/", routesApiRecords.BuildHandleAPIGetRecords(db, log)).Methods("GET")
+	records.Handle("/", authMiddlewareBuilder.Build(
+		http.HandlerFunc(routesApiRecords.BuildHandleAPIPostRecord(db, log)),
 	)).Methods("POST")
-	records.Handle("/{record_id:[0-9]+}", authMiddlewareBuilder.build(
-		http.HandlerFunc(BuildHandleAPIPutRecord(db, log)),
+	records.Handle("/{record_id:[0-9]+}", authMiddlewareBuilder.Build(
+		http.HandlerFunc(routesApiRecords.BuildHandleAPIPutRecord(db, log)),
 	)).Methods("PUT")
-	records.Handle("/{record_id:[0-9]+}", authMiddlewareBuilder.build(
-		http.HandlerFunc(BuildHandleAPIDeleteRecord(db, log)),
+	records.Handle("/{record_id:[0-9]+}", authMiddlewareBuilder.Build(
+		http.HandlerFunc(routesApiRecords.BuildHandleAPIDeleteRecord(db, log)),
 	)).Methods("DELETE")
-	records.Handle("/heatmap", BuildHandleAPIGetRecordsForHeatmap(db, log)).Methods("GET")
+	records.Handle("/heatmap", routesApiRecords.BuildHandleAPIGetRecordsForHeatmap(db, log)).Methods("GET")
 
 	profile := api.PathPrefix("/profile").Subrouter()
 	profileMe := profile.PathPrefix("/me").Subrouter()
-	profileMe.Use(authMiddlewareBuilder.build)
-	profileMe.Handle("/", BuildHandleAPIGetAuth(db, log))
-	profileMe.Handle("/hobbits", http.HandlerFunc(BuildHandleAPIProfileGetHobbits(db, log))).Methods("GET")
+	profileMe.Use(authMiddlewareBuilder.Build)
+	profileMe.Handle("/", routesApiAuth.BuildHandleAPIGetAuth(db, log))
+	profileMe.Handle("/hobbits", http.HandlerFunc(routesApiProfile.BuildHandleAPIProfileGetHobbits(db, log))).Methods("GET")
 	profileMeAppPassword := profileMe.PathPrefix("/apppassword").Subrouter()
-	profileMeAppPassword.Use(authMiddlewareBuilder.WithPermitAppPasswordAuth(false).build)
-	profileMeAppPassword.HandleFunc("/", BuildHandleAPIProfileGetAppPasswords(db, log)).Methods("GET")
-	profileMeAppPassword.HandleFunc("/", BuildHandleAPIProfilePostAppPassword(db, log)).Methods("POST")
+	profileMeAppPassword.Use(authMiddlewareBuilder.WithPermitAppPasswordAuth(false).Build)
+	profileMeAppPassword.HandleFunc("/", routesApiProfile.BuildHandleAPIProfileGetAppPasswords(db, log)).Methods("GET")
+	profileMeAppPassword.HandleFunc("/", routesApiProfile.BuildHandleAPIProfilePostAppPassword(db, log)).Methods("POST")
 
 	frontend, err := frontendHandler()
 	if err != nil {

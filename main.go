@@ -107,10 +107,11 @@ func main() {
 
 	profile := api.PathPrefix("/profile").Subrouter()
 	profileMe := profile.PathPrefix("/me").Subrouter()
+	profileMe.Use(AuthMiddlewareBuilder(log))
 	profileMe.Handle("/", BuildHandleAPIGetAuth(db, log))
-	profileMe.Handle("/hobbits", AuthMiddlewareBuilder(log)(
-		http.HandlerFunc(BuildHandleAPIProfileGetHobbits(db, log)),
-	)).Methods("GET")
+	profileMe.Handle("/hobbits", http.HandlerFunc(BuildHandleAPIProfileGetHobbits(db, log))).Methods("GET")
+	profileMeAppPassword := profileMe.PathPrefix("/apppassword").Subrouter()
+	profileMeAppPassword.HandleFunc("/", BuildHandleAPIProfileGetAppPasswords(db, log)).Methods("GET")
 
 	frontend, err := frontendHandler()
 	if err != nil {

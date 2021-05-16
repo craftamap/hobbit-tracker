@@ -5,6 +5,7 @@ import (
 	"encoding/gob"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/craftamap/hobbit-tracker/models"
 	"github.com/gorilla/sessions"
@@ -56,17 +57,22 @@ func AuthToContextMiddleBuilder(db *gorm.DB, log *logrus.Logger) func(http.Handl
 					log.Warnf("failed to find app passwords for user %s; %s ", username, err)
 					return AuthDetails{}, err
 				}
-				log.Info("appPasswords", appPasswords)
 				secretAndPasswordMatched := false
+				var matchedAppPassword models.AppPassword
 				for _, appPassword := range appPasswords {
 					err := bcrypt.CompareHashAndPassword([]byte(appPassword.Secret), []byte(password))
 					if err == nil {
 						secretAndPasswordMatched = true
+						matchedAppPassword = appPassword
 						break
 					}
 				}
 				if secretAndPasswordMatched {
 					log.Info("Password matched")
+					if err := db.Model(&matchedAppPassword).Updates(models.AppPassword{LastUsedAt: time.Now()}).Error; err != nil {
+						log.Errorf("Failed to update LastUsedAt for app password %s", matchedAppPassword.ID)
+						return AuthDetails{}, err
+					}
 					return AuthDetails{
 						Authenticated: true,
 						Username:      user.Username,

@@ -165,7 +165,7 @@ func BuildHandleDeleteAppPassword(db *gorm.DB, log *logrus.Logger) http.HandlerF
 
 		if appPassword.UserID != user.ID {
 			log.Errorf(
-				"Users for app password %s do not match! User %s is authenticated, but user %s is the owner of the app password",
+				"Users for app password %s do not match! User %d is authenticated, but user %d is the owner of the app password",
 				appPassword.ID, user.ID, appPassword.ID,
 			)
 			w.WriteHeader(http.StatusUnauthorized)

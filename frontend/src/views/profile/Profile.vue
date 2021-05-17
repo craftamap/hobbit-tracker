@@ -14,8 +14,8 @@
 <script lang="ts">
 import { defineComponent } from 'vue'
 
-import { Hobbit } from '../models/'
-import SimpleHobbit from '../components/SimpleHobbit.vue'
+import { Hobbit } from '@/models/'
+import SimpleHobbit from '@/components/SimpleHobbit.vue'
 
 export default defineComponent({
   name: 'Profile',

@@ -15,15 +15,15 @@ type User struct {
 }
 
 type AppPassword struct {
-	ID          uuid.UUID `gorm:"primaryKey;type:uuid"`
-	Description string
-	Secret      string         `json:",omitempty"`
-	UserID      uint           `gorm:"index" json:"-"`
+	ID          uuid.UUID      `gorm:"primaryKey;type:uuid" json:"id,omitempty"`
+	Description string         `json:"description,omitempty"`
+	Secret      string         `json:"secret,omitempty"`
+	UserID      uint           `gorm:"index" json:"user_id,omitempty"`
 	User        *User          `gorm:"foreignKey:UserID" json:"user,omitempty"`
-	LastUsedAt  time.Time      `json:",omitempty"`
-	CreatedAt   time.Time      `json:",omitempty"`
-	UpdatedAt   time.Time      `json:",omitempty"`
-	DeletedAt   gorm.DeletedAt `gorm:"index"`
+	LastUsedAt  time.Time      `json:"last_used_at,omitempty"`
+	CreatedAt   time.Time      `json:"created_at,omitempty"`
+	UpdatedAt   time.Time      `json:"updated_at,omitempty"`
+	DeletedAt   gorm.DeletedAt `gorm:"index" json:"deleted_at,omitempty"`
 }
 
 func (ap *AppPassword) BeforeCreate(scope *gorm.DB) error {

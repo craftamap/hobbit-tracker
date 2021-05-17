@@ -19,3 +19,10 @@ export interface NumericRecord {
   value: number;
   comment: string;
 }
+
+export interface AppPassword {
+    id: string;
+    description: string;
+    secret: string;
+    last_used_at: string;
+}

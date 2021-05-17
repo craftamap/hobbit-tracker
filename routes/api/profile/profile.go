@@ -6,13 +6,15 @@ import (
 
 	"github.com/craftamap/hobbit-tracker/middleware/authToContext"
 	"github.com/craftamap/hobbit-tracker/models"
+	"github.com/google/uuid"
+	"github.com/gorilla/mux"
 	"github.com/sethvargo/go-password/password"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
 
-func BuildHandleAPIProfileGetAppPasswords(db *gorm.DB, log *logrus.Logger) http.HandlerFunc {
+func BuildHandleGetAppPasswords(db *gorm.DB, log *logrus.Logger) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		user := models.User{}
 
@@ -42,14 +44,14 @@ func BuildHandleAPIProfileGetAppPasswords(db *gorm.DB, log *logrus.Logger) http.
 				CreatedAt:   appPassword.CreatedAt,
 				DeletedAt:   appPassword.DeletedAt,
 				Description: appPassword.Description,
-				Secret:      "",
+				Secret:      "", // DO NOT PRINT THE SECRET !!!
 			})
 		}
 		json.NewEncoder(w).Encode(sanitizedAppPasswords)
 	}
 }
 
-func BuildHandleAPIProfilePostAppPassword(db *gorm.DB, log *logrus.Logger) http.HandlerFunc {
+func BuildHandlePostAppPassword(db *gorm.DB, log *logrus.Logger) http.HandlerFunc {
 	// TODO: Limit total number of app passwords (10?)
 	return func(w http.ResponseWriter, r *http.Request) {
 		user := models.User{}
@@ -125,7 +127,64 @@ func BuildHandleAPIProfilePostAppPassword(db *gorm.DB, log *logrus.Logger) http.
 	}
 }
 
-func BuildHandleAPIProfileGetHobbits(db *gorm.DB, log *logrus.Logger) http.HandlerFunc {
+func BuildHandleDeleteAppPassword(db *gorm.DB, log *logrus.Logger) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		user := models.User{}
+
+		err := db.Where("ID = ?", r.Context().Value(authToContext.AuthDetailsContextKey).(authToContext.AuthDetails).UserID).First(&user).Error
+		if err != nil {
+			log.Error(err)
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+
+		vars := mux.Vars(r)
+		id, ok := vars["id"]
+		if !ok {
+			log.Error("Can't get id from mux")
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+
+		parsedUuid, err := uuid.Parse(id)
+		if err != nil {
+			log.Error(err)
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+
+		appPassword := models.AppPassword{
+			ID: parsedUuid,
+		}
+
+		if err := db.First(&appPassword).Error; err != nil {
+			log.Error(err)
+			w.WriteHeader(http.StatusNotFound)
+			return
+		}
+
+		if appPassword.UserID != user.ID {
+			log.Errorf(
+				"Users for app password %s do not match! User %s is authenticated, but user %s is the owner of the app password",
+				appPassword.ID, user.ID, appPassword.ID,
+			)
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+
+		if err := db.Delete(&appPassword).Error; err != nil {
+			log.Error(err)
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+
+		appPassword.Secret = "" // Even after creation, do not print secret
+
+		json.NewEncoder(w).Encode(appPassword)
+	}
+}
+
+func BuildHandleProfileGetHobbits(db *gorm.DB, log *logrus.Logger) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		hobbits := []models.Hobbit{}
 

@@ -5,6 +5,9 @@
       >!
     </div>
     <div>
+      <div class="text-align-right">
+        <CogIcon class="h-24 cursor-pointer" @click="navigateToAppPassword" />
+      </div>
       <div>Your hobbits:</div>
       <SimpleHobbit v-for="hobbit in hobbitsOfUser" :key='hobbit.id' :hobbit="hobbit" />
     </div>
@@ -14,6 +17,8 @@
 <script lang="ts">
 import { defineComponent } from 'vue'
 
+import { CogIcon } from '@heroicons/vue/outline'
+
 import { Hobbit } from '@/models/'
 import SimpleHobbit from '@/components/SimpleHobbit.vue'
 
@@ -21,6 +26,7 @@ export default defineComponent({
   name: 'Profile',
   components: {
     SimpleHobbit,
+    CogIcon,
   },
   created() {
     this.dispatchFetchHobbitsByUser()
@@ -39,6 +45,9 @@ export default defineComponent({
   methods: {
     dispatchFetchHobbitsByUser() {
       this.$store.dispatch('fetchHobbitsByUser', { userId: this.userId })
+    },
+    navigateToAppPassword() {
+      this.$router.push('/profile/me/apppassword')
     },
   },
 })

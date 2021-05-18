@@ -132,4 +132,8 @@ a {
 .cursor-pointer {
   cursor: pointer;
 }
+
+.text-align-right {
+  text-align: right;
+}
 </style>

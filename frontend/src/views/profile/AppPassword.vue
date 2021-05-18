@@ -23,7 +23,8 @@
             <input id="description" type="text" v-model="addDialog.description" />
           </div>
           <template v-if="addDialog.password">
-            <p>Your new password is: {{ addDialog.password }}</p>
+            <p>Your new password is:</p>
+            <input type="text" readonly :value="addDialog.password" />
           </template>
           <div>
             <Button type="primary" value="add" @click="addAppPassword" :loading="addDialog.loading" v-if="!addDialog.password" />
@@ -48,7 +49,7 @@
 import { defineComponent } from 'vue'
 import { createNamespacedHelpers } from 'vuex'
 import { ProfileState } from '@/store/modules/profile'
-import AppPasswordItem from '@/components/AppPasswordItem.vue'
+import AppPasswordItem from '@/components/profile/AppPasswordItem.vue'
 import Dialog from '@/components/Dialog.vue'
 import Button from '@/components/form/Button.vue'
 import FormWrapper from '@/components/form/FormWrapper.vue'

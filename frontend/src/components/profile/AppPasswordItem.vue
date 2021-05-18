@@ -4,7 +4,7 @@
       <span class="description">{{appPassword.description}}</span> · <span class="id">{{appPassword.id}}</span>
     </div>
     <div class="last-used-wrapper">
-      <span class="last-used-at-label">Last Used At: </span>{{ formatDate(appPassword.last_used_at) }}
+      <span class="last-used-at-label">Last Used At: </span>{{ formatDate(appPassword.last_used_at) }} ({{ formatDateAgo(appPassword.last_used_at) }})
     </div>
     <div class="icons-wrapper">
       <span tabindex="0"><Trash class="h-16 cursor-pointer"  @click="emitDelete($event)"/></span>
@@ -15,7 +15,7 @@
 <script lang="ts">
 import moment from 'moment'
 import { defineComponent, PropType } from 'vue'
-import { AppPassword } from '../models'
+import { AppPassword } from '../../models'
 import { TrashIcon as Trash } from '@heroicons/vue/outline'
 
 export default defineComponent({
@@ -29,8 +29,19 @@ export default defineComponent({
     },
   },
   methods: {
-    formatDate(date: string) {
-      return moment(date).format('YYYY-MM-DD HH:mm')
+    formatDate(date: string): string {
+      const d = moment(date)
+      if (d.year() === 1) {
+        return 'never'
+      }
+      return d.format('YYYY-MM-DD HH:mm')
+    },
+    formatDateAgo(date: string): string {
+      const d = moment(date)
+      if (d.year() === 1) {
+        return 'never'
+      }
+      return moment.duration(d.diff(moment())).humanize() + ' ago'
     },
     emitDelete() {
       this.$emit('delete', {

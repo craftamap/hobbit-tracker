@@ -13,7 +13,7 @@ import (
 
 // BuildHandleLogout is a function returning a http.HandlerFunc which logs out the current user.
 // Users are getting logged out by setting their authDetails
-func BuildHandleLogout(log *logrus.Logger, store *sessions.CookieStore) http.HandlerFunc {
+func BuildHandleLogout(log *logrus.Logger, store sessions.Store) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		session, _ := store.Get(r, "session")
 		authDetails := session.Values[authtocontext.AuthDetailsSessionKey].(authtocontext.AuthDetails)
@@ -37,7 +37,7 @@ func BuildHandleLogout(log *logrus.Logger, store *sessions.CookieStore) http.Han
 }
 
 // BuildHandleLogin is a function returning a http.HandlerFunc which logs in a user by their credentails.
-func BuildHandleLogin(db *gorm.DB, log *logrus.Logger, store *sessions.CookieStore) http.HandlerFunc {
+func BuildHandleLogin(db *gorm.DB, log *logrus.Logger, store sessions.Store) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		err := r.ParseForm()
 		if err != nil {

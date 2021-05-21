@@ -11,7 +11,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func RegisterRoutes(hobbits *mux.Router, db *gorm.DB, log *logrus.Logger, store *sessions.CookieStore) {
+func RegisterRoutes(hobbits *mux.Router, db *gorm.DB, log *logrus.Logger, store sessions.Store) {
 	authMiddlewareBuilder := auth.Builder(log)
 
 	hobbits.Handle("/", authMiddlewareBuilder.Build(

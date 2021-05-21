@@ -10,7 +10,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func RegisterRoutes(records *mux.Router, db *gorm.DB, log *logrus.Logger, store *sessions.CookieStore) {
+func RegisterRoutes(records *mux.Router, db *gorm.DB, log *logrus.Logger, store sessions.Store) {
 	authMiddlewareBuilder := auth.Builder(log)
 
 	records.Handle("/", BuildHandleAPIGetRecords(db, log)).Methods("GET")

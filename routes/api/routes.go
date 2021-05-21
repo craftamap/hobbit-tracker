@@ -10,7 +10,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func RegisterRoutes(api *mux.Router, db *gorm.DB, log *logrus.Logger, store *sessions.CookieStore) {
+func RegisterRoutes(api *mux.Router, db *gorm.DB, log *logrus.Logger, store sessions.Store) {
 	rAuth := api.PathPrefix("/auth").Subrouter()
 	auth.RegisterRoutes(rAuth, db, log, store)
 

@@ -52,12 +52,12 @@ func init() {
 type MiddlewareHandler struct {
 	db    *gorm.DB
 	log   *logrus.Logger
-	store *sessions.CookieStore
+	store sessions.Store
 	next  http.Handler
 }
 
 // New returns a new AuthToContextMiddlewareHandler
-func New(db *gorm.DB, log *logrus.Logger, store *sessions.CookieStore) func(http.Handler) http.Handler {
+func New(db *gorm.DB, log *logrus.Logger, store sessions.Store) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return MiddlewareHandler{
 			log:   log,

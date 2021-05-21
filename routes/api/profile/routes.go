@@ -11,7 +11,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func RegisterRoutes(profile *mux.Router, db *gorm.DB, log *logrus.Logger, store *sessions.CookieStore) {
+func RegisterRoutes(profile *mux.Router, db *gorm.DB, log *logrus.Logger, store sessions.Store) {
 	authMiddlewareBuilder := auth.Builder(log)
 
 	profileMe := profile.PathPrefix("/me").Subrouter()

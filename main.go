@@ -7,13 +7,14 @@ import (
 	"io/fs"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/craftamap/hobbit-tracker/middleware/authtocontext"
 	"github.com/craftamap/hobbit-tracker/models"
 	"github.com/craftamap/hobbit-tracker/routes"
 	"github.com/gorilla/mux"
-	"github.com/gorilla/sessions"
 	"github.com/sirupsen/logrus"
+	"github.com/wader/gormstore/v2"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
@@ -22,9 +23,7 @@ var diskMode bool
 var port int
 
 var (
-	// key must be 16, 24 or 32 bytes long (AES-128, AES-192 or AES-256)
-	key   = []byte("jMcBBEBKAzw89XNb")
-	Store = sessions.NewCookieStore(key)
+	Store *gormstore.Store
 )
 
 //go:embed frontend/dist
@@ -77,6 +76,15 @@ func main() {
 	db.AutoMigrate(&models.NumericRecord{})
 	db.AutoMigrate(&models.AppPassword{})
 	log.Info("AutoMigrated DB")
+
+	// key must be 16, 24 or 32 bytes long (AES-128, AES-192 or AES-256)
+	key := []byte("jMcBBEBKAzw89XNb")
+	Store = gormstore.New(db, key)
+	// db cleanup every hour
+	// close quit channel to stop cleanup
+	quit := make(chan struct{})
+	go Store.PeriodicCleanup(1*time.Hour, quit)
+	defer close(quit)
 
 	r := mux.NewRouter()
 	r.StrictSlash(true)

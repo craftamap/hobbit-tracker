@@ -7,12 +7,14 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+// AuthMiddlewareHandlerBuilder is a builder for authMiddlewareHandler, allowing easier configuration
 type AuthMiddlewareHandlerBuilder struct {
 	log                   *logrus.Logger
 	permitSessionAuth     bool
 	permitAppPasswordAuth bool
 }
 
+// AuthMiddlewareHandlerBuilder initializes the Builder with all required parameters of the builder
 func Builder(log *logrus.Logger) AuthMiddlewareHandlerBuilder {
 	return AuthMiddlewareHandlerBuilder{
 		log:                   log,
@@ -21,47 +23,61 @@ func Builder(log *logrus.Logger) AuthMiddlewareHandlerBuilder {
 	}
 }
 
-func (m AuthMiddlewareHandlerBuilder) WithPermitSessionAuth(permitSessionAuth bool) AuthMiddlewareHandlerBuilder {
+// WithPermitSessionAuth returns a new AuthMiddlewareHandlerBuilder with the new permitSessionAuth value
+func (b AuthMiddlewareHandlerBuilder) WithPermitSessionAuth(permitSessionAuth bool) AuthMiddlewareHandlerBuilder {
 	return AuthMiddlewareHandlerBuilder{
-		log:                   m.log,
-		permitAppPasswordAuth: m.permitAppPasswordAuth,
+		log:                   b.log,
+		permitAppPasswordAuth: b.permitAppPasswordAuth,
 		permitSessionAuth:     permitSessionAuth,
 	}
 }
 
-func (m AuthMiddlewareHandlerBuilder) WithPermitAppPasswordAuth(permitAppPasswordAuth bool) AuthMiddlewareHandlerBuilder {
+// WithPermitAppPasswordAuth returns a new authMiddlewareHandlerBuilder with the permitAppPasswordAuth value
+func (b AuthMiddlewareHandlerBuilder) WithPermitAppPasswordAuth(permitAppPasswordAuth bool) AuthMiddlewareHandlerBuilder {
 	return AuthMiddlewareHandlerBuilder{
-		log:                   m.log,
+		log:                   b.log,
 		permitAppPasswordAuth: permitAppPasswordAuth,
-		permitSessionAuth:     m.permitSessionAuth,
+		permitSessionAuth:     b.permitSessionAuth,
 	}
 }
 
-// AuthMiddlewareBuilder creates a http.Handler which ensures that a user is authenticated.
-// If a user is not authenticated, a http.StatusUnauthorized is written to the request and the request is returned.
-// If a user is authenticated, the next handler is served.
-func (m AuthMiddlewareHandlerBuilder) Build(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		contextAuthDetails := r.Context().Value(authToContext.AuthDetailsContextKey)
-		authDetails := contextAuthDetails.(authToContext.AuthDetails)
+// Build creates a new authMiddlewareHandler containing all the values of the Builder and the next handler given by parameter
+func (b AuthMiddlewareHandlerBuilder) Build(next http.Handler) http.Handler {
+	return authMiddlewareHandler{
+		log:                   b.log,
+		permitSessionAuth:     b.permitSessionAuth,
+		permitAppPasswordAuth: b.permitAppPasswordAuth,
+		next:                  next,
+	}
+}
 
-		if !authDetails.Authenticated {
-			w.WriteHeader(http.StatusUnauthorized)
-			return
-		}
+type authMiddlewareHandler struct {
+	log                   *logrus.Logger
+	permitSessionAuth     bool
+	permitAppPasswordAuth bool
+	next                  http.Handler
+}
 
-		if authDetails.AuthType == authToContext.AuthTypeAppPassword && !m.permitAppPasswordAuth {
-			w.WriteHeader(http.StatusUnauthorized)
-			w.Write([]byte("AuthType AppPassword not allowed for this endpoint"))
-			return
-		}
+func (m authMiddlewareHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	contextAuthDetails := r.Context().Value(authToContext.AuthDetailsContextKey)
+	authDetails := contextAuthDetails.(authToContext.AuthDetails)
 
-		if authDetails.AuthType == authToContext.AuthTypeSession && !m.permitSessionAuth {
-			w.WriteHeader(http.StatusUnauthorized)
-			w.Write([]byte("AuthType Session not allowed for this endpoint"))
-			return
-		}
+	if !authDetails.Authenticated {
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
 
-		next.ServeHTTP(w, r)
-	})
+	if authDetails.AuthType == authToContext.AuthTypeAppPassword && !m.permitAppPasswordAuth {
+		w.WriteHeader(http.StatusUnauthorized)
+		w.Write([]byte("AuthType AppPassword not allowed for this endpoint"))
+		return
+	}
+
+	if authDetails.AuthType == authToContext.AuthTypeSession && !m.permitSessionAuth {
+		w.WriteHeader(http.StatusUnauthorized)
+		w.Write([]byte("AuthType Session not allowed for this endpoint"))
+		return
+	}
+
+	m.next.ServeHTTP(w, r)
 }

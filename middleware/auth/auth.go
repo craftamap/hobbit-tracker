@@ -58,6 +58,7 @@ type authMiddlewareHandler struct {
 	next                  http.Handler
 }
 
+// ServeHTTP implements the authentication
 func (m authMiddlewareHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	contextAuthDetails := r.Context().Value(authToContext.AuthDetailsContextKey)
 	authDetails := contextAuthDetails.(authToContext.AuthDetails)

@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/craftamap/hobbit-tracker/middleware/authToContext"
+	"github.com/craftamap/hobbit-tracker/middleware/authtocontext"
 	"github.com/craftamap/hobbit-tracker/models"
 	"github.com/craftamap/hobbit-tracker/routes"
 	"github.com/gorilla/mux"
@@ -81,7 +81,7 @@ func main() {
 	r := mux.NewRouter()
 	r.StrictSlash(true)
 	r.Use(loggingMiddleware)
-	r.Use(authToContext.New(db, log, Store))
+	r.Use(authtocontext.New(db, log, Store))
 
 	routes.RegisterRoutes(r, db, log, Store)
 

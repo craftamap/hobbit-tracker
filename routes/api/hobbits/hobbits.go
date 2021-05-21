@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/craftamap/hobbit-tracker/middleware/authToContext"
+	"github.com/craftamap/hobbit-tracker/middleware/authtocontext"
 	"github.com/craftamap/hobbit-tracker/models"
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
@@ -26,7 +26,7 @@ func BuildHandleAPIPostHobbit(db *gorm.DB, log *logrus.Logger) http.HandlerFunc 
 		user := models.User{}
 
 		// TODO: Add error handling here
-		err = db.Where("ID = ?", r.Context().Value(authToContext.AuthDetailsContextKey).(authToContext.AuthDetails).UserID).First(&user).Error
+		err = db.Where("ID = ?", r.Context().Value(authtocontext.AuthDetailsContextKey).(authtocontext.AuthDetails).UserID).First(&user).Error
 		if err != nil {
 			log.Error(err)
 			w.WriteHeader(http.StatusBadRequest)
@@ -100,7 +100,7 @@ func BuildHandleAPIPutHobbit(db *gorm.DB, log *logrus.Logger) http.HandlerFunc {
 		user := models.User{}
 
 		// TODO: Add error handling here
-		err := db.Where("ID = ?", r.Context().Value(authToContext.AuthDetailsContextKey).(authToContext.AuthDetails).UserID).First(&user).Error
+		err := db.Where("ID = ?", r.Context().Value(authtocontext.AuthDetailsContextKey).(authtocontext.AuthDetails).UserID).First(&user).Error
 		if err != nil {
 			log.Error(err)
 			w.WriteHeader(http.StatusBadRequest)

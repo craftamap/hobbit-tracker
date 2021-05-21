@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/craftamap/hobbit-tracker/middleware/authToContext"
+	"github.com/craftamap/hobbit-tracker/middleware/authtocontext"
 	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 )
@@ -12,10 +12,10 @@ import (
 func BuildHandleAPIGetAuth(db *gorm.DB, log *logrus.Logger) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		c := r.Context()
-		contextAuthDetails := c.Value(authToContext.AuthDetailsContextKey)
-		authDetails, ok := contextAuthDetails.(authToContext.AuthDetails)
+		contextAuthDetails := c.Value(authtocontext.AuthDetailsContextKey)
+		authDetails, ok := contextAuthDetails.(authtocontext.AuthDetails)
 		if !ok {
-			json.NewEncoder(w).Encode(authToContext.AuthDetails{
+			json.NewEncoder(w).Encode(authtocontext.AuthDetails{
 				Authenticated: false,
 			})
 			return

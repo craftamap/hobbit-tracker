@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/craftamap/hobbit-tracker/middleware/authToContext"
+	authToContext "github.com/craftamap/hobbit-tracker/middleware/authtocontext"
 	"github.com/craftamap/hobbit-tracker/models"
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"

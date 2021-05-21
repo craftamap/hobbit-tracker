@@ -3,7 +3,7 @@ package routes
 import (
 	"net/http"
 
-	"github.com/craftamap/hobbit-tracker/middleware/authToContext"
+	"github.com/craftamap/hobbit-tracker/middleware/authtocontext"
 	"github.com/craftamap/hobbit-tracker/models"
 	"github.com/gorilla/sessions"
 	"github.com/sirupsen/logrus"
@@ -16,10 +16,10 @@ import (
 func BuildHandleLogout(log *logrus.Logger, store *sessions.CookieStore) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		session, _ := store.Get(r, "session")
-		authDetails := session.Values[authToContext.AuthDetailsSessionKey].(authToContext.AuthDetails)
+		authDetails := session.Values[authtocontext.AuthDetailsSessionKey].(authtocontext.AuthDetails)
 		username := authDetails.Username
 
-		session.Values[authToContext.AuthDetailsSessionKey] = authToContext.AuthDetails{
+		session.Values[authtocontext.AuthDetailsSessionKey] = authtocontext.AuthDetails{
 			Authenticated: false,
 		}
 		session.Save(r, w)
@@ -80,7 +80,7 @@ func BuildHandleLogin(db *gorm.DB, log *logrus.Logger, store *sessions.CookieSto
 		// Auth successful
 		session, _ := store.Get(r, "session")
 
-		session.Values[authToContext.AuthDetailsSessionKey] = authToContext.AuthDetails{
+		session.Values[authtocontext.AuthDetailsSessionKey] = authtocontext.AuthDetails{
 			Authenticated: true,
 			Username:      user.Username,
 			UserID:        user.ID,

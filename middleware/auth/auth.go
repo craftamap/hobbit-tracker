@@ -3,7 +3,7 @@ package auth
 import (
 	"net/http"
 
-	"github.com/craftamap/hobbit-tracker/middleware/authToContext"
+	"github.com/craftamap/hobbit-tracker/middleware/authtocontext"
 	"github.com/sirupsen/logrus"
 )
 
@@ -14,7 +14,7 @@ type AuthMiddlewareHandlerBuilder struct {
 	permitAppPasswordAuth bool
 }
 
-// AuthMiddlewareHandlerBuilder initializes the Builder with all required parameters of the builder
+// Builder initializes the Builder with all required parameters of the builder
 func Builder(log *logrus.Logger) AuthMiddlewareHandlerBuilder {
 	return AuthMiddlewareHandlerBuilder{
 		log:                   log,
@@ -60,21 +60,21 @@ type authMiddlewareHandler struct {
 
 // ServeHTTP implements the authentication
 func (m authMiddlewareHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	contextAuthDetails := r.Context().Value(authToContext.AuthDetailsContextKey)
-	authDetails := contextAuthDetails.(authToContext.AuthDetails)
+	contextAuthDetails := r.Context().Value(authtocontext.AuthDetailsContextKey)
+	authDetails := contextAuthDetails.(authtocontext.AuthDetails)
 
 	if !authDetails.Authenticated {
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
 
-	if authDetails.AuthType == authToContext.AuthTypeAppPassword && !m.permitAppPasswordAuth {
+	if authDetails.AuthType == authtocontext.AuthTypeAppPassword && !m.permitAppPasswordAuth {
 		w.WriteHeader(http.StatusUnauthorized)
 		w.Write([]byte("AuthType AppPassword not allowed for this endpoint"))
 		return
 	}
 
-	if authDetails.AuthType == authToContext.AuthTypeSession && !m.permitSessionAuth {
+	if authDetails.AuthType == authtocontext.AuthTypeSession && !m.permitSessionAuth {
 		w.WriteHeader(http.StatusUnauthorized)
 		w.Write([]byte("AuthType Session not allowed for this endpoint"))
 		return

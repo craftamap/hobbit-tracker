@@ -1,4 +1,4 @@
-package authToContext
+package authtocontext
 
 import (
 	"context"

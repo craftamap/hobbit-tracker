@@ -7,16 +7,16 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-// AuthMiddlewareHandlerBuilder is a builder for authMiddlewareHandler, allowing easier configuration
-type AuthMiddlewareHandlerBuilder struct {
+// MiddlewareHandlerBuilder is a builder for authMiddlewareHandler, allowing easier configuration
+type MiddlewareHandlerBuilder struct {
 	log                   *logrus.Logger
 	permitSessionAuth     bool
 	permitAppPasswordAuth bool
 }
 
 // Builder initializes the Builder with all required parameters of the builder
-func Builder(log *logrus.Logger) AuthMiddlewareHandlerBuilder {
-	return AuthMiddlewareHandlerBuilder{
+func Builder(log *logrus.Logger) MiddlewareHandlerBuilder {
+	return MiddlewareHandlerBuilder{
 		log:                   log,
 		permitSessionAuth:     true,
 		permitAppPasswordAuth: true,
@@ -24,8 +24,8 @@ func Builder(log *logrus.Logger) AuthMiddlewareHandlerBuilder {
 }
 
 // WithPermitSessionAuth returns a new AuthMiddlewareHandlerBuilder with the new permitSessionAuth value
-func (b AuthMiddlewareHandlerBuilder) WithPermitSessionAuth(permitSessionAuth bool) AuthMiddlewareHandlerBuilder {
-	return AuthMiddlewareHandlerBuilder{
+func (b MiddlewareHandlerBuilder) WithPermitSessionAuth(permitSessionAuth bool) MiddlewareHandlerBuilder {
+	return MiddlewareHandlerBuilder{
 		log:                   b.log,
 		permitAppPasswordAuth: b.permitAppPasswordAuth,
 		permitSessionAuth:     permitSessionAuth,
@@ -33,8 +33,8 @@ func (b AuthMiddlewareHandlerBuilder) WithPermitSessionAuth(permitSessionAuth bo
 }
 
 // WithPermitAppPasswordAuth returns a new authMiddlewareHandlerBuilder with the permitAppPasswordAuth value
-func (b AuthMiddlewareHandlerBuilder) WithPermitAppPasswordAuth(permitAppPasswordAuth bool) AuthMiddlewareHandlerBuilder {
-	return AuthMiddlewareHandlerBuilder{
+func (b MiddlewareHandlerBuilder) WithPermitAppPasswordAuth(permitAppPasswordAuth bool) MiddlewareHandlerBuilder {
+	return MiddlewareHandlerBuilder{
 		log:                   b.log,
 		permitAppPasswordAuth: permitAppPasswordAuth,
 		permitSessionAuth:     b.permitSessionAuth,
@@ -42,7 +42,7 @@ func (b AuthMiddlewareHandlerBuilder) WithPermitAppPasswordAuth(permitAppPasswor
 }
 
 // Build creates a new authMiddlewareHandler containing all the values of the Builder and the next handler given by parameter
-func (b AuthMiddlewareHandlerBuilder) Build(next http.Handler) http.Handler {
+func (b MiddlewareHandlerBuilder) Build(next http.Handler) http.Handler {
 	return authMiddlewareHandler{
 		log:                   b.log,
 		permitSessionAuth:     b.permitSessionAuth,

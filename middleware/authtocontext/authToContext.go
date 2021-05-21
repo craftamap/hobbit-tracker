@@ -14,10 +14,14 @@ import (
 	"gorm.io/gorm"
 )
 
+// AuthType is a alias for string used for AuthTypeSession and AuthTypePassPassword
+// AuthType is used to store the type of used authentication within AuthDetails
 type AuthType string
 
 const (
-	AuthTypeSession     AuthType = "Session"
+	// AuthTypeSession is used to represent a session-authentication in AuthDetails
+	AuthTypeSession AuthType = "Session"
+	// AuthTypeAppPassword  used to represent a app-password-authentication in AuthDetails
 	AuthTypeAppPassword AuthType = "AppPassword"
 )
 
@@ -43,9 +47,9 @@ func init() {
 	gob.Register(AuthDetails{})
 }
 
-// AuthToContextMiddlewareHandler is a middleware for handling all possible authentication options
+// MiddlewareHandler is a middleware for handling all possible authentication options
 // and storing them into the context of the http request
-type AuthToContextMiddlewareHandler struct {
+type MiddlewareHandler struct {
 	db    *gorm.DB
 	log   *logrus.Logger
 	store *sessions.CookieStore
@@ -55,7 +59,7 @@ type AuthToContextMiddlewareHandler struct {
 // New returns a new AuthToContextMiddlewareHandler
 func New(db *gorm.DB, log *logrus.Logger, store *sessions.CookieStore) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
-		return AuthToContextMiddlewareHandler{
+		return MiddlewareHandler{
 			log:   log,
 			db:    db,
 			next:  next,
@@ -65,7 +69,7 @@ func New(db *gorm.DB, log *logrus.Logger, store *sessions.CookieStore) func(http
 }
 
 // ServeHTTP implements the core functionality of this middleware
-func (m AuthToContextMiddlewareHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (m MiddlewareHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	handleBasicAuth := func(username string, password string) (AuthDetails, error) {
 		user := &models.User{}
 		if err := m.db.Where("username = ?", username).First(user).Error; err != nil {

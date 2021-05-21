@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
-	authToContext "github.com/craftamap/hobbit-tracker/middleware/authtocontext"
+	"github.com/craftamap/hobbit-tracker/middleware/authtocontext"
 	"github.com/craftamap/hobbit-tracker/models"
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
@@ -19,7 +19,7 @@ func BuildHandleGetAppPasswords(db *gorm.DB, log *logrus.Logger) http.HandlerFun
 		user := models.User{}
 
 		// TODO: Add error handling here
-		err := db.Where("ID = ?", r.Context().Value(authToContext.AuthDetailsContextKey).(authToContext.AuthDetails).UserID).First(&user).Error
+		err := db.Where("ID = ?", r.Context().Value(authtocontext.AuthDetailsContextKey).(authtocontext.AuthDetails).UserID).First(&user).Error
 		if err != nil {
 			log.Error(err)
 			w.WriteHeader(http.StatusBadRequest)
@@ -56,7 +56,7 @@ func BuildHandlePostAppPassword(db *gorm.DB, log *logrus.Logger) http.HandlerFun
 	return func(w http.ResponseWriter, r *http.Request) {
 		user := models.User{}
 
-		err := db.Where("ID = ?", r.Context().Value(authToContext.AuthDetailsContextKey).(authToContext.AuthDetails).UserID).First(&user).Error
+		err := db.Where("ID = ?", r.Context().Value(authtocontext.AuthDetailsContextKey).(authtocontext.AuthDetails).UserID).First(&user).Error
 		if err != nil {
 			log.Error(err)
 			w.WriteHeader(http.StatusBadRequest)
@@ -131,7 +131,7 @@ func BuildHandleDeleteAppPassword(db *gorm.DB, log *logrus.Logger) http.HandlerF
 	return func(w http.ResponseWriter, r *http.Request) {
 		user := models.User{}
 
-		err := db.Where("ID = ?", r.Context().Value(authToContext.AuthDetailsContextKey).(authToContext.AuthDetails).UserID).First(&user).Error
+		err := db.Where("ID = ?", r.Context().Value(authtocontext.AuthDetailsContextKey).(authtocontext.AuthDetails).UserID).First(&user).Error
 		if err != nil {
 			log.Error(err)
 			w.WriteHeader(http.StatusBadRequest)
@@ -188,7 +188,7 @@ func BuildHandleProfileGetHobbits(db *gorm.DB, log *logrus.Logger) http.HandlerF
 	return func(w http.ResponseWriter, r *http.Request) {
 		hobbits := []models.Hobbit{}
 
-		err := db.Joins("User").Where(&models.Hobbit{UserID: r.Context().Value(authToContext.AuthDetailsContextKey).(authToContext.AuthDetails).UserID}).Find(&hobbits).Error
+		err := db.Joins("User").Where(&models.Hobbit{UserID: r.Context().Value(authtocontext.AuthDetailsContextKey).(authtocontext.AuthDetails).UserID}).Find(&hobbits).Error
 		if err != nil {
 			log.Error(err)
 			w.WriteHeader(http.StatusInternalServerError)

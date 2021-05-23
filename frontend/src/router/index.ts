@@ -37,7 +37,11 @@ const routes: Array<RouteRecordRaw> = [
   },
   {
     path: '/profile/me',
-    component: () => import(/* webpackChunkName: "profile" */ '../views/Profile.vue'),
+    component: () => import(/* webpackChunkName: "profile" */ '../views/profile/Profile.vue'),
+  },
+  {
+    path: '/profile/me/apppassword',
+    component: () => import(/* webpackChunkName: "profile" */ '../views/profile/AppPassword.vue'),
   },
 ]
 

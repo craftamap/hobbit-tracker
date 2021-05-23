@@ -52,6 +52,13 @@ export default defineComponent({
   --ming: #076470ff;
   --midnight-green-eagle-green: #1a4b52ff;
   --dark-jungle-green: #111d1fff;
+  --primary-text: #000000;
+  --secondary-text: #808080;
+
+  @media (prefers-color-scheme: dark) {
+    --primary-text: #ffffff;
+    --secondary-text: #808080;
+  }
 }
 
 @media (prefers-color-scheme: dark) {
@@ -118,7 +125,15 @@ a {
   height: 20px;
 }
 
+.h-24 {
+  height: 24px;
+}
+
 .cursor-pointer {
   cursor: pointer;
+}
+
+.text-align-right {
+  text-align: right;
 }
 </style>

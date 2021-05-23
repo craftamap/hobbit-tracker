@@ -7,16 +7,25 @@ import (
 	"io/fs"
 	"net/http"
 	"os"
+	"time"
 
+	"github.com/craftamap/hobbit-tracker/middleware/authtocontext"
 	"github.com/craftamap/hobbit-tracker/models"
+	"github.com/craftamap/hobbit-tracker/routes"
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
+	"github.com/wader/gormstore/v2"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
 
 var diskMode bool
 var port int
+
+var (
+	// Store represents the Cookie Store
+	Store *gormstore.Store
+)
 
 //go:embed frontend/dist
 var content embed.FS
@@ -42,8 +51,7 @@ func loggingMiddleware(next http.Handler) http.Handler {
 }
 
 func frontendHandler() (http.Handler, error) {
-	var fsys fs.FS
-	fsys = fs.FS(content)
+	var fsys = fs.FS(content)
 	contentStatic, err := fs.Sub(fsys, "frontend/dist")
 	if err != nil {
 		return nil, err
@@ -64,53 +72,43 @@ func main() {
 	}
 
 	log.Info("AutoMigrating DB")
-	db.AutoMigrate(&models.Hobbit{})
-	db.AutoMigrate(&models.User{})
-	db.AutoMigrate(&models.NumericRecord{})
+	err = db.AutoMigrate(&models.Hobbit{})
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	err = db.AutoMigrate(&models.User{})
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	err = db.AutoMigrate(&models.NumericRecord{})
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	err = db.AutoMigrate(&models.AppPassword{})
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 	log.Info("AutoMigrated DB")
+
+	// key must be 16, 24 or 32 bytes long (AES-128, AES-192 or AES-256)
+	key := []byte("jMcBBEBKAzw89XNb")
+	Store = gormstore.New(db, key)
+	// db cleanup every hour
+	// close quit channel to stop cleanup
+	quit := make(chan struct{})
+	go Store.PeriodicCleanup(1*time.Hour, quit)
+	defer close(quit)
 
 	r := mux.NewRouter()
 	r.StrictSlash(true)
 	r.Use(loggingMiddleware)
+	r.Use(authtocontext.New(db, log, Store))
 
-	auth := r.PathPrefix("/auth").Subrouter()
-	auth.HandleFunc("/login", BuildHandleLogin(db, log)).Methods("POST")
-	auth.HandleFunc("/logout", BuildHandleLogout(log))
-
-	api := r.PathPrefix("/api").Subrouter()
-	api.HandleFunc("/auth", BuildHandleAPIGetAuth(db, log)).Methods("GET")
-	hobbits := api.PathPrefix("/hobbits").Subrouter()
-
-	hobbits.Handle("/", AuthMiddlewareBuilder(log)(
-		http.HandlerFunc(BuildHandleAPIPostHobbit(db, log)),
-	)).Methods("POST")
-
-	hobbits.Handle("/{id:[0-9]+}", AuthMiddlewareBuilder(log)(
-		http.HandlerFunc(BuildHandleAPIPutHobbit(db, log)),
-	)).Methods("PUT")
-
-	hobbits.Handle("/{id:[0-9]+}", BuildHandleAPIGetHobbit(db, log)).Methods("GET")
-	hobbits.Handle("/", BuildHandleAPIGetHobbits(db, log)).Methods("GET")
-
-	records := hobbits.PathPrefix("/{hobbit_id:[0-9]+}/records").Subrouter()
-	records.Handle("/", BuildHandleAPIGetRecords(db, log)).Methods("GET")
-	records.Handle("/", AuthMiddlewareBuilder(log)(
-		http.HandlerFunc(BuildHandleAPIPostRecord(db, log)),
-	)).Methods("POST")
-	records.Handle("/{record_id:[0-9]+}", AuthMiddlewareBuilder(log)(
-		http.HandlerFunc(BuildHandleAPIPutRecord(db, log)),
-	)).Methods("PUT")
-	records.Handle("/{record_id:[0-9]+}", AuthMiddlewareBuilder(log)(
-		http.HandlerFunc(BuildHandleAPIDeleteRecord(db, log)),
-	)).Methods("DELETE")
-	records.Handle("/heatmap", BuildHandleAPIGetRecordsForHeatmap(db, log)).Methods("GET")
-
-	profile := api.PathPrefix("/profile").Subrouter()
-	profileMe := profile.PathPrefix("/me").Subrouter()
-	profileMe.Handle("/", BuildHandleAPIGetAuth(db, log))
-	profileMe.Handle("/hobbits", AuthMiddlewareBuilder(log)(
-		http.HandlerFunc(BuildHandleAPIProfileGetHobbits(db, log)),
-	)).Methods("GET")
+	routes.RegisterRoutes(r, db, log, Store)
 
 	frontend, err := frontendHandler()
 	if err != nil {
@@ -120,5 +118,9 @@ func main() {
 	r.PathPrefix("/").Handler(frontend)
 	listeningOn := fmt.Sprintf(":%d", port)
 	log.Infof("Listening on %s", listeningOn)
-	http.ListenAndServe(listeningOn, r)
+	err = http.ListenAndServe(listeningOn, r)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 }

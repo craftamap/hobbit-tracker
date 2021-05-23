@@ -77,7 +77,11 @@ func BuildHandleAPIPostRecord(db *gorm.DB, log *logrus.Logger) http.HandlerFunc 
 		// Do not put out hobbit id
 		returnedRecord.HobbitID = 0
 
-		json.NewEncoder(w).Encode(returnedRecord)
+		err = json.NewEncoder(w).Encode(returnedRecord)
+		if err != nil {
+			log.Error(err)
+			w.WriteHeader(http.StatusInternalServerError)
+		}
 	}
 }
 
@@ -160,7 +164,11 @@ func BuildHandleAPIPutRecord(db *gorm.DB, log *logrus.Logger) http.HandlerFunc {
 
 		returnedRecord := sanitizedRecord
 
-		json.NewEncoder(w).Encode(returnedRecord)
+		err = json.NewEncoder(w).Encode(returnedRecord)
+		if err != nil {
+			log.Error(err)
+			w.WriteHeader(http.StatusInternalServerError)
+		}
 
 	}
 }
@@ -239,7 +247,11 @@ func BuildHandleAPIDeleteRecord(db *gorm.DB, log *logrus.Logger) http.HandlerFun
 			return
 		}
 
-		json.NewEncoder(w).Encode(deletedRecord)
+		err = json.NewEncoder(w).Encode(deletedRecord)
+		if err != nil {
+			log.Error(err)
+			w.WriteHeader(http.StatusInternalServerError)
+		}
 	}
 }
 
@@ -269,7 +281,11 @@ func BuildHandleAPIGetRecords(db *gorm.DB, log *logrus.Logger) http.HandlerFunc 
 			return
 		}
 
-		json.NewEncoder(w).Encode(records)
+		err = json.NewEncoder(w).Encode(records)
+		if err != nil {
+			log.Error(err)
+			w.WriteHeader(http.StatusInternalServerError)
+		}
 	}
 }
 
@@ -299,6 +315,10 @@ func BuildHandleAPIGetRecordsForHeatmap(db *gorm.DB, log *logrus.Logger) http.Ha
 			return
 		}
 
-		json.NewEncoder(w).Encode(records)
+		err = json.NewEncoder(w).Encode(records)
+		if err != nil {
+			log.Error(err)
+			w.WriteHeader(http.StatusInternalServerError)
+		}
 	}
 }

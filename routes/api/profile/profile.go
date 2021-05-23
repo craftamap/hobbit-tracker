@@ -47,7 +47,11 @@ func BuildHandleGetAppPasswords(db *gorm.DB, log *logrus.Logger) http.HandlerFun
 				Secret:      "", // DO NOT PRINT THE SECRET !!!
 			})
 		}
-		json.NewEncoder(w).Encode(sanitizedAppPasswords)
+		err = json.NewEncoder(w).Encode(sanitizedAppPasswords)
+		if err != nil {
+			log.Error(err)
+			w.WriteHeader(http.StatusInternalServerError)
+		}
 	}
 }
 
@@ -180,7 +184,11 @@ func BuildHandleDeleteAppPassword(db *gorm.DB, log *logrus.Logger) http.HandlerF
 
 		appPassword.Secret = "" // Even after creation, do not print secret
 
-		json.NewEncoder(w).Encode(appPassword)
+		err = json.NewEncoder(w).Encode(appPassword)
+		if err != nil {
+			log.Error(err)
+			w.WriteHeader(http.StatusInternalServerError)
+		}
 	}
 }
 
@@ -195,6 +203,10 @@ func BuildHandleProfileGetHobbits(db *gorm.DB, log *logrus.Logger) http.HandlerF
 			return
 		}
 
-		json.NewEncoder(w).Encode(hobbits)
+		err = json.NewEncoder(w).Encode(hobbits)
+		if err != nil {
+			log.Error(err)
+			w.WriteHeader(http.StatusInternalServerError)
+		}
 	}
 }

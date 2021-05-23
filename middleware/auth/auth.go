@@ -70,13 +70,19 @@ func (m authMiddlewareHandler) ServeHTTP(w http.ResponseWriter, r *http.Request)
 
 	if authDetails.AuthType == authtocontext.AuthTypeAppPassword && !m.permitAppPasswordAuth {
 		w.WriteHeader(http.StatusUnauthorized)
-		w.Write([]byte("AuthType AppPassword not allowed for this endpoint"))
+		_, err := w.Write([]byte("AuthType AppPassword not allowed for this endpoint"))
+		if err != nil {
+			m.log.Error(err)
+		}
 		return
 	}
 
 	if authDetails.AuthType == authtocontext.AuthTypeSession && !m.permitSessionAuth {
 		w.WriteHeader(http.StatusUnauthorized)
-		w.Write([]byte("AuthType Session not allowed for this endpoint"))
+		_, err := w.Write([]byte("AuthType Session not allowed for this endpoint"))
+		if err != nil {
+			m.log.Error(err)
+		}
 		return
 	}
 

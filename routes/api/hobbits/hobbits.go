@@ -48,7 +48,11 @@ func BuildHandleAPIPostHobbit(db *gorm.DB, log *logrus.Logger) http.HandlerFunc 
 		}
 		log.Infof("Created hobbit %+v", sanitizedHobbit)
 
-		json.NewEncoder(w).Encode(sanitizedHobbit)
+		err = json.NewEncoder(w).Encode(sanitizedHobbit)
+		if err != nil {
+			log.Error(err)
+			w.WriteHeader(http.StatusInternalServerError)
+		}
 	}
 }
 
@@ -62,7 +66,12 @@ func BuildHandleAPIGetHobbits(db *gorm.DB, log *logrus.Logger) http.HandlerFunc 
 			return
 		}
 
-		json.NewEncoder(w).Encode(hobbits)
+		err = json.NewEncoder(w).Encode(hobbits)
+		if err != nil {
+			log.Error(err)
+			w.WriteHeader(http.StatusInternalServerError)
+		}
+
 	}
 }
 
@@ -91,7 +100,11 @@ func BuildHandleAPIGetHobbit(db *gorm.DB, log *logrus.Logger) http.HandlerFunc {
 			return
 		}
 
-		json.NewEncoder(w).Encode(hobbit)
+		err = json.NewEncoder(w).Encode(hobbit)
+		if err != nil {
+			log.Error(err)
+			w.WriteHeader(http.StatusInternalServerError)
+		}
 	}
 }
 

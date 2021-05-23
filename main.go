@@ -72,10 +72,26 @@ func main() {
 	}
 
 	log.Info("AutoMigrating DB")
-	db.AutoMigrate(&models.Hobbit{})
-	db.AutoMigrate(&models.User{})
-	db.AutoMigrate(&models.NumericRecord{})
-	db.AutoMigrate(&models.AppPassword{})
+	err = db.AutoMigrate(&models.Hobbit{})
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	err = db.AutoMigrate(&models.User{})
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	err = db.AutoMigrate(&models.NumericRecord{})
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	err = db.AutoMigrate(&models.AppPassword{})
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 	log.Info("AutoMigrated DB")
 
 	// key must be 16, 24 or 32 bytes long (AES-128, AES-192 or AES-256)
@@ -102,5 +118,9 @@ func main() {
 	r.PathPrefix("/").Handler(frontend)
 	listeningOn := fmt.Sprintf(":%d", port)
 	log.Infof("Listening on %s", listeningOn)
-	http.ListenAndServe(listeningOn, r)
+	err = http.ListenAndServe(listeningOn, r)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 }

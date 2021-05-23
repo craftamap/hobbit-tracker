@@ -22,7 +22,11 @@ func BuildHandleLogout(log *logrus.Logger, store sessions.Store) http.HandlerFun
 		session.Values[authtocontext.AuthDetailsSessionKey] = authtocontext.AuthDetails{
 			Authenticated: false,
 		}
-		session.Save(r, w)
+		err := session.Save(r, w)
+		if err != nil {
+			log.Error(err)
+			w.WriteHeader(http.StatusInternalServerError)
+		}
 
 		redirectPath := r.PostForm.Get("redirect")
 		if redirectPath == "" {

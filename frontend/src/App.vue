@@ -50,20 +50,24 @@ export default defineComponent({
   --sky-blue-crayola: #66d2e3ff;
   --cadet-blue: #49a0abff;
   --ming: #076470ff;
+  --primary: #076470ff;
   --midnight-green-eagle-green: #1a4b52ff;
-  --dark-jungle-green: #111d1fff;
-  --primary-text: #000000;
-  --secondary-text: #808080;
+  --primary-dark: #1a4b52ff;
+
+  --primary-text: #111d1f;
+  --secondary-text: #444444;
+  --background: #ffffff;
 
   @media (prefers-color-scheme: dark) {
     --primary-text: #ffffff;
-    --secondary-text: #808080;
+    --secondary-text: #cccccc;
+    --background: #111d1f;
   }
 }
 
 @media (prefers-color-scheme: dark) {
   body {
-    background: var(--dark-jungle-green);
+    background: var(--background);
   }
 }
 
@@ -84,13 +88,9 @@ body {
   font-family: "Lato", Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  color: var(--dark-jungle-green);
+  color: var(--primary-text);
   margin: 0 auto;
   max-width: 1000px;
-
-  @media (prefers-color-scheme: dark) {
-    color: white;
-  }
 }
 
 #nav {
@@ -98,14 +98,10 @@ body {
 
   a {
     font-weight: bold;
-    color: var(--dark-jungle-green);
-
-    @media (prefers-color-scheme: dark) {
-      color: white;
-    }
+    color: var(--primary-text);
 
     &.router-link-exact-active {
-      color: var(--ming);
+      color: var(--primary);
     }
   }
 }

@@ -1,5 +1,5 @@
 <template>
-  <div class="form-wrapper">
+  <FormWrapper>
     <form ref="form" method="POST" action="/auth/login" v-on:keyup.enter="submit">
       <div class="welcome">
         Welcome back!
@@ -21,19 +21,21 @@
         />
       </div>
       <div>
-        <VButton @click="submit" value="Login" type="primary"/>
+        <Button @click="submit" value="Login" type="primary"/>
       </div>
     </form>
-  </div>
+  </FormWrapper>
 </template>
 
 <script>
-import VButton from '../components/form/Button'
+import Button from '../components/form/Button'
+import FormWrapper from '../components/form/FormWrapper'
 
 export default {
   name: 'Login',
   components: {
-    VButton,
+    Button,
+    FormWrapper,
   },
   methods: {
     submit() {
@@ -50,39 +52,5 @@ export default {
   margin-bottom: 2rem;
   color: darkgray;
 
-}
-.form-wrapper {
-  display: flex;
-  justify-content: center;
-  justify-items: center;
-
-  form {
-    border-radius: 0.5rem;
-    padding: 2rem;
-    background: #eee;
-    width: 300px;
-
-    input {
-      margin-bottom: 0.25rem;
-      appearance: none;
-      &:focus {
-        outline: none;
-      }
-      border: none;
-      line-height: 2em;
-      padding: 5px;
-      border-radius: 3px;
-      display: block;
-      margin-left: auto;
-      margin-right: auto;
-      width: 95%;
-
-      &.submit {
-        background: var(--ming);
-        color: #fff;
-        width: 100%;
-      }
-    }
-  }
 }
 </style>

@@ -25,10 +25,7 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .dialog {
-  background: white;
-  @media (prefers-color-scheme: dark) {
-    background: var(--dark-jungle-green);
-  }
+  background: var(--background);
   padding: 1.5em;
   border-radius: 0.75em;
 }

@@ -61,7 +61,7 @@ export default defineComponent({
   color: darkgray;
 
   .username {
-    color: var(--ming);
+    color: var(--primary);
   }
 }
 </style>

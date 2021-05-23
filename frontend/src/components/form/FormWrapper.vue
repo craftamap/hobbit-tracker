@@ -25,7 +25,7 @@ export default defineComponent({
     width: 300px;
 
     @media (prefers-color-scheme: dark) {
-      background: var(--midnight-green-eagle-green);
+      background: var(--primary-dark);
     }
 
     input, textarea {
@@ -44,7 +44,7 @@ export default defineComponent({
       width: 95%;
 
       &.submit {
-        background: var(--ming);
+        background: var(--primary);
         color: #fff;
         width: 100%;
       }

@@ -98,7 +98,7 @@ export default defineComponent({
   }
 
   .by {
-    color: gray;
+    color: var(--secondary-text);
   }
 
   .header {

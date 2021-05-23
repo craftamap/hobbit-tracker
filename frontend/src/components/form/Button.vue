@@ -45,11 +45,11 @@ button {
   }
 
   &.primary {
-    background: var(--ming);
+    background: var(--primary);
     color: #fff;
 
     &:active {
-      background: var(--midnight-green-eagle-green);
+      background: var(--primary-dark);
     }
   }
 

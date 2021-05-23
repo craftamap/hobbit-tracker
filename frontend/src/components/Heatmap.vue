@@ -43,11 +43,15 @@ export default defineComponent({
       if (this.prefersDark.matches) {
         // replace with better color
         calHeatMap.colorRange(['#333333', '#218380'])
-        console.log('a')
       }
       calHeatMap()
-      console.log('draw')
     },
   },
 })
 </script>
+
+<style lang="scss">
+[data-uid] text {
+  fill: var(--primary-text);
+}
+</style>

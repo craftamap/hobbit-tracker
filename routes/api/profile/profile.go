@@ -146,7 +146,7 @@ func BuildHandleDeleteAppPassword(db *gorm.DB, log *logrus.Logger) http.HandlerF
 			return
 		}
 
-		parsedUuid, err := uuid.Parse(id)
+		parsedUUID, err := uuid.Parse(id)
 		if err != nil {
 			log.Error(err)
 			w.WriteHeader(http.StatusBadRequest)
@@ -154,7 +154,7 @@ func BuildHandleDeleteAppPassword(db *gorm.DB, log *logrus.Logger) http.HandlerF
 		}
 
 		appPassword := models.AppPassword{
-			ID: parsedUuid,
+			ID: parsedUUID,
 		}
 
 		if err := db.First(&appPassword).Error; err != nil {

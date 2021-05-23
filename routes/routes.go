@@ -13,6 +13,6 @@ func RegisterRoutes(r *mux.Router, db *gorm.DB, log *logrus.Logger, store sessio
 	auth.HandleFunc("/login", BuildHandleLogin(db, log, store)).Methods("POST")
 	auth.HandleFunc("/logout", BuildHandleLogout(log, store))
 
-	rApi := r.PathPrefix("/api").Subrouter()
-	api.RegisterRoutes(rApi, db, log, store)
+	routeOfAPI := r.PathPrefix("/api").Subrouter()
+	api.RegisterRoutes(routeOfAPI, db, log, store)
 }

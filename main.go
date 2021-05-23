@@ -23,6 +23,7 @@ var diskMode bool
 var port int
 
 var (
+	// Store represents the Cookie Store
 	Store *gormstore.Store
 )
 

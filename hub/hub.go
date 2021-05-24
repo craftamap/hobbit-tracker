@@ -1,0 +1,50 @@
+// hub is a event hub system managing events by distributing them to subscribed channels
+package hub
+
+import "fmt"
+
+type ServerSideEventTypus string
+
+const (
+	HobbitCreated ServerSideEventTypus = "HobbitCreated"
+	HobbitDeleted ServerSideEventTypus = "HobbitDeleted"
+)
+
+// ServerSideEvent simulates a event happening on the Server
+type ServerSideEvent struct {
+	Typus        ServerSideEventTypus
+	OptionalData interface{}
+}
+
+type Hub struct {
+	Subscribers map[chan ServerSideEvent]bool
+}
+
+func New() *Hub {
+	return &Hub{
+		Subscribers: make(map[chan ServerSideEvent]bool),
+	}
+}
+
+func (h *Hub) Register(channelToRegister chan ServerSideEvent) {
+	h.Subscribers[channelToRegister] = true
+}
+
+func (h *Hub) Unregister(channelToUnregister chan ServerSideEvent) {
+	delete(h.Subscribers, channelToUnregister)
+}
+
+func (h *Hub) Broadcast(event ServerSideEvent) {
+	fmt.Println("Broadcast event", event)
+	fmt.Println(h.Subscribers)
+	for subscriber, isActive := range h.Subscribers {
+		if isActive {
+			select {
+			case subscriber <- event:
+			default:
+				// TODO: Better error message
+				fmt.Println("Unable to put thing into thing")
+			}
+		}
+	}
+}

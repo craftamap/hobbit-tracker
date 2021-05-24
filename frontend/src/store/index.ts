@@ -12,6 +12,7 @@ export interface State {
     username?: string;
     userId?: number;
   };
+  socket?: WebSocket;
 }
 
 export const store = createStore<State>({
@@ -28,6 +29,7 @@ export const store = createStore<State>({
       username: undefined,
       userId: undefined,
     },
+    socket: undefined,
   },
   getters: {
     getHobbits: (state) => (): Hobbit[] => {
@@ -82,6 +84,9 @@ export const store = createStore<State>({
       selectedHobbit.records = selectedHobbit.records.filter((record) => {
         return record.id !== recordId
       })
+    },
+    setWebsocket(state, { socket }: { socket: WebSocket }) {
+      state.socket = socket
     },
   },
   actions: {
@@ -218,6 +223,15 @@ export const store = createStore<State>({
         console.log(json)
         commit('setHobbit', json)
       })
+    },
+    async createWebSocketConnection({ commit }) {
+      const socket = new WebSocket('ws://localhost:8080/ws')
+      console.log(socket)
+      socket.onmessage = (ev) => {
+        console.log(ev)
+      }
+
+      commit('setWebsocket', { socket })
     },
   },
 })

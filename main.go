@@ -9,9 +9,12 @@ import (
 	"os"
 	"time"
 
+	"github.com/craftamap/hobbit-tracker/hub"
 	"github.com/craftamap/hobbit-tracker/middleware/authtocontext"
+	"github.com/craftamap/hobbit-tracker/middleware/requestcontext"
 	"github.com/craftamap/hobbit-tracker/models"
 	"github.com/craftamap/hobbit-tracker/routes"
+	"github.com/craftamap/hobbit-tracker/websockets"
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
 	"github.com/wader/gormstore/v2"
@@ -102,13 +105,28 @@ func main() {
 	quit := make(chan struct{})
 	go Store.PeriodicCleanup(1*time.Hour, quit)
 	defer close(quit)
+	eventHub := hub.New()
 
 	r := mux.NewRouter()
 	r.StrictSlash(true)
 	r.Use(loggingMiddleware)
-	r.Use(authtocontext.New(db, log, Store))
+	r.Use(requestcontext.New(Store, db, log, eventHub))
+	r.Use(authtocontext.New())
 
 	routes.RegisterRoutes(r, db, log, Store)
+	websockets.RegisterRoutes(r, db, log, Store, eventHub)
+
+	tckr := time.NewTicker(10 * time.Second)
+	go func() {
+		for {
+			select {
+			case <-tckr.C:
+				eventHub.Broadcast(hub.ServerSideEvent{
+					Typus: hub.HobbitCreated,
+				})
+			}
+		}
+	}()
 
 	frontend, err := frontendHandler()
 	if err != nil {

@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/craftamap/hobbit-tracker/hub"
 	"github.com/craftamap/hobbit-tracker/middleware/authtocontext"
 	"github.com/craftamap/hobbit-tracker/models"
 	"github.com/gorilla/mux"
@@ -53,6 +54,12 @@ func BuildHandleAPIPostHobbit(db *gorm.DB, log *logrus.Logger) http.HandlerFunc 
 			log.Error(err)
 			w.WriteHeader(http.StatusInternalServerError)
 		}
+
+		h := r.Context().Value("eventHub").(*hub.Hub)
+		h.Broadcast(hub.ServerSideEvent{
+			Typus:        hub.HobbitCreated,
+			OptionalData: sanitizedHobbit,
+		})
 	}
 }
 

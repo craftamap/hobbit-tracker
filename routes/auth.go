@@ -4,17 +4,18 @@ import (
 	"net/http"
 
 	"github.com/craftamap/hobbit-tracker/middleware/authtocontext"
+	"github.com/craftamap/hobbit-tracker/middleware/requestcontext"
 	"github.com/craftamap/hobbit-tracker/models"
-	"github.com/gorilla/sessions"
-	"github.com/sirupsen/logrus"
 	"golang.org/x/crypto/bcrypt"
-	"gorm.io/gorm"
 )
 
 // BuildHandleLogout is a function returning a http.HandlerFunc which logs out the current user.
 // Users are getting logged out by setting their authDetails
-func BuildHandleLogout(log *logrus.Logger, store sessions.Store) http.HandlerFunc {
+func BuildHandleLogout() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		log := requestcontext.Log(r)
+		store := requestcontext.Store(r)
+
 		session, _ := store.Get(r, "session")
 		authDetails := session.Values[authtocontext.AuthDetailsSessionKey].(authtocontext.AuthDetails)
 		username := authDetails.Username
@@ -41,8 +42,12 @@ func BuildHandleLogout(log *logrus.Logger, store sessions.Store) http.HandlerFun
 }
 
 // BuildHandleLogin is a function returning a http.HandlerFunc which logs in a user by their credentails.
-func BuildHandleLogin(db *gorm.DB, log *logrus.Logger, store sessions.Store) http.HandlerFunc {
+func BuildHandleLogin() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		db := requestcontext.DB(r)
+		log := requestcontext.Log(r)
+		store := requestcontext.Store(r)
+
 		err := r.ParseForm()
 		if err != nil {
 			log.Warn("Could not parse form data")

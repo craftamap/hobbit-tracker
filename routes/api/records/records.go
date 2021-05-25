@@ -6,14 +6,16 @@ import (
 	"strconv"
 
 	"github.com/craftamap/hobbit-tracker/middleware/authtocontext"
+	"github.com/craftamap/hobbit-tracker/middleware/requestcontext"
 	"github.com/craftamap/hobbit-tracker/models"
 	"github.com/gorilla/mux"
-	"github.com/sirupsen/logrus"
-	"gorm.io/gorm"
 )
 
-func BuildHandleAPIPostRecord(db *gorm.DB, log *logrus.Logger) http.HandlerFunc {
+func BuildHandleAPIPostRecord() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		db := requestcontext.DB(r)
+		log := requestcontext.Log(r)
+
 		user := models.User{}
 
 		// TODO: Add error handling here
@@ -85,8 +87,11 @@ func BuildHandleAPIPostRecord(db *gorm.DB, log *logrus.Logger) http.HandlerFunc 
 	}
 }
 
-func BuildHandleAPIPutRecord(db *gorm.DB, log *logrus.Logger) http.HandlerFunc {
+func BuildHandleAPIPutRecord() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		db := requestcontext.DB(r)
+		log := requestcontext.Log(r)
+
 		user := models.User{}
 
 		// TODO: Add error handling here
@@ -173,8 +178,11 @@ func BuildHandleAPIPutRecord(db *gorm.DB, log *logrus.Logger) http.HandlerFunc {
 	}
 }
 
-func BuildHandleAPIDeleteRecord(db *gorm.DB, log *logrus.Logger) http.HandlerFunc {
+func BuildHandleAPIDeleteRecord() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		db := requestcontext.DB(r)
+		log := requestcontext.Log(r)
+
 		user := models.User{}
 
 		err := db.Where("ID = ?", r.Context().Value(authtocontext.AuthDetailsContextKey).(authtocontext.AuthDetails).UserID).First(&user).Error
@@ -255,8 +263,11 @@ func BuildHandleAPIDeleteRecord(db *gorm.DB, log *logrus.Logger) http.HandlerFun
 	}
 }
 
-func BuildHandleAPIGetRecords(db *gorm.DB, log *logrus.Logger) http.HandlerFunc {
+func BuildHandleAPIGetRecords() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		db := requestcontext.DB(r)
+		log := requestcontext.Log(r)
+
 		vars := mux.Vars(r)
 		hobbitID, ok := vars["hobbit_id"]
 		if !ok {
@@ -289,8 +300,11 @@ func BuildHandleAPIGetRecords(db *gorm.DB, log *logrus.Logger) http.HandlerFunc 
 	}
 }
 
-func BuildHandleAPIGetRecordsForHeatmap(db *gorm.DB, log *logrus.Logger) http.HandlerFunc {
+func BuildHandleAPIGetRecordsForHeatmap() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		db := requestcontext.DB(r)
+		log := requestcontext.Log(r)
+
 		vars := mux.Vars(r)
 		hobbitID, ok := vars["hobbit_id"]
 		if !ok {

@@ -4,20 +4,18 @@ import (
 	"net/http"
 
 	"github.com/craftamap/hobbit-tracker/middleware/authtocontext"
-	"github.com/sirupsen/logrus"
+	"github.com/craftamap/hobbit-tracker/middleware/requestcontext"
 )
 
 // MiddlewareHandlerBuilder is a builder for authMiddlewareHandler, allowing easier configuration
 type MiddlewareHandlerBuilder struct {
-	log                   *logrus.Logger
 	permitSessionAuth     bool
 	permitAppPasswordAuth bool
 }
 
 // Builder initializes the Builder with all required parameters of the builder
-func Builder(log *logrus.Logger) MiddlewareHandlerBuilder {
+func Builder() MiddlewareHandlerBuilder {
 	return MiddlewareHandlerBuilder{
-		log:                   log,
 		permitSessionAuth:     true,
 		permitAppPasswordAuth: true,
 	}
@@ -26,7 +24,6 @@ func Builder(log *logrus.Logger) MiddlewareHandlerBuilder {
 // WithPermitSessionAuth returns a new AuthMiddlewareHandlerBuilder with the new permitSessionAuth value
 func (b MiddlewareHandlerBuilder) WithPermitSessionAuth(permitSessionAuth bool) MiddlewareHandlerBuilder {
 	return MiddlewareHandlerBuilder{
-		log:                   b.log,
 		permitAppPasswordAuth: b.permitAppPasswordAuth,
 		permitSessionAuth:     permitSessionAuth,
 	}
@@ -35,7 +32,6 @@ func (b MiddlewareHandlerBuilder) WithPermitSessionAuth(permitSessionAuth bool) 
 // WithPermitAppPasswordAuth returns a new authMiddlewareHandlerBuilder with the permitAppPasswordAuth value
 func (b MiddlewareHandlerBuilder) WithPermitAppPasswordAuth(permitAppPasswordAuth bool) MiddlewareHandlerBuilder {
 	return MiddlewareHandlerBuilder{
-		log:                   b.log,
 		permitAppPasswordAuth: permitAppPasswordAuth,
 		permitSessionAuth:     b.permitSessionAuth,
 	}
@@ -44,7 +40,6 @@ func (b MiddlewareHandlerBuilder) WithPermitAppPasswordAuth(permitAppPasswordAut
 // Build creates a new authMiddlewareHandler containing all the values of the Builder and the next handler given by parameter
 func (b MiddlewareHandlerBuilder) Build(next http.Handler) http.Handler {
 	return authMiddlewareHandler{
-		log:                   b.log,
 		permitSessionAuth:     b.permitSessionAuth,
 		permitAppPasswordAuth: b.permitAppPasswordAuth,
 		next:                  next,
@@ -52,7 +47,6 @@ func (b MiddlewareHandlerBuilder) Build(next http.Handler) http.Handler {
 }
 
 type authMiddlewareHandler struct {
-	log                   *logrus.Logger
 	permitSessionAuth     bool
 	permitAppPasswordAuth bool
 	next                  http.Handler
@@ -60,6 +54,8 @@ type authMiddlewareHandler struct {
 
 // ServeHTTP implements the authentication
 func (m authMiddlewareHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	log := requestcontext.Log(r)
+
 	contextAuthDetails := r.Context().Value(authtocontext.AuthDetailsContextKey)
 	authDetails := contextAuthDetails.(authtocontext.AuthDetails)
 
@@ -72,7 +68,7 @@ func (m authMiddlewareHandler) ServeHTTP(w http.ResponseWriter, r *http.Request)
 		w.WriteHeader(http.StatusUnauthorized)
 		_, err := w.Write([]byte("AuthType AppPassword not allowed for this endpoint"))
 		if err != nil {
-			m.log.Error(err)
+			log.Error(err)
 		}
 		return
 	}
@@ -81,7 +77,7 @@ func (m authMiddlewareHandler) ServeHTTP(w http.ResponseWriter, r *http.Request)
 		w.WriteHeader(http.StatusUnauthorized)
 		_, err := w.Write([]byte("AuthType Session not allowed for this endpoint"))
 		if err != nil {
-			m.log.Error(err)
+			log.Error(err)
 		}
 		return
 	}

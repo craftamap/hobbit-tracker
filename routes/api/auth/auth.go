@@ -5,12 +5,13 @@ import (
 	"net/http"
 
 	"github.com/craftamap/hobbit-tracker/middleware/authtocontext"
-	"github.com/sirupsen/logrus"
-	"gorm.io/gorm"
+	"github.com/craftamap/hobbit-tracker/middleware/requestcontext"
 )
 
-func BuildHandleAPIGetAuth(db *gorm.DB, log *logrus.Logger) http.HandlerFunc {
+func BuildHandleAPIGetAuth() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		log := requestcontext.Log(r)
+
 		c := r.Context()
 		contextAuthDetails := c.Value(authtocontext.AuthDetailsContextKey)
 		authDetails, ok := contextAuthDetails.(authtocontext.AuthDetails)

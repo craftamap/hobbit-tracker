@@ -21,13 +21,36 @@ type ServerSideEvent struct {
 }
 
 type Hub struct {
-	Subscribers map[chan ServerSideEvent]bool
+	Subscribers       map[chan ServerSideEvent]bool
+	eventsToBroadcast chan ServerSideEvent
 }
 
 func New() *Hub {
 	return &Hub{
-		Subscribers: make(map[chan ServerSideEvent]bool),
+		Subscribers:       make(map[chan ServerSideEvent]bool),
+		eventsToBroadcast: make(chan ServerSideEvent, 512),
 	}
+}
+
+// TODO: merge this with New?
+func (h *Hub) Run() {
+	go func() {
+		for {
+			select {
+			case event := <-h.eventsToBroadcast:
+				for subscriber, isActive := range h.Subscribers {
+					if isActive {
+						select {
+						case subscriber <- event:
+						default:
+							// TODO: Better error message
+							fmt.Println("Unable to put thing into thing")
+						}
+					}
+				}
+			}
+		}
+	}()
 }
 
 func (h *Hub) Register(channelToRegister chan ServerSideEvent) {
@@ -41,14 +64,10 @@ func (h *Hub) Unregister(channelToUnregister chan ServerSideEvent) {
 func (h *Hub) Broadcast(event ServerSideEvent) {
 	fmt.Println("Broadcast event", event)
 	fmt.Println(h.Subscribers)
-	for subscriber, isActive := range h.Subscribers {
-		if isActive {
-			select {
-			case subscriber <- event:
-			default:
-				// TODO: Better error message
-				fmt.Println("Unable to put thing into thing")
-			}
-		}
+	select {
+	case h.eventsToBroadcast <- event:
+	default:
+		// TODO: Better error message
+		fmt.Println("Unable to put thing into thing")
 	}
 }

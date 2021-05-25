@@ -115,6 +115,7 @@ func main() {
 	go Store.PeriodicCleanup(1*time.Hour, quit)
 	defer close(quit)
 	eventHub := hub.New()
+	eventHub.Run()
 
 	r := mux.NewRouter()
 	r.StrictSlash(true)

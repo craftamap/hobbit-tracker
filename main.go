@@ -128,17 +128,17 @@ func main() {
 	routes.RegisterRoutes(r, db, log, Store)
 	websockets.RegisterRoutes(r, db, log, Store, eventHub)
 
-	tckr := time.NewTicker(10 * time.Second)
-	go func() {
-		for {
-			select {
-			case <-tckr.C:
-				eventHub.Broadcast(hub.ServerSideEvent{
-					Typus: hub.HobbitCreated,
-				})
-			}
-		}
-	}()
+	//	tckr := time.NewTicker(10 * time.Second)
+	//	go func() {
+	//		for {
+	//			select {
+	//			case <-tckr.C:
+	//				eventHub.Broadcast(hub.ServerSideEvent{
+	//					Typus: hub.HobbitCreated,
+	//				})
+	//			}
+	//		}
+	//	}()
 
 	frontend, err := frontendHandler()
 	if err != nil {

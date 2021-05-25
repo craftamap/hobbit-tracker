@@ -6,8 +6,12 @@ import "fmt"
 type ServerSideEventTypus string
 
 const (
-	HobbitCreated ServerSideEventTypus = "HobbitCreated"
-	HobbitDeleted ServerSideEventTypus = "HobbitDeleted"
+	HobbitCreated  ServerSideEventTypus = "HobbitCreated"
+	HobbitDeleted  ServerSideEventTypus = "HobbitDeleted"
+	HobbitModified ServerSideEventTypus = "HobbitModified"
+	RecordCreated  ServerSideEventTypus = "RecordCreated"
+	RecordDeleted  ServerSideEventTypus = "RecordDeleted"
+	RecordModified ServerSideEventTypus = "RecordModified"
 )
 
 // ServerSideEvent simulates a event happening on the Server

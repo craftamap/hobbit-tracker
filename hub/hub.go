@@ -16,8 +16,8 @@ const (
 
 // ServerSideEvent simulates a event happening on the Server
 type ServerSideEvent struct {
-	Typus        ServerSideEventTypus
-	OptionalData interface{}
+	Typus        ServerSideEventTypus `json:"typus"`
+	OptionalData interface{}          `json:"optional_data,omitempty"`
 }
 
 type Hub struct {

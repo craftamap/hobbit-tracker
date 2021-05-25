@@ -224,14 +224,33 @@ export const store = createStore<State>({
         commit('setHobbit', json)
       })
     },
-    async createWebSocketConnection({ commit }) {
+    async createWebSocketConnection({ commit, dispatch }) {
       const socket = new WebSocket('ws://localhost:8080/ws')
       console.log(socket)
       socket.onmessage = (ev) => {
         console.log(ev)
+        const parsedEventData = JSON.parse(ev.data)
+        dispatch('recieveWebSocketMessage', parsedEventData)
       }
 
       commit('setWebsocket', { socket })
+    },
+    async recieveWebSocketMessage({ dispatch }, { typus, optional_data: optionalData }) {
+      console.log(typus, optionalData)
+      switch (typus) {
+        case 'RecordDeleted':
+        case 'RecordModified':
+        case 'RecordCreated':
+          dispatch('fetchRecords', optionalData?.hobbit_id)
+          break
+        case 'HobbitCreated':
+        case 'HobbitModified':
+          dispatch('fetchHobbit', { id: optionalData?.id })
+          break
+        case 'HobbitDeleted':
+          // TODO:
+          break
+      }
     },
   },
 })

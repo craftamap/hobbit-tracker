@@ -9,6 +9,7 @@ import (
 )
 
 func RegisterRoutes(r *mux.Router, db *gorm.DB, log *logrus.Logger, store sessions.Store) {
+
 	auth := r.PathPrefix("/auth").Subrouter()
 	auth.HandleFunc("/login", BuildHandleLogin()).Methods("POST")
 	auth.HandleFunc("/logout", BuildHandleLogout())

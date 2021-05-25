@@ -15,6 +15,7 @@ import (
 	"github.com/craftamap/hobbit-tracker/models"
 	"github.com/craftamap/hobbit-tracker/routes"
 	"github.com/craftamap/hobbit-tracker/websockets"
+	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
 	"github.com/wader/gormstore/v2"
@@ -66,6 +67,14 @@ func frontendHandler() (http.Handler, error) {
 	return http.FileServer(http.FS(contentStatic)), nil
 }
 
+type customRecoveryLogger struct {
+	log *logrus.Logger
+}
+
+func (c *customRecoveryLogger) Println(msgs ...interface{}) {
+	c.log.Errorln(msgs...)
+}
+
 func main() {
 	var err error
 	db, err = gorm.Open(sqlite.Open("hobbits.sqlite"), &gorm.Config{})
@@ -110,6 +119,9 @@ func main() {
 	r := mux.NewRouter()
 	r.StrictSlash(true)
 	r.Use(loggingMiddleware)
+
+	// TODO: find a way to make
+	r.Use(handlers.RecoveryHandler(handlers.RecoveryLogger(&customRecoveryLogger{log})))
 	r.Use(requestcontext.New(Store, db, log, eventHub))
 	r.Use(authtocontext.New())
 

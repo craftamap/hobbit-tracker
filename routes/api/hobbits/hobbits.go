@@ -17,6 +17,7 @@ func BuildHandleAPIPostHobbit() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		db := requestcontext.DB(r)
 		log := requestcontext.Log(r)
+		eventHub := requestcontext.Hub(r)
 
 		recievedHobbit := models.Hobbit{}
 		err := json.NewDecoder(r.Body).Decode(&recievedHobbit)
@@ -57,8 +58,7 @@ func BuildHandleAPIPostHobbit() http.HandlerFunc {
 			w.WriteHeader(http.StatusInternalServerError)
 		}
 
-		h := r.Context().Value("eventHub").(*hub.Hub)
-		h.Broadcast(hub.ServerSideEvent{
+		eventHub.Broadcast(hub.ServerSideEvent{
 			Typus:        hub.HobbitCreated,
 			OptionalData: sanitizedHobbit,
 		})
@@ -127,6 +127,7 @@ func BuildHandleAPIPutHobbit() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		db := requestcontext.DB(r)
 		log := requestcontext.Log(r)
+		eventHub := requestcontext.Hub(r)
 
 		user := models.User{}
 
@@ -182,5 +183,10 @@ func BuildHandleAPIPutHobbit() http.HandlerFunc {
 		}
 		db.Model(&currentHobbit).Updates(sanitizedHobbit)
 		log.Infof("Updated hobbit %+v", sanitizedHobbit)
+
+		eventHub.Broadcast(hub.ServerSideEvent{
+			Typus:        hub.HobbitModified,
+			OptionalData: sanitizedHobbit,
+		})
 	}
 }

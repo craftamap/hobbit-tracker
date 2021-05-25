@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/craftamap/hobbit-tracker/hub"
 	"github.com/craftamap/hobbit-tracker/middleware/authtocontext"
 	"github.com/craftamap/hobbit-tracker/middleware/requestcontext"
 	"github.com/craftamap/hobbit-tracker/models"
@@ -15,6 +16,7 @@ func BuildHandleAPIPostRecord() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		db := requestcontext.DB(r)
 		log := requestcontext.Log(r)
+		eventHub := requestcontext.Hub(r)
 
 		user := models.User{}
 
@@ -84,6 +86,11 @@ func BuildHandleAPIPostRecord() http.HandlerFunc {
 			log.Error(err)
 			w.WriteHeader(http.StatusInternalServerError)
 		}
+
+		eventHub.Broadcast(hub.ServerSideEvent{
+			Typus:        hub.RecordCreated,
+			OptionalData: sanitizedRecord,
+		})
 	}
 }
 
@@ -91,6 +98,7 @@ func BuildHandleAPIPutRecord() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		db := requestcontext.DB(r)
 		log := requestcontext.Log(r)
+		eventHub := requestcontext.Hub(r)
 
 		user := models.User{}
 
@@ -175,6 +183,10 @@ func BuildHandleAPIPutRecord() http.HandlerFunc {
 			w.WriteHeader(http.StatusInternalServerError)
 		}
 
+		eventHub.Broadcast(hub.ServerSideEvent{
+			Typus:        hub.RecordModified,
+			OptionalData: sanitizedRecord,
+		})
 	}
 }
 
@@ -182,6 +194,7 @@ func BuildHandleAPIDeleteRecord() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		db := requestcontext.DB(r)
 		log := requestcontext.Log(r)
+		eventHub := requestcontext.Hub(r)
 
 		user := models.User{}
 
@@ -260,6 +273,11 @@ func BuildHandleAPIDeleteRecord() http.HandlerFunc {
 			log.Error(err)
 			w.WriteHeader(http.StatusInternalServerError)
 		}
+
+		eventHub.Broadcast(hub.ServerSideEvent{
+			Typus:        hub.RecordDeleted,
+			OptionalData: deletedRecord,
+		})
 	}
 }
 

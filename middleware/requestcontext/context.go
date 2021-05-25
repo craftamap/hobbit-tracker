@@ -53,3 +53,7 @@ func DB(r *http.Request) *gorm.DB {
 func Log(r *http.Request) *logrus.Logger {
 	return r.Context().Value("log").(*logrus.Logger)
 }
+
+func Hub(r *http.Request) *hub.Hub {
+	return r.Context().Value("eventHub").(*hub.Hub)
+}

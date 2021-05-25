@@ -1,10 +1,12 @@
-// hub is a event hub system managing events by distributing them to subscribed channels
+// Package hub is a event hub system managing events by distributing them to subscribed channels
 package hub
 
 import "fmt"
 
+// ServerSideEventTypus is an alias for string used for ServerSideEvents
 type ServerSideEventTypus string
 
+//  constants of EventTypus
 const (
 	HobbitCreated  ServerSideEventTypus = "HobbitCreated"
 	HobbitDeleted  ServerSideEventTypus = "HobbitDeleted"
@@ -20,11 +22,13 @@ type ServerSideEvent struct {
 	OptionalData interface{}          `json:"optional_data,omitempty"`
 }
 
+// Hub is the actual event Hub
 type Hub struct {
 	Subscribers       map[chan ServerSideEvent]bool
 	eventsToBroadcast chan ServerSideEvent
 }
 
+// New creates a new event hub
 func New() *Hub {
 	return &Hub{
 		Subscribers:       make(map[chan ServerSideEvent]bool),
@@ -32,8 +36,9 @@ func New() *Hub {
 	}
 }
 
-// TODO: merge this with New?
+// Run starts the broadcasting of the events
 func (h *Hub) Run() {
+	// TODO: merge this with New?
 	go func() {
 		for {
 			select {
@@ -53,14 +58,17 @@ func (h *Hub) Run() {
 	}()
 }
 
+// Register adds a channel to the event hub
 func (h *Hub) Register(channelToRegister chan ServerSideEvent) {
 	h.Subscribers[channelToRegister] = true
 }
 
+// Unregister removes a channel from the event hub
 func (h *Hub) Unregister(channelToUnregister chan ServerSideEvent) {
 	delete(h.Subscribers, channelToUnregister)
 }
 
+// Broadcast broadcasts the given event to all of the subscribers
 func (h *Hub) Broadcast(event ServerSideEvent) {
 	fmt.Println("Broadcast event", event)
 	fmt.Println(h.Subscribers)

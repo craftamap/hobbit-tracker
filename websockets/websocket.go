@@ -7,12 +7,12 @@ import (
 	"time"
 
 	"github.com/craftamap/hobbit-tracker/hub"
+	"github.com/craftamap/hobbit-tracker/middleware/authtocontext"
+	"github.com/craftamap/hobbit-tracker/middleware/requestcontext"
 	"github.com/craftamap/hobbit-tracker/models"
 	"github.com/gorilla/mux"
-	"github.com/gorilla/sessions"
 	"github.com/gorilla/websocket"
 	"github.com/sirupsen/logrus"
-	"gorm.io/gorm"
 )
 
 const (
@@ -35,14 +35,16 @@ var upgrader = websocket.Upgrader{
 	WriteBufferSize: 1024,
 }
 
+// WebSocketClient is the server-side client of a websocket connection started by a request
 type WebSocketClient struct {
 	log              *logrus.Logger
 	Conn             *websocket.Conn
+	AuthDetails      authtocontext.AuthDetails
 	User             *models.User
 	ServerSideEvents chan hub.ServerSideEvent
 }
 
-func (c *WebSocketClient) HandleWriting() {
+func (c *WebSocketClient) handleWriting() {
 	ticker := time.NewTicker(pingPeriod)
 	defer func() {
 		ticker.Stop()
@@ -64,7 +66,7 @@ func (c *WebSocketClient) HandleWriting() {
 	}
 }
 
-func (c *WebSocketClient) HandleReading(hub *hub.Hub) {
+func (c *WebSocketClient) handleReading(hub *hub.Hub) {
 	defer func() {
 		hub.Unregister(c.ServerSideEvents)
 		c.Conn.Close()
@@ -90,22 +92,42 @@ func (c *WebSocketClient) HandleReading(hub *hub.Hub) {
 	}
 }
 
-func RegisterRoutes(r *mux.Router, db *gorm.DB, log *logrus.Logger, store sessions.Store, h *hub.Hub) {
+// RegisterRoutes registers the websocket route to the passed router
+func RegisterRoutes(r *mux.Router) {
 	r.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
+		db := requestcontext.DB(r)
+		log := requestcontext.Log(r)
+		h := requestcontext.Hub(r)
 
 		conn, err := upgrader.Upgrade(w, r, w.Header())
 		if err != nil {
 			return
 		}
+
+		authDetails := r.Context().Value(authtocontext.AuthDetailsContextKey).(authtocontext.AuthDetails)
+		user := models.User{}
+
+		// TODO: Add error handling here
+		if authDetails.Authenticated {
+			err = db.Where("ID = ?", r.Context().Value(authtocontext.AuthDetailsContextKey).(authtocontext.AuthDetails).UserID).First(&user).Error
+			if err != nil {
+				log.Error(err)
+				w.WriteHeader(http.StatusBadRequest)
+				return
+			}
+		}
+
 		s := WebSocketClient{
 			Conn:             conn,
 			log:              log,
 			ServerSideEvents: make(chan hub.ServerSideEvent, 256),
+			AuthDetails:      authDetails,
+			User:             &user,
 		}
 
 		h.Register(s.ServerSideEvents)
 
-		go s.HandleWriting()
-		go s.HandleReading(h)
+		go s.handleWriting()
+		go s.handleReading(h)
 	})
 }

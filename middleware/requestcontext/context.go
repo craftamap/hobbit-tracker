@@ -10,7 +10,8 @@ import (
 	"gorm.io/gorm"
 )
 
-type RequestContextMiddleware struct {
+// Handler implements a middleware allowing storage of relevant pointers for requests in the request context
+type Handler struct {
 	Store    *gormstore.Store
 	DB       *gorm.DB
 	Log      *logrus.Logger
@@ -18,21 +19,33 @@ type RequestContextMiddleware struct {
 	next     http.Handler
 }
 
-func (m RequestContextMiddleware) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+// requestContextContextKey is a alias to string used for context keys
+type requestContextContextKey string
+
+const (
+	requestContextStoreKey    requestContextContextKey = "store"
+	requestContextDBKey       requestContextContextKey = "db"
+	requestContextLogKey      requestContextContextKey = "log"
+	requestContextEventHubKey requestContextContextKey = "eventHub"
+)
+
+// ServeHTTP implements the actual middleware code
+func (m Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	ctx = context.WithValue(ctx, "store", m.Store)
-	ctx = context.WithValue(ctx, "db", m.DB)
-	ctx = context.WithValue(ctx, "log", m.Log)
-	ctx = context.WithValue(ctx, "eventHub", m.EventHub)
+	ctx = context.WithValue(ctx, requestContextStoreKey, m.Store)
+	ctx = context.WithValue(ctx, requestContextDBKey, m.DB)
+	ctx = context.WithValue(ctx, requestContextLogKey, m.Log)
+	ctx = context.WithValue(ctx, requestContextEventHubKey, m.EventHub)
 
 	r = r.WithContext(ctx)
 	m.next.ServeHTTP(w, r)
 }
 
+// New creates a new Handler
 func New(store *gormstore.Store, db *gorm.DB, log *logrus.Logger, eventHub *hub.Hub) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
-		return RequestContextMiddleware{
+		return Handler{
 			Store:    store,
 			DB:       db,
 			Log:      log,
@@ -42,18 +55,22 @@ func New(store *gormstore.Store, db *gorm.DB, log *logrus.Logger, eventHub *hub.
 	}
 }
 
+// Store retrieves the cookie store from the current request
 func Store(r *http.Request) *gormstore.Store {
-	return r.Context().Value("store").(*gormstore.Store)
+	return r.Context().Value(requestContextStoreKey).(*gormstore.Store)
 }
 
+// DB retrieves the database connection from the current request
 func DB(r *http.Request) *gorm.DB {
-	return r.Context().Value("db").(*gorm.DB)
+	return r.Context().Value(requestContextDBKey).(*gorm.DB)
 }
 
+// Log retrieves the log from the current request
 func Log(r *http.Request) *logrus.Logger {
-	return r.Context().Value("log").(*logrus.Logger)
+	return r.Context().Value(requestContextLogKey).(*logrus.Logger)
 }
 
+// Hub retrieves the event hub from the current request
 func Hub(r *http.Request) *hub.Hub {
-	return r.Context().Value("eventHub").(*hub.Hub)
+	return r.Context().Value(requestContextEventHubKey).(*hub.Hub)
 }

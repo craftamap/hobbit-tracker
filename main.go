@@ -127,7 +127,7 @@ func main() {
 	r.Use(authtocontext.New())
 
 	routes.RegisterRoutes(r, db, log, Store)
-	websockets.RegisterRoutes(r, db, log, Store, eventHub)
+	websockets.RegisterRoutes(r)
 
 	//	tckr := time.NewTicker(10 * time.Second)
 	//	go func() {

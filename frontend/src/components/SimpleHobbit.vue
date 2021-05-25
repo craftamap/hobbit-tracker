@@ -53,8 +53,7 @@ export default defineComponent({
       return (this?.hobbit?.records as NumericRecord[]) || []
     },
     getHeatmapData(): object[] {
-      const result: { [key: string]: { date: Date; count: number } } = {}
-      return (
+      const retVal = (
         (this?.hobbit?.heatmap as NumericRecord[]) || [
           {
             timestamp: new Date(),
@@ -67,6 +66,7 @@ export default defineComponent({
           count: record.value,
         }
       })
+      return retVal
     },
   },
   methods: {

@@ -1,7 +1,9 @@
 // Package hub is a event hub system managing events by distributing them to subscribed channels
 package hub
 
-import "fmt"
+import (
+	"github.com/sirupsen/logrus"
+)
 
 // ServerSideEventTypus is an alias for string used for ServerSideEvents
 type ServerSideEventTypus string
@@ -26,13 +28,15 @@ type ServerSideEvent struct {
 type Hub struct {
 	Subscribers       map[chan ServerSideEvent]bool
 	eventsToBroadcast chan ServerSideEvent
+	log               *logrus.Logger
 }
 
 // New creates a new event hub
-func New() *Hub {
+func New(log *logrus.Logger) *Hub {
 	return &Hub{
 		Subscribers:       make(map[chan ServerSideEvent]bool),
 		eventsToBroadcast: make(chan ServerSideEvent, 512),
+		log:               log,
 	}
 }
 
@@ -48,8 +52,7 @@ func (h *Hub) Run() {
 						select {
 						case subscriber <- event:
 						default:
-							// TODO: Better error message
-							fmt.Println("Unable to put thing into thing")
+							h.log.Warnf("Unable to put event %+v into subscriber %+v", event, subscriber)
 						}
 					}
 				}
@@ -70,12 +73,9 @@ func (h *Hub) Unregister(channelToUnregister chan ServerSideEvent) {
 
 // Broadcast broadcasts the given event to all of the subscribers
 func (h *Hub) Broadcast(event ServerSideEvent) {
-	fmt.Println("Broadcast event", event)
-	fmt.Println(h.Subscribers)
 	select {
 	case h.eventsToBroadcast <- event:
 	default:
-		// TODO: Better error message
-		fmt.Println("Unable to put thing into thing")
+		h.log.Error("Unable to put event %+v into event hub broadcaster %+v", event, h.eventsToBroadcast)
 	}
 }

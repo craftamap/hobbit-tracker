@@ -226,17 +226,25 @@ export const store = createStore<State>({
     },
     async createWebSocketConnection({ commit, dispatch }) {
       const socket = new WebSocket('ws://localhost:8080/ws')
-      console.log(socket)
       socket.onmessage = (ev) => {
-        console.log(ev)
         const parsedEventData = JSON.parse(ev.data)
         dispatch('recieveWebSocketMessage', parsedEventData)
+      }
+
+      socket.onclose = (ev) => {
+        console.debug('WebSocket close event:', ev)
+        dispatch('recieveWebSocketMessage', { socket: undefined })
+      }
+
+      socket.onerror = (ev) => {
+        // TODO: add better error handling
+        console.debug('WebSocket: recieved error event:', ev)
       }
 
       commit('setWebsocket', { socket })
     },
     async recieveWebSocketMessage({ dispatch }, { typus, optional_data: optionalData }) {
-      console.log(typus, optionalData)
+      console.debug('recieved WebSocketMessage of typus', typus, 'and optional data', optionalData)
       switch (typus) {
         case 'RecordDeleted':
         case 'RecordModified':

@@ -41,6 +41,7 @@ func init() {
 	log.SetFormatter(&logrus.TextFormatter{
 		FullTimestamp: true,
 	})
+	log.SetLevel(logrus.DebugLevel)
 
 	flag.BoolVar(&diskMode, "disk-mode", false, "disk mode")
 	flag.IntVar(&port, "port", 8080, "port")
@@ -121,25 +122,12 @@ func main() {
 	r.StrictSlash(true)
 	r.Use(loggingMiddleware)
 
-	// TODO: find a way to make
 	r.Use(handlers.RecoveryHandler(handlers.RecoveryLogger(&customRecoveryLogger{log})))
 	r.Use(requestcontext.New(Store, db, log, eventHub))
 	r.Use(authtocontext.New())
 
 	routes.RegisterRoutes(r, db, log, Store)
 	websockets.RegisterRoutes(r)
-
-	//	tckr := time.NewTicker(10 * time.Second)
-	//	go func() {
-	//		for {
-	//			select {
-	//			case <-tckr.C:
-	//				eventHub.Broadcast(hub.ServerSideEvent{
-	//					Typus: hub.HobbitCreated,
-	//				})
-	//			}
-	//		}
-	//	}()
 
 	frontend, err := frontendHandler()
 	if err != nil {

@@ -114,7 +114,7 @@ func main() {
 	quit := make(chan struct{})
 	go Store.PeriodicCleanup(1*time.Hour, quit)
 	defer close(quit)
-	eventHub := hub.New()
+	eventHub := hub.New(log)
 	eventHub.Run()
 
 	r := mux.NewRouter()

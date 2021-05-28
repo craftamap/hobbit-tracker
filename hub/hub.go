@@ -42,7 +42,6 @@ func New(log *logrus.Logger) *Hub {
 
 // Run starts the broadcasting of the events
 func (h *Hub) Run() {
-	// TODO: merge this with New?
 	go func() {
 		for {
 			select {
@@ -76,6 +75,6 @@ func (h *Hub) Broadcast(event ServerSideEvent) {
 	select {
 	case h.eventsToBroadcast <- event:
 	default:
-		h.log.Error("Unable to put event %+v into event hub broadcaster %+v", event, h.eventsToBroadcast)
+		h.log.Errorf("Unable to put event %+v into event hub broadcaster %+v", event, h.eventsToBroadcast)
 	}
 }

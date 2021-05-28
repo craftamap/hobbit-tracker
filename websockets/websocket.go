@@ -44,14 +44,6 @@ var upgrader = websocket.Upgrader{
 	WriteBufferSize: 1024,
 }
 
-func errorln(c *WebSocketClient, msg string) {
-	c.log.Errorln(fmt.Sprintf("[%s]", c.getLipglossStyle().Render(c.websocketClientId.String())), msg)
-}
-
-func debugln(c *WebSocketClient, msg string) {
-	c.log.Debugln(fmt.Sprintf("[%s]", c.getLipglossStyle().Render(c.websocketClientId.String())), msg)
-}
-
 // WebSocketClient is the server-side client of a websocket connection started by a request
 type WebSocketClient struct {
 	log               *logrus.Logger
@@ -70,25 +62,43 @@ func (c *WebSocketClient) getLipglossStyle() lipgloss.Style {
 	return lipgloss.NewStyle().Foreground(lipgloss.Color(strconv.Itoa(c.rangedUUIDHash())))
 }
 
+func (c *WebSocketClient) errorln(msg string) {
+	c.log.Errorln(fmt.Sprintf("[%s]", c.getLipglossStyle().Render(c.websocketClientId.String())), msg)
+}
+
+func (c *WebSocketClient) warnln(msg string) {
+	c.log.Errorln(fmt.Sprintf("[%s]", c.getLipglossStyle().Render(c.websocketClientId.String())), msg)
+}
+
+func (c *WebSocketClient) debugln(msg string) {
+	c.log.Debugln(fmt.Sprintf("[%s]", c.getLipglossStyle().Render(c.websocketClientId.String())), msg)
+}
+
 func (c *WebSocketClient) handleWriting() {
 	ticker := time.NewTicker(pingPeriod)
 	defer func() {
 		ticker.Stop()
-		c.Conn.Close()
+		err := c.Conn.Close()
+		if err != nil {
+			c.warnln(fmt.Sprintln("Could not close connection in defer of handleWriting: ", err))
+		}
 	}()
 	for {
 		select {
 		case event := <-c.ServerSideEvents:
-			debugln(c, fmt.Sprintln("event sent to client - event:", event))
+			c.debugln(fmt.Sprintln("event sent to client - event:", event))
 			err := c.Conn.WriteJSON(event)
 			if err != nil {
 				return
 			}
 		case <-ticker.C:
-			debugln(c, "ping")
-			c.Conn.SetWriteDeadline(time.Now().Add(writeWait))
+			c.debugln("ping")
+			err := c.Conn.SetWriteDeadline(time.Now().Add(writeWait))
+			if err != nil {
+				c.warnln(fmt.Sprintln("Could not set deadline", err))
+			}
 			if err := c.Conn.WriteMessage(websocket.PingMessage, nil); err != nil {
-				errorln(c, fmt.Sprintln("error occured while sending ping to client:", err))
+				c.warnln(fmt.Sprintln("error occured while sending ping to client:", err))
 				return
 			}
 		}
@@ -98,22 +108,26 @@ func (c *WebSocketClient) handleWriting() {
 func (c *WebSocketClient) handleReading(hub *hub.Hub) {
 	defer func() {
 		hub.Unregister(c.ServerSideEvents)
-		c.Conn.Close()
+		err := c.Conn.Close()
+		c.warnln(fmt.Sprintln("Could not close connection in defer of handleWriting: ", err))
 	}()
 
 	c.Conn.SetReadLimit(maxMessageSize)
-	c.Conn.SetReadDeadline(time.Now().Add(pongWait))
+	err := c.Conn.SetReadDeadline(time.Now().Add(pongWait))
+	if err != nil {
+		c.warnln(fmt.Sprintln("Could not set SetReadLine", err))
+	}
 	c.Conn.SetPongHandler(func(string) error {
-		debugln(c, "pong")
-		c.Conn.SetReadDeadline(time.Now().Add(pongWait))
-		return nil
+		c.debugln("pong")
+		err := c.Conn.SetReadDeadline(time.Now().Add(pongWait))
+		return err
 	})
 
 	for {
 		typus, message, err := c.Conn.ReadMessage()
 		if err != nil {
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
-				errorln(c, fmt.Sprintln("Closing event occured whilst reading/ waiting for message", err))
+				c.warnln(fmt.Sprintln("Closing event occured whilst reading/ waiting for message", err))
 			}
 			break
 		}

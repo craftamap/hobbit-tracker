@@ -23,7 +23,10 @@ func BuildHandleLogout() http.HandlerFunc {
 		session.Values[authtocontext.AuthDetailsSessionKey] = authtocontext.AuthDetails{
 			Authenticated: false,
 		}
+		// this deletes the session
+		session.Options.MaxAge = -1
 		err := session.Save(r, w)
+
 		if err != nil {
 			log.Error(err)
 			w.WriteHeader(http.StatusInternalServerError)

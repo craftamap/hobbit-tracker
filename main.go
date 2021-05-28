@@ -23,8 +23,11 @@ import (
 	"gorm.io/gorm"
 )
 
-var diskMode bool
-var port int
+var (
+	flagDiskMode bool
+	flagPort     int
+	flagVerbose  bool
+)
 
 var (
 	// Store represents the Cookie Store
@@ -41,11 +44,15 @@ func init() {
 	log.SetFormatter(&logrus.TextFormatter{
 		FullTimestamp: true,
 	})
-	log.SetLevel(logrus.DebugLevel)
 
-	flag.BoolVar(&diskMode, "disk-mode", false, "disk mode")
-	flag.IntVar(&port, "port", 8080, "port")
+	flag.BoolVar(&flagDiskMode, "disk-mode", false, "disk mode")
+	flag.IntVar(&flagPort, "port", 8080, "port")
+	flag.BoolVar(&flagVerbose, "v", false, "verbose, enables debug logs")
 	flag.Parse()
+
+	if flagVerbose {
+		log.SetLevel(logrus.DebugLevel)
+	}
 }
 
 func loggingMiddleware(next http.Handler) http.Handler {
@@ -61,7 +68,7 @@ func frontendHandler() (http.Handler, error) {
 	if err != nil {
 		return nil, err
 	}
-	if diskMode {
+	if flagDiskMode {
 		log.Warn("Disk Mode")
 		contentStatic = os.DirFS("frontend/dist")
 	}
@@ -135,7 +142,7 @@ func main() {
 		return
 	}
 	r.PathPrefix("/").Handler(frontend)
-	listeningOn := fmt.Sprintf(":%d", port)
+	listeningOn := fmt.Sprintf(":%d", flagPort)
 	log.Infof("Listening on %s", listeningOn)
 	err = http.ListenAndServe(listeningOn, r)
 	if err != nil {

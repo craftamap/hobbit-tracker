@@ -109,7 +109,7 @@ func (m MiddlewareHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	handleSessionAuth := func(session *sessions.Session) (AuthDetails, error) {
 		authDetails, ok := session.Values[AuthDetailsSessionKey].(AuthDetails)
 		if !ok {
-			log.Infof("Could not type assert cookie to AuthDetails, %+T", session.Values[AuthDetailsSessionKey])
+			log.Debugln("Could not type assert cookie to AuthDetails, %+T", session.Values[AuthDetailsSessionKey])
 			return AuthDetails{}, fmt.Errorf("Could not type assert cookie to AuthDetails, %+T", session.Values[AuthDetailsSessionKey])
 		}
 		if authDetails.AuthType != AuthTypeSession {
@@ -124,12 +124,12 @@ func (m MiddlewareHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if username, password, ok := r.BasicAuth(); ok {
 		authDetails, err = handleBasicAuth(username, password)
 		if err != nil {
-			log.Infof("User could not be authenticated by basicAuth")
+			log.Debugln("User could not be authenticated by basicAuth")
 		}
-	} else if session, err := store.Get(r, "session"); err == nil && !session.IsNew {
+	} else if session, err := store.Get(r, "session"); err == nil && !session.IsNew && len(session.Values) > 0 {
 		authDetails, err = handleSessionAuth(session)
 		if err != nil {
-			log.Infof("User could not be authenticated by SessionAuth")
+			log.Debugln("User could not be authenticated by SessionAuth")
 		}
 	}
 

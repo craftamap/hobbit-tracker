@@ -68,6 +68,7 @@ func (h *Hub) Register(channelToRegister chan ServerSideEvent) {
 // Unregister removes a channel from the event hub
 func (h *Hub) Unregister(channelToUnregister chan ServerSideEvent) {
 	delete(h.Subscribers, channelToUnregister)
+	close(channelToUnregister)
 }
 
 // Broadcast broadcasts the given event to all of the subscribers

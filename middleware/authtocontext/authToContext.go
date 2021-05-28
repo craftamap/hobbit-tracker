@@ -109,7 +109,7 @@ func (m MiddlewareHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	handleSessionAuth := func(session *sessions.Session) (AuthDetails, error) {
 		authDetails, ok := session.Values[AuthDetailsSessionKey].(AuthDetails)
 		if !ok {
-			log.Debugln("Could not type assert cookie to AuthDetails, %+T", session.Values[AuthDetailsSessionKey])
+			log.Debugf("Could not type assert cookie to AuthDetails, %+T", session.Values[AuthDetailsSessionKey])
 			return AuthDetails{}, fmt.Errorf("Could not type assert cookie to AuthDetails, %+T", session.Values[AuthDetailsSessionKey])
 		}
 		if authDetails.AuthType != AuthTypeSession {

@@ -6,15 +6,19 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/craftamap/hobbit-tracker/hub"
 	"github.com/craftamap/hobbit-tracker/middleware/authtocontext"
+	"github.com/craftamap/hobbit-tracker/middleware/requestcontext"
 	"github.com/craftamap/hobbit-tracker/models"
 	"github.com/gorilla/mux"
-	"github.com/sirupsen/logrus"
-	"gorm.io/gorm"
 )
 
-func BuildHandleAPIPostHobbit(db *gorm.DB, log *logrus.Logger) http.HandlerFunc {
+func BuildHandleAPIPostHobbit() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		db := requestcontext.DB(r)
+		log := requestcontext.Log(r)
+		eventHub := requestcontext.Hub(r)
+
 		recievedHobbit := models.Hobbit{}
 		err := json.NewDecoder(r.Body).Decode(&recievedHobbit)
 		if err != nil {
@@ -53,11 +57,19 @@ func BuildHandleAPIPostHobbit(db *gorm.DB, log *logrus.Logger) http.HandlerFunc 
 			log.Error(err)
 			w.WriteHeader(http.StatusInternalServerError)
 		}
+
+		eventHub.Broadcast(hub.ServerSideEvent{
+			Typus:        hub.HobbitCreated,
+			OptionalData: sanitizedHobbit,
+		})
 	}
 }
 
-func BuildHandleAPIGetHobbits(db *gorm.DB, log *logrus.Logger) http.HandlerFunc {
+func BuildHandleAPIGetHobbits() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		db := requestcontext.DB(r)
+		log := requestcontext.Log(r)
+
 		hobbits := []models.Hobbit{}
 		err := db.Joins("User").Find(&hobbits).Error
 		if err != nil {
@@ -75,8 +87,11 @@ func BuildHandleAPIGetHobbits(db *gorm.DB, log *logrus.Logger) http.HandlerFunc 
 	}
 }
 
-func BuildHandleAPIGetHobbit(db *gorm.DB, log *logrus.Logger) http.HandlerFunc {
+func BuildHandleAPIGetHobbit() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		db := requestcontext.DB(r)
+		log := requestcontext.Log(r)
+
 		// TODO: add error handling
 		vars := mux.Vars(r)
 		id, ok := vars["id"]
@@ -108,8 +123,12 @@ func BuildHandleAPIGetHobbit(db *gorm.DB, log *logrus.Logger) http.HandlerFunc {
 	}
 }
 
-func BuildHandleAPIPutHobbit(db *gorm.DB, log *logrus.Logger) http.HandlerFunc {
+func BuildHandleAPIPutHobbit() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		db := requestcontext.DB(r)
+		log := requestcontext.Log(r)
+		eventHub := requestcontext.Hub(r)
+
 		user := models.User{}
 
 		// TODO: Add error handling here
@@ -164,5 +183,10 @@ func BuildHandleAPIPutHobbit(db *gorm.DB, log *logrus.Logger) http.HandlerFunc {
 		}
 		db.Model(&currentHobbit).Updates(sanitizedHobbit)
 		log.Infof("Updated hobbit %+v", sanitizedHobbit)
+
+		eventHub.Broadcast(hub.ServerSideEvent{
+			Typus:        hub.HobbitModified,
+			OptionalData: sanitizedHobbit,
+		})
 	}
 }

@@ -9,9 +9,13 @@ import (
 	"os"
 	"time"
 
+	"github.com/craftamap/hobbit-tracker/hub"
 	"github.com/craftamap/hobbit-tracker/middleware/authtocontext"
+	"github.com/craftamap/hobbit-tracker/middleware/requestcontext"
 	"github.com/craftamap/hobbit-tracker/models"
 	"github.com/craftamap/hobbit-tracker/routes"
+	"github.com/craftamap/hobbit-tracker/websockets"
+	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
 	"github.com/wader/gormstore/v2"
@@ -19,8 +23,11 @@ import (
 	"gorm.io/gorm"
 )
 
-var diskMode bool
-var port int
+var (
+	flagDiskMode bool
+	flagPort     int
+	flagVerbose  bool
+)
 
 var (
 	// Store represents the Cookie Store
@@ -38,9 +45,14 @@ func init() {
 		FullTimestamp: true,
 	})
 
-	flag.BoolVar(&diskMode, "disk-mode", false, "disk mode")
-	flag.IntVar(&port, "port", 8080, "port")
+	flag.BoolVar(&flagDiskMode, "disk-mode", false, "disk mode")
+	flag.IntVar(&flagPort, "port", 8080, "port")
+	flag.BoolVar(&flagVerbose, "v", false, "verbose, enables debug logs")
 	flag.Parse()
+
+	if flagVerbose {
+		log.SetLevel(logrus.DebugLevel)
+	}
 }
 
 func loggingMiddleware(next http.Handler) http.Handler {
@@ -56,11 +68,19 @@ func frontendHandler() (http.Handler, error) {
 	if err != nil {
 		return nil, err
 	}
-	if diskMode {
+	if flagDiskMode {
 		log.Warn("Disk Mode")
 		contentStatic = os.DirFS("frontend/dist")
 	}
 	return http.FileServer(http.FS(contentStatic)), nil
+}
+
+type customRecoveryLogger struct {
+	log *logrus.Logger
+}
+
+func (c *customRecoveryLogger) Println(msgs ...interface{}) {
+	c.log.Errorln(msgs...)
 }
 
 func main() {
@@ -102,13 +122,19 @@ func main() {
 	quit := make(chan struct{})
 	go Store.PeriodicCleanup(1*time.Hour, quit)
 	defer close(quit)
+	eventHub := hub.New(log)
+	eventHub.Run()
 
 	r := mux.NewRouter()
 	r.StrictSlash(true)
 	r.Use(loggingMiddleware)
-	r.Use(authtocontext.New(db, log, Store))
+
+	r.Use(handlers.RecoveryHandler(handlers.RecoveryLogger(&customRecoveryLogger{log})))
+	r.Use(requestcontext.New(Store, db, log, eventHub))
+	r.Use(authtocontext.New())
 
 	routes.RegisterRoutes(r, db, log, Store)
+	websockets.RegisterRoutes(r)
 
 	frontend, err := frontendHandler()
 	if err != nil {
@@ -116,7 +142,7 @@ func main() {
 		return
 	}
 	r.PathPrefix("/").Handler(frontend)
-	listeningOn := fmt.Sprintf(":%d", port)
+	listeningOn := fmt.Sprintf(":%d", flagPort)
 	log.Infof("Listening on %s", listeningOn)
 	err = http.ListenAndServe(listeningOn, r)
 	if err != nil {

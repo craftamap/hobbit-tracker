@@ -5,24 +5,20 @@ import (
 
 	"github.com/craftamap/hobbit-tracker/middleware/auth"
 	"github.com/gorilla/mux"
-	"github.com/gorilla/sessions"
-	"github.com/sirupsen/logrus"
-	"gorm.io/gorm"
 )
 
-func RegisterRoutes(records *mux.Router, db *gorm.DB, log *logrus.Logger, store sessions.Store) {
-	authMiddlewareBuilder := auth.Builder(log)
+func RegisterRoutes(records *mux.Router) {
+	authMiddlewareBuilder := auth.Builder()
 
-	records.Handle("/", BuildHandleAPIGetRecords(db, log)).Methods("GET")
+	records.Handle("/", BuildHandleAPIGetRecords()).Methods("GET")
 	records.Handle("/", authMiddlewareBuilder.Build(
-		http.HandlerFunc(BuildHandleAPIPostRecord(db, log)),
+		http.HandlerFunc(BuildHandleAPIPostRecord()),
 	)).Methods("POST")
 	records.Handle("/{record_id:[0-9]+}", authMiddlewareBuilder.Build(
-		http.HandlerFunc(BuildHandleAPIPutRecord(db, log)),
+		http.HandlerFunc(BuildHandleAPIPutRecord()),
 	)).Methods("PUT")
 	records.Handle("/{record_id:[0-9]+}", authMiddlewareBuilder.Build(
-		http.HandlerFunc(BuildHandleAPIDeleteRecord(db, log)),
+		http.HandlerFunc(BuildHandleAPIDeleteRecord()),
 	)).Methods("DELETE")
-	records.Handle("/heatmap", BuildHandleAPIGetRecordsForHeatmap(db, log)).Methods("GET")
-
+	records.Handle("/heatmap", BuildHandleAPIGetRecordsForHeatmap()).Methods("GET")
 }

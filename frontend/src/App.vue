@@ -28,6 +28,7 @@ import DialogWrapper from '@/components/DialogWrapper.vue'
 export default defineComponent({
   created() {
     this.dispatchFetchAuth()
+    this.dispatchCreateSocket()
   },
   components: {
     DialogWrapper,
@@ -40,6 +41,9 @@ export default defineComponent({
   methods: {
     dispatchFetchAuth() {
       this.$store.dispatch('fetchAuth')
+    },
+    dispatchCreateSocket() {
+      this.$store.dispatch('createWebSocketConnection')
     },
   },
 })

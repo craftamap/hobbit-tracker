@@ -12,6 +12,7 @@ export interface State {
     username?: string;
     userId?: number;
   };
+  socket?: WebSocket;
 }
 
 export const store = createStore<State>({
@@ -28,6 +29,7 @@ export const store = createStore<State>({
       username: undefined,
       userId: undefined,
     },
+    socket: undefined,
   },
   getters: {
     getHobbits: (state) => (): Hobbit[] => {
@@ -82,6 +84,9 @@ export const store = createStore<State>({
       selectedHobbit.records = selectedHobbit.records.filter((record) => {
         return record.id !== recordId
       })
+    },
+    setWebsocket(state, { socket }: { socket: WebSocket }) {
+      state.socket = socket
     },
   },
   actions: {
@@ -218,6 +223,42 @@ export const store = createStore<State>({
         console.log(json)
         commit('setHobbit', json)
       })
+    },
+    async createWebSocketConnection({ commit, dispatch }) {
+      const socket = new WebSocket('ws://localhost:8080/ws')
+      socket.onmessage = (ev) => {
+        const parsedEventData = JSON.parse(ev.data)
+        dispatch('recieveWebSocketMessage', parsedEventData)
+      }
+
+      socket.onclose = (ev) => {
+        console.debug('WebSocket close event:', ev)
+        dispatch('recieveWebSocketMessage', { socket: undefined })
+      }
+
+      socket.onerror = (ev) => {
+        // TODO: add better error handling
+        console.debug('WebSocket: recieved error event:', ev)
+      }
+
+      commit('setWebsocket', { socket })
+    },
+    async recieveWebSocketMessage({ dispatch }, { typus, optional_data: optionalData }) {
+      console.debug('recieved WebSocketMessage of typus', typus, 'and optional data', optionalData)
+      switch (typus) {
+        case 'RecordDeleted':
+        case 'RecordModified':
+        case 'RecordCreated':
+          dispatch('fetchRecords', optionalData?.hobbit_id)
+          break
+        case 'HobbitCreated':
+        case 'HobbitModified':
+          dispatch('fetchHobbit', { id: optionalData?.id })
+          break
+        case 'HobbitDeleted':
+          // TODO:
+          break
+      }
     },
   },
 })

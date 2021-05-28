@@ -5,17 +5,19 @@ import (
 	"net/http"
 
 	"github.com/craftamap/hobbit-tracker/middleware/authtocontext"
+	"github.com/craftamap/hobbit-tracker/middleware/requestcontext"
 	"github.com/craftamap/hobbit-tracker/models"
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 	"github.com/sethvargo/go-password/password"
-	"github.com/sirupsen/logrus"
 	"golang.org/x/crypto/bcrypt"
-	"gorm.io/gorm"
 )
 
-func BuildHandleGetAppPasswords(db *gorm.DB, log *logrus.Logger) http.HandlerFunc {
+func BuildHandleGetAppPasswords() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		db := requestcontext.DB(r)
+		log := requestcontext.Log(r)
+
 		user := models.User{}
 
 		// TODO: Add error handling here
@@ -55,9 +57,12 @@ func BuildHandleGetAppPasswords(db *gorm.DB, log *logrus.Logger) http.HandlerFun
 	}
 }
 
-func BuildHandlePostAppPassword(db *gorm.DB, log *logrus.Logger) http.HandlerFunc {
+func BuildHandlePostAppPassword() http.HandlerFunc {
 	// TODO: Limit total number of app passwords (10?)
 	return func(w http.ResponseWriter, r *http.Request) {
+		db := requestcontext.DB(r)
+		log := requestcontext.Log(r)
+
 		user := models.User{}
 
 		err := db.Where("ID = ?", r.Context().Value(authtocontext.AuthDetailsContextKey).(authtocontext.AuthDetails).UserID).First(&user).Error
@@ -131,8 +136,11 @@ func BuildHandlePostAppPassword(db *gorm.DB, log *logrus.Logger) http.HandlerFun
 	}
 }
 
-func BuildHandleDeleteAppPassword(db *gorm.DB, log *logrus.Logger) http.HandlerFunc {
+func BuildHandleDeleteAppPassword() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		db := requestcontext.DB(r)
+		log := requestcontext.Log(r)
+
 		user := models.User{}
 
 		err := db.Where("ID = ?", r.Context().Value(authtocontext.AuthDetailsContextKey).(authtocontext.AuthDetails).UserID).First(&user).Error
@@ -192,8 +200,11 @@ func BuildHandleDeleteAppPassword(db *gorm.DB, log *logrus.Logger) http.HandlerF
 	}
 }
 
-func BuildHandleProfileGetHobbits(db *gorm.DB, log *logrus.Logger) http.HandlerFunc {
+func BuildHandleProfileGetHobbits() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		db := requestcontext.DB(r)
+		log := requestcontext.Log(r)
+
 		hobbits := []models.Hobbit{}
 
 		err := db.Joins("User").Where(&models.Hobbit{UserID: r.Context().Value(authtocontext.AuthDetailsContextKey).(authtocontext.AuthDetails).UserID}).Find(&hobbits).Error

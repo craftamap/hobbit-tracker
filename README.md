@@ -1,6 +1,6 @@
 # Hobbit Tracker
 
-Hobbit Tracker is a small habbit tracker built with Golang and Vue.js.
+Hobbit Tracker is a small habit tracker built with Golang and Vue.js.
 
 ## Building the project
 
@@ -45,7 +45,8 @@ Currently, we use the following important libraries in the backend:
 - [gorm.io/gorm](https://gorm.io/gorm)
 - [sirupsen/logrus](https://github.com/sirupsen/logrus)
 
-To launch the backend for development, you can also use the `-disk-mode`-flag.
+To launch the backend for development, you can also use the `-disk-mode`-flag, 
+which will read the files from your disk, and not from the files included in the binary.
 
 The frontend uses Vue.js, Vue Router and Vuex, as well as some other smaller libraries.
 

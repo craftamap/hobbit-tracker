@@ -3,7 +3,9 @@ package profile
 import (
 	"encoding/json"
 	"net/http"
+	"sort"
 	"strconv"
+	"time"
 
 	"github.com/craftamap/hobbit-tracker/middleware/authtocontext"
 	"github.com/craftamap/hobbit-tracker/middleware/requestcontext"
@@ -312,6 +314,91 @@ func BuildHandleProfileGetHobbits() http.HandlerFunc {
 		}
 
 		err = json.NewEncoder(w).Encode(hobbits)
+		if err != nil {
+			log.Error(err)
+			w.WriteHeader(http.StatusInternalServerError)
+		}
+	}
+}
+
+type FeedEventTypus string
+
+const (
+	FeedEventTypusHobbitCreated FeedEventTypus = "HobbitCreated"
+	FeedEventTypusRecordCreated FeedEventTypus = "RecordCreated"
+)
+
+type FeedEvent struct {
+	FeedEventTypus FeedEventTypus
+	CreatedAt      time.Time
+	Payload        interface{}
+}
+
+func GetMyFeed() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		db := requestcontext.DB(r)
+		log := requestcontext.Log(r)
+		authDetails := authtocontext.Get(r)
+
+		user := models.User{}
+
+		err := db.Preload("Follows").Where("ID = ?", authDetails.UserID).First(&user).Error
+		if err != nil {
+			log.Error(err)
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+
+		userIdsOfFollows := []uint{}
+		for _, follow := range user.Follows {
+			userIdsOfFollows = append(userIdsOfFollows, follow.ID)
+		}
+
+		/** TODO: This is kind of sub-optimal, as we fetch both 25 hobbits as well as records. Optimaly, we would only fetch
+		the 25 items we need from the db. This would also allow us to continue the feed with pages.
+		*/
+		// First, fetch all records of people you follow
+		recentRecordsOfFollowers := []*models.NumericRecord{}
+		err = db.Joins("Hobbit").Where("hobbit.user_id IN ?", userIdsOfFollows).Limit(25).Order("numeric_records.created_at DESC").Find(&recentRecordsOfFollowers).Error
+		if err != nil {
+			log.Error(err)
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+
+		// Then we fetch all of the hobbits of people you follow
+		recentHobbitsOfFollowers := []*models.Hobbit{}
+		err = db.Where("user_id in ?", userIdsOfFollows).Limit(25).Order("created_at DESC").Find(&recentHobbitsOfFollowers).Error
+
+		relevantEvents := []FeedEvent{}
+
+		for _, r := range recentRecordsOfFollowers {
+			relevantEvents = append(relevantEvents, FeedEvent{
+				FeedEventTypus: FeedEventTypusRecordCreated,
+				CreatedAt:      r.CreatedAt,
+				Payload:        r,
+			})
+		}
+		for _, h := range recentHobbitsOfFollowers {
+			relevantEvents = append(relevantEvents, FeedEvent{
+				FeedEventTypus: FeedEventTypusHobbitCreated,
+				CreatedAt:      h.CreatedAt,
+				Payload:        h,
+			})
+		}
+
+		sort.Slice(relevantEvents, func(i, j int) bool {
+			return relevantEvents[i].CreatedAt.After(relevantEvents[j].CreatedAt)
+		})
+
+		upperMax := len(relevantEvents) - 1
+		if upperMax >= 25 {
+			upperMax = 25
+		}
+
+		relevantEvents = relevantEvents[0:upperMax]
+
+		err = json.NewEncoder(w).Encode(relevantEvents)
 		if err != nil {
 			log.Error(err)
 			w.WriteHeader(http.StatusInternalServerError)

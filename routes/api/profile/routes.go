@@ -14,7 +14,9 @@ func RegisterRoutes(profile *mux.Router) {
 	profileMe := profile.PathPrefix("/me").Subrouter()
 	profileMe.Use(authMiddlewareBuilder.Build)
 	profileMe.Handle("/", apiAuth.BuildHandleAPIGetAuth())
-	profileMe.Handle("/hobbits", http.HandlerFunc(BuildHandleProfileGetHobbits())).Methods("GET")
+	profileMe.HandleFunc("/hobbits", BuildHandleProfileGetHobbits()).Methods("GET")
+	profileMe.HandleFunc("/feed", GetMyFeed()).Methods(http.MethodGet)
+
 	profileMeAppPassword := profileMe.PathPrefix("/apppassword").Subrouter()
 	profileMeAppPassword.Use(authMiddlewareBuilder.Build) //.WithPermitAppPasswordAuth(false).Build)
 	profileMeAppPassword.HandleFunc("/", BuildHandleGetAppPasswords()).Methods("GET")

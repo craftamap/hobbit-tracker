@@ -139,3 +139,7 @@ func (m MiddlewareHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	m.next.ServeHTTP(w, r)
 }
+
+func Get(r *http.Request) AuthDetails {
+	return r.Context().Value(AuthDetailsContextKey).(AuthDetails)
+}

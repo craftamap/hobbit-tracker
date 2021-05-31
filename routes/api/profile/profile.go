@@ -3,6 +3,7 @@ package profile
 import (
 	"encoding/json"
 	"net/http"
+	"strconv"
 
 	"github.com/craftamap/hobbit-tracker/middleware/authtocontext"
 	"github.com/craftamap/hobbit-tracker/middleware/requestcontext"
@@ -12,6 +13,102 @@ import (
 	"github.com/sethvargo/go-password/password"
 	"golang.org/x/crypto/bcrypt"
 )
+
+func GetOthersUserInfo() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		db := requestcontext.DB(r)
+		log := requestcontext.Log(r)
+
+		urlVariables := mux.Vars(r)
+		otherUserStrId, ok := urlVariables["id"]
+		if !ok {
+			log.Error("No user id found!")
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+
+		otherUserID, err := strconv.ParseUint(otherUserStrId, 10, 64)
+		if err != nil {
+			log.Error("user id is not numeric")
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+
+		// If userId is the userId of current user, redirect to /me
+		authDetails := r.Context().Value(authtocontext.AuthDetailsContextKey).(authtocontext.AuthDetails)
+		if authDetails.Authenticated && authDetails.UserID == uint(otherUserID) {
+			http.Redirect(w, r, "../me", http.StatusTemporaryRedirect)
+			return
+		}
+
+		otherUser := models.User{}
+		if err = db.Where(models.User{ID: uint(otherUserID)}).First(&otherUser).Error; err != nil {
+			log.Error("user could not be found")
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+
+		// sanitise otherUser for save output
+
+		sanitisedOtherUser := models.User{
+			ID:       otherUser.ID,
+			Username: otherUser.Username,
+			Image:    otherUser.Image,
+		}
+
+		w.Header().Add("Content-Type", "application/json")
+		err = json.NewEncoder(w).Encode(sanitisedOtherUser)
+		if err != nil {
+			log.Error(err)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+	}
+}
+
+func GetOthersHobbits() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		db := requestcontext.DB(r)
+		log := requestcontext.Log(r)
+
+		urlVariables := mux.Vars(r)
+		otherUserStrId, ok := urlVariables["id"]
+		if !ok {
+			log.Error("No user id found!")
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+
+		otherUserID, err := strconv.ParseUint(otherUserStrId, 10, 64)
+		if err != nil {
+			log.Error("user id is not numeric")
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+
+		// If userId is the userId of current user, redirect to /me
+		authDetails := r.Context().Value(authtocontext.AuthDetailsContextKey).(authtocontext.AuthDetails)
+		if authDetails.Authenticated && authDetails.UserID == uint(otherUserID) {
+			http.Redirect(w, r, "../me/hobbits", http.StatusTemporaryRedirect)
+			return
+		}
+
+		hobbits := []models.Hobbit{}
+
+		err = db.Where(&models.Hobbit{UserID: uint(otherUserID)}).Find(&hobbits).Error
+		if err != nil {
+			log.Error(err)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
+		err = json.NewEncoder(w).Encode(hobbits)
+		if err != nil {
+			log.Error(err)
+			w.WriteHeader(http.StatusInternalServerError)
+		}
+	}
+}
 
 func BuildHandleGetAppPasswords() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {

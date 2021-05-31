@@ -20,4 +20,8 @@ func RegisterRoutes(profile *mux.Router) {
 	profileMeAppPassword.HandleFunc("/", BuildHandleGetAppPasswords()).Methods("GET")
 	profileMeAppPassword.HandleFunc("/", BuildHandlePostAppPassword()).Methods("POST")
 	profileMeAppPassword.HandleFunc("/{id:[0-9a-zA-Z\\-]+}", BuildHandleDeleteAppPassword()).Methods("DELETE")
+
+	profileOthers := profile.PathPrefix("/{id:[0-9]+}").Subrouter()
+	profileOthers.HandleFunc("/", GetOthersUserInfo()).Methods(http.MethodGet)
+	profileOthers.HandleFunc("/hobbits", GetOthersHobbits()).Methods(http.MethodGet)
 }

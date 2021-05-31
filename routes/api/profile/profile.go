@@ -359,7 +359,7 @@ func GetMyFeed() http.HandlerFunc {
 		*/
 		// First, fetch all records of people you follow
 		recentRecordsOfFollowers := []*models.NumericRecord{}
-		err = db.Joins("Hobbit").Where("hobbit.user_id IN ?", userIdsOfFollows).Limit(25).Order("numeric_records.created_at DESC").Find(&recentRecordsOfFollowers).Error
+		err = db.Preload("Hobbit.User").Joins("Hobbit").Joins("LEFT JOIN Users on hobbit.user_id = users.id").Where("hobbit.user_id IN ?", userIdsOfFollows).Limit(25).Order("numeric_records.created_at DESC").Find(&recentRecordsOfFollowers).Error
 		if err != nil {
 			log.Error(err)
 			w.WriteHeader(http.StatusBadRequest)
@@ -368,7 +368,7 @@ func GetMyFeed() http.HandlerFunc {
 
 		// Then we fetch all of the hobbits of people you follow
 		recentHobbitsOfFollowers := []*models.Hobbit{}
-		err = db.Where("user_id in ?", userIdsOfFollows).Limit(25).Order("created_at DESC").Find(&recentHobbitsOfFollowers).Error
+		err = db.Joins("User").Where("user_id in ?", userIdsOfFollows).Limit(25).Order("created_at DESC").Find(&recentHobbitsOfFollowers).Error
 
 		relevantEvents := []FeedEvent{}
 

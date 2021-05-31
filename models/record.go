@@ -9,4 +9,6 @@ type NumericRecord struct {
 	Hobbit    Hobbit    `gorm:"foreignKey:HobbitID" json:"hobbit,omitempty"`
 	Value     int64     `json:"value,omitempty"`
 	Comment   string    `json:"comment,omitempty"`
+	CreatedAt time.Time
+	UpdatedAt time.Time
 }

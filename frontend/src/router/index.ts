@@ -1,11 +1,17 @@
 import { createRouter, createWebHashHistory, RouteRecordRaw } from 'vue-router'
 import Overview from '../views/Overview.vue'
+import Dashboard from '../views/Dashboard.vue'
 
 const routes: Array<RouteRecordRaw> = [
   {
     path: '/',
     name: 'Overview',
     component: Overview,
+  },
+  {
+    path: '/dashboard',
+    name: 'Feed',
+    component: Dashboard,
   },
   {
     path: '/login',

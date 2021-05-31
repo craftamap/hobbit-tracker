@@ -1,6 +1,7 @@
 import { createStore } from 'vuex'
 import { Hobbit, NumericRecord } from '../models/index'
 import profile from './modules/profile'
+import feed from './modules/feed'
 
 export interface State {
   hobbits: {
@@ -18,6 +19,7 @@ export interface State {
 export const store = createStore<State>({
   modules: {
     profile: profile,
+    feed: feed,
   },
   state: {
     hobbits: {

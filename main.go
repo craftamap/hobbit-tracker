@@ -122,10 +122,8 @@ func main() {
 		db.Where("created_at IS NULL").Find(&records)
 		if len(records) > 0 {
 			log.Info("Found migration from v0.2.1, performing migration")
-			db.Model(&models.NumericRecord{}).Where("updated_at IS NULL").Updates(&models.NumericRecord{UpdatedAt: time.Now()})
 			db.Model(&models.NumericRecord{}).Where("created_at IS NULL").Updates(&models.NumericRecord{CreatedAt: time.Now()})
 
-			db.Model(&models.Hobbit{}).Where("updated_at IS NULL").Updates(&models.Hobbit{UpdatedAt: time.Now()})
 			db.Model(&models.Hobbit{}).Where("created_at IS NULL").Updates(&models.Hobbit{CreatedAt: time.Now()})
 			log.Info("Found migration from v0.2.1, done")
 		}

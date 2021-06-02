@@ -1,12 +1,6 @@
 <template>
   <div v-for="feedEvent, idx in feedEvents" :key="idx">
-    <div v-if="feedEvent.FeedEventTypus == 'HobbitCreated'">
-      <h3>{{feedEvent.Payload.user.username}} created a new Hobbit: {{feedEvent.Payload.name}}</h3>
-    </div>
-    <div v-if="feedEvent.FeedEventTypus == 'RecordCreated'" >
-      <h3>{{feedEvent.Payload.hobbit.user.username}} added a Record to {{feedEvent.Payload.hobbit.name}}:</h3>
-      <h2>{{feedEvent.Payload.value}}</h2>
-    </div>
+    <FeedEvent :feedEvent="feedEvent" />
   </div>
 </template>
 
@@ -14,11 +8,15 @@
 import { defineComponent } from 'vue'
 import { createNamespacedHelpers } from 'vuex'
 import { FeedState } from '../store/modules/feed'
+import FeedEvent from '@/components/FeedEvent.vue'
 
 const { mapState, mapActions } = createNamespacedHelpers('feed')
 
 export default defineComponent({
   name: 'Dashboard',
+  components: {
+    FeedEvent,
+  },
   created() {
     this.fetchFeed()
   },

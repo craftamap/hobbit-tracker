@@ -5,14 +5,14 @@ import (
 	"net/http"
 
 	"github.com/craftamap/hobbit-tracker/hub"
+	"github.com/gorilla/sessions"
 	"github.com/sirupsen/logrus"
-	"github.com/wader/gormstore/v2"
 	"gorm.io/gorm"
 )
 
 // Handler implements a middleware allowing storage of relevant pointers for requests in the request context
 type Handler struct {
-	Store    *gormstore.Store
+	Store    sessions.Store
 	DB       *gorm.DB
 	Log      *logrus.Logger
 	EventHub *hub.Hub
@@ -43,7 +43,7 @@ func (m Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 // New creates a new Handler
-func New(store *gormstore.Store, db *gorm.DB, log *logrus.Logger, eventHub *hub.Hub) func(http.Handler) http.Handler {
+func New(store sessions.Store, db *gorm.DB, log *logrus.Logger, eventHub *hub.Hub) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return Handler{
 			Store:    store,
@@ -56,8 +56,8 @@ func New(store *gormstore.Store, db *gorm.DB, log *logrus.Logger, eventHub *hub.
 }
 
 // Store retrieves the cookie store from the current request
-func Store(r *http.Request) *gormstore.Store {
-	return r.Context().Value(requestContextStoreKey).(*gormstore.Store)
+func Store(r *http.Request) sessions.Store {
+	return r.Context().Value(requestContextStoreKey).(sessions.Store)
 }
 
 // DB retrieves the database connection from the current request

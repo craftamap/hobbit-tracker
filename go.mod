@@ -3,6 +3,7 @@ module github.com/craftamap/hobbit-tracker
 go 1.16
 
 require (
+	github.com/DATA-DOG/go-sqlmock v1.5.0
 	github.com/charmbracelet/lipgloss v0.2.1
 	github.com/felixge/httpsnoop v1.0.2 // indirect
 	github.com/google/uuid v1.2.0
@@ -15,6 +16,7 @@ require (
 	github.com/wader/gormstore/v2 v2.0.0
 	golang.org/x/crypto v0.0.0-20210220033148-5ea612d1eb83
 	golang.org/x/sys v0.0.0-20210521203332-0cec03c779c1 // indirect
+	gorm.io/driver/postgres v1.0.8
 	gorm.io/driver/sqlite v1.1.4
 	gorm.io/gorm v1.21.3
 )

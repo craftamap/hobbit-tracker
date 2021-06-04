@@ -21,6 +21,7 @@ import (
 	"github.com/wader/gormstore/v2"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
 
 var (
@@ -85,7 +86,9 @@ func (c *customRecoveryLogger) Println(msgs ...interface{}) {
 
 func main() {
 	var err error
-	db, err = gorm.Open(sqlite.Open("hobbits.sqlite"), &gorm.Config{})
+	db, err = gorm.Open(sqlite.Open("hobbits.sqlite"), &gorm.Config{
+		Logger: logger.Default.LogMode(logger.Info),
+	})
 	if err != nil {
 		fmt.Println(err)
 		return

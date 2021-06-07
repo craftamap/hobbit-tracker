@@ -24,7 +24,7 @@ func TestHandleLogout(t *testing.T) {
 		expect      func(description string, rr *httptest.ResponseRecorder)
 	}{
 		{
-			description: "correct credentials",
+			description: "valid cookie",
 			prepare: func(dbM sqlmock.Sqlmock, rc func(http.Handler) http.Handler) *http.Request {
 				var cookies []*http.Cookie
 				{
@@ -61,7 +61,29 @@ func TestHandleLogout(t *testing.T) {
 				if sessionCookie == nil || sessionCookie.Expires.After(time.Now()) {
 					t.Errorf("Expected Set-Cookie to set sessionCookie to invalid Date, but got: %+v", rr.Result().Cookies())
 				}
+			},
+		}, {
+			description: "invalid/unknown cookie",
+			prepare: func(dbM sqlmock.Sqlmock, rc func(http.Handler) http.Handler) *http.Request {
+				r, _ := http.NewRequest("POST", "/", strings.NewReader(""))
+				return r
+			},
+			expect: func(description string, rr *httptest.ResponseRecorder) {
+				if rr.Result().StatusCode != http.StatusFound {
+					t.Errorf("Test \"%s\" failed because we expected StatusCode %d, but got %d", description, http.StatusFound, rr.Result().StatusCode)
+				}
+				cookies := rr.Result().Cookies()
+				var sessionCookie *http.Cookie
+				for _, c := range cookies {
+					if c.Name == "session" {
+						sessionCookie = c
+					}
+				}
 
+				t.Logf("sessionCookie: %+v", sessionCookie)
+				if sessionCookie == nil || sessionCookie.Expires.After(time.Now()) {
+					t.Errorf("Expected Set-Cookie to set sessionCookie to invalid Date, but got: %+v", rr.Result().Cookies())
+				}
 			},
 		},
 	}

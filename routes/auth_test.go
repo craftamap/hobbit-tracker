@@ -85,6 +85,19 @@ func TestHandleLogin(t *testing.T) {
 				if rr.Result().StatusCode != http.StatusFound {
 					t.Errorf("Test \"%s\" failed because we expected StatusCode %d, but got %d", description, http.StatusFound, rr.Result().StatusCode)
 				}
+				cookies := rr.Result().Cookies()
+				var sessionCookie *http.Cookie
+				for _, c := range cookies {
+					if c.Name == "session" {
+						sessionCookie = c
+					}
+				}
+
+				if sessionCookie == nil {
+					t.Errorf("Expected Set-Cookie to be set with session cookie, but got: %+v", rr.Result().Cookies())
+				}
+
+				// TODO: Find a convinient way to ensure that the value is actually stored in the store
 			},
 		},
 	}
@@ -116,5 +129,4 @@ func TestHandleLogin(t *testing.T) {
 
 		testCase.expect(testCase.description, rr)
 	}
-
 }

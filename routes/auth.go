@@ -17,8 +17,10 @@ func BuildHandleLogout() http.HandlerFunc {
 		store := requestcontext.Store(r)
 
 		session, _ := store.Get(r, "session")
-		authDetails := session.Values[authtocontext.AuthDetailsSessionKey].(authtocontext.AuthDetails)
-		username := authDetails.Username
+		authDetails, ok := session.Values[authtocontext.AuthDetailsSessionKey].(authtocontext.AuthDetails)
+		if !ok {
+			log.Debug("Unknown user hitted the logout page - let's ignore this, and actually delete his cookies so we are clean")
+		}
 
 		session.Values[authtocontext.AuthDetailsSessionKey] = authtocontext.AuthDetails{
 			Authenticated: false,
@@ -40,7 +42,11 @@ func BuildHandleLogout() http.HandlerFunc {
 		w.Header().Add("Location", redirectPath)
 		w.WriteHeader(http.StatusFound)
 
-		log.Infof("Logged out user %s", username)
+		if authDetails.Username == "" {
+			log.Infof("Logged out unknown user")
+		} else {
+			log.Infof("Logged out user %s", authDetails.Username)
+		}
 	}
 }
 

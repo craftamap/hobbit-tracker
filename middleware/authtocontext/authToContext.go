@@ -68,6 +68,11 @@ func (m MiddlewareHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	store := requestcontext.Store(r)
 
 	handleBasicAuth := func(username string, password string) (AuthDetails, error) {
+		if username == "" || password == "" {
+			log.Warnf("username or password empty")
+			return AuthDetails{}, fmt.Errorf("username or password empty")
+		}
+
 		user := &models.User{}
 		if err := db.Where("username = ?", username).First(user).Error; err != nil {
 			log.Warnf("found no user with username %s; %s ", username, err)

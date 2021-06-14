@@ -6,29 +6,31 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/craftamap/hobbit-tracker/middleware/requestcontext"
+	"github.com/craftamap/hobbit-tracker/models"
+	"github.com/google/uuid"
 	"github.com/gorilla/sessions"
 	"github.com/sirupsen/logrus"
-	"gorm.io/driver/postgres"
+	"golang.org/x/crypto/bcrypt"
+	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
 
 func TestMiddlewareHandler_ServeHTTP(t *testing.T) {
 	testMatrix := []struct {
 		name    string
-		prepare func(dbM sqlmock.Sqlmock) *http.Request
+		prepare func(db *gorm.DB) *http.Request
 		expect  func(t *testing.T, rr *httptest.ResponseRecorder, nextRequest *http.Request)
 	}{
 		{
 			name: "basicAuth/empty credentials",
-			prepare: func(mock sqlmock.Sqlmock) *http.Request {
+			prepare: func(db *gorm.DB) *http.Request {
 				r, _ := http.NewRequest("POST", "/", &strings.Reader{})
 				r.SetBasicAuth("", "")
 
-				mock.ExpectQuery("SELECT ")
 				return r
-			}, expect: func(t *testing.T, rr *httptest.ResponseRecorder, nextRequest *http.Request) {
+			},
+			expect: func(t *testing.T, rr *httptest.ResponseRecorder, nextRequest *http.Request) {
 
 				authDetails := nextRequest.Context().Value(AuthDetailsContextKey)
 
@@ -36,21 +38,109 @@ func TestMiddlewareHandler_ServeHTTP(t *testing.T) {
 					t.Errorf("expected %+v, but got %+v", AuthDetails{}, authDetails)
 				}
 			},
+		}, {
+			name: "basicAuth/matching user does not exist",
+			prepare: func(db *gorm.DB) *http.Request {
+				r, _ := http.NewRequest("POST", "/", &strings.Reader{})
+				r.SetBasicAuth("user", "")
+
+				return r
+			},
+			expect: func(t *testing.T, rr *httptest.ResponseRecorder, nextRequest *http.Request) {
+
+				authDetails := nextRequest.Context().Value(AuthDetailsContextKey)
+
+				if authDetails != (AuthDetails{}) {
+					t.Errorf("expected %+v, but got %+v", AuthDetails{}, authDetails)
+				}
+			},
+		}, {
+			name: "basicAuth/no app password",
+			prepare: func(db *gorm.DB) *http.Request {
+				r, _ := http.NewRequest("POST", "/", &strings.Reader{})
+				r.SetBasicAuth("user", "password")
+
+				db.Save(&models.User{
+					ID:       1,
+					Username: "user",
+				})
+
+				return r
+			},
+			expect: func(t *testing.T, rr *httptest.ResponseRecorder, nextRequest *http.Request) {
+
+				authDetails := nextRequest.Context().Value(AuthDetailsContextKey)
+
+				if authDetails != (AuthDetails{}) {
+					t.Errorf("expected %+v, but got %+v", AuthDetails{}, authDetails)
+				}
+			},
+		}, {
+			name: "basicAuth/no correct app password",
+			prepare: func(db *gorm.DB) *http.Request {
+				r, _ := http.NewRequest("POST", "/", &strings.Reader{})
+				r.SetBasicAuth("user", "password")
+
+				db.Save(&models.User{
+					ID:       1,
+					Username: "user",
+				})
+				wrongPassword, _ := bcrypt.GenerateFromPassword([]byte("wrongPassword"), -1)
+				// Insert 3 wrong passwords
+				for i := 0; i < 3; i++ {
+					db.Save(&models.AppPassword{
+						ID:     uuid.New(),
+						UserID: 1,
+						Secret: string(wrongPassword),
+					})
+				}
+
+				return r
+			},
+			expect: func(t *testing.T, rr *httptest.ResponseRecorder, nextRequest *http.Request) {
+
+				authDetails := nextRequest.Context().Value(AuthDetailsContextKey)
+
+				if authDetails != (AuthDetails{}) {
+					t.Errorf("expected %+v, but got %+v", AuthDetails{}, authDetails)
+				}
+			},
+		}, {
+			name: "basicAuth/correct app password",
+			prepare: func(db *gorm.DB) *http.Request {
+				r, _ := http.NewRequest("POST", "/", &strings.Reader{})
+				r.SetBasicAuth("user", "password")
+
+				db.Save(&models.User{
+					ID:       1,
+					Username: "user",
+				})
+				correctPassword, _ := bcrypt.GenerateFromPassword([]byte("password"), -1)
+				db.Save(&models.AppPassword{
+					ID:     uuid.New(),
+					UserID: 1,
+					Secret: string(correctPassword),
+				})
+
+				return r
+			},
+			expect: func(t *testing.T, rr *httptest.ResponseRecorder, nextRequest *http.Request) {
+
+				authDetails := nextRequest.Context().Value(AuthDetailsContextKey)
+
+				if authDetails != (AuthDetails{Authenticated: true, Username: "user", UserID: 1, AuthType: "AppPassword"}) {
+					t.Errorf("expected %+v, but got %+v", AuthDetails{}, authDetails)
+				}
+			},
 		},
 	}
 	for _, testCase := range testMatrix {
 		t.Run(testCase.name, func(t *testing.T) {
-			dbM, mock, err := sqlmock.New()
-			if err != nil {
-				t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
-			}
-			dialector := postgres.New(postgres.Config{
-				DSN:                  "sqlmock_db_0",
-				DriverName:           "postgres",
-				Conn:                 dbM,
-				PreferSimpleProtocol: true,
-			})
-			db, err := gorm.Open(dialector, &gorm.Config{})
+			db, _ := gorm.Open(sqlite.Open(":memory:"), &gorm.Config{})
+			db.AutoMigrate(&models.Hobbit{})
+			db.AutoMigrate(&models.User{})
+			db.AutoMigrate(&models.NumericRecord{})
+			db.AutoMigrate(&models.AppPassword{})
 
 			store := sessions.NewCookieStore([]byte("secret"))
 			// logger, _ := test.NewNullLogger()
@@ -58,7 +148,7 @@ func TestMiddlewareHandler_ServeHTTP(t *testing.T) {
 
 			rr := httptest.NewRecorder()
 
-			r := testCase.prepare(mock)
+			r := testCase.prepare(db)
 
 			var nextRequest *http.Request
 			next := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

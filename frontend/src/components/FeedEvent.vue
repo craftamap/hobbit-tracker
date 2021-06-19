@@ -41,7 +41,7 @@
 <script lang="ts">
 import { defineComponent, PropType } from 'vue'
 import { FeedEvent, FeedEventTypus } from '@/store/modules/feed'
-import { Hobbit, NumericRecord } from '@/models'
+import { Hobbit, NumericRecord, User } from '@/models'
 
 export default defineComponent({
   name: 'FeedEvent',
@@ -52,10 +52,10 @@ export default defineComponent({
     title(): string {
       if (this.feedEvent?.FeedEventTypus === FeedEventTypus.HobbitCreated) {
         const hobbit = this.feedEvent.Payload as Hobbit
-        return `${(hobbit.user as any).username} has created a new Hobbit.`
+        return `${hobbit.user.username} has created a new Hobbit.`
       } else if (this.feedEvent?.FeedEventTypus === FeedEventTypus.RecordCreated) {
         const record = this.feedEvent.Payload as NumericRecord
-        return `${((record as any).hobbit.user as any).username} has created a new entry in "${((record as any).hobbit).name}."`
+        return `${record?.hobbit?.user?.username} has created a new entry in "${record?.hobbit?.name}."`
       }
       return ''
     },
@@ -65,11 +65,11 @@ export default defineComponent({
     isRecordCreated(): boolean {
       return this.feedEvent?.FeedEventTypus === FeedEventTypus.RecordCreated
     },
-    hobbit(): Hobbit | null {
+    hobbit(): Hobbit | null | undefined {
       if (this.isHobbitCreated) {
         return this?.feedEvent?.Payload as Hobbit
       } else if (this.isRecordCreated) {
-        return (this?.feedEvent?.Payload as any).hobbit as Hobbit
+        return (this?.feedEvent?.Payload as NumericRecord)?.hobbit
       }
       return null
     },

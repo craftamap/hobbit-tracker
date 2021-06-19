@@ -10,7 +10,7 @@ export interface Hobbit {
 
 export interface User {
   id: number;
-  name: string;
+  username: string;
 };
 
 export interface NumericRecord {
@@ -18,6 +18,7 @@ export interface NumericRecord {
   timestamp: string;
   value: number;
   comment: string;
+  hobbit?: Hobbit;
 }
 
 export interface AppPassword {

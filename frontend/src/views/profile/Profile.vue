@@ -9,7 +9,7 @@
         <CogIcon class="h-24 cursor-pointer" @click="navigateToAppPassword" />
       </div>
       <div>Your hobbits:</div>
-      <SimpleHobbit v-for="hobbit in hobbitsOfUser" :key='hobbit.id' :hobbit="hobbit" />
+      <SimpleHobbit v-for="hobbit in hobbitsOfUser" :key='hobbit.id' :hobbit="hobbit" :withHeatmap=true />
     </div>
   </div>
 </template>

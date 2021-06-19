@@ -1,6 +1,6 @@
 import { createRouter, createWebHashHistory, RouteRecordRaw } from 'vue-router'
 import Overview from '../views/Overview.vue'
-import Dashboard from '../views/Dashboard.vue'
+import Feed from '../views/Feed.vue'
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -9,9 +9,9 @@ const routes: Array<RouteRecordRaw> = [
     component: Overview,
   },
   {
-    path: '/dashboard',
+    path: '/feed',
     name: 'Feed',
-    component: Dashboard,
+    component: Feed,
   },
   {
     path: '/login',

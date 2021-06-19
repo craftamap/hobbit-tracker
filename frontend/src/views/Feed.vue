@@ -1,6 +1,8 @@
 <template>
-  <div v-for="feedEvent, idx in feedEvents" :key="idx">
-    <FeedEvent :feedEvent="feedEvent" />
+  <div>
+    <div v-for="feedEvent, idx in feedEvents" :key="idx">
+      <FeedEvent :feedEvent="feedEvent" />
+    </div>
   </div>
 </template>
 
@@ -13,7 +15,7 @@ import FeedEvent from '@/components/FeedEvent.vue'
 const { mapState, mapActions } = createNamespacedHelpers('feed')
 
 export default defineComponent({
-  name: 'Dashboard',
+  name: 'Feed',
   components: {
     FeedEvent,
   },

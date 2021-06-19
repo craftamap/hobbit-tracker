@@ -47,7 +47,9 @@ export default defineComponent({
     }
   },
   created() {
-    this.fetchHeatmapData()
+    if (this.withHeatmap) {
+      this.fetchHeatmapData()
+    }
   },
   computed: {
     getRecords(): NumericRecord[] {

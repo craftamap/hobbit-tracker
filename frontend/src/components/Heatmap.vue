@@ -4,7 +4,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from 'vue'
+import { defineComponent } from 'vue'
 import { v4 as uuidv4 } from 'uuid'
 import CalendarHeatMap from 'calendar-heatmap-mini'
 
@@ -33,17 +33,19 @@ export default defineComponent({
   methods: {
     async renderCalHeatMap() {
       return new Promise((resolve) => {
-        const calHeatMap = new CalendarHeatMap()
-          .data(this.data)
-          .selector(`[data-uid='${this.uid}']`)
-          .colorRange(['#e9f6f7', '#218380'])
-          .tooltipEnabled(true)
-        if (this.prefersDark.matches) {
-        // replace with better color
-          calHeatMap.colorRange(['#333333', '#218380'])
-        }
+        setTimeout(() => {
+          const calHeatMap = new CalendarHeatMap()
+            .data(this.data)
+            .selector(`[data-uid='${this.uid}']`)
+            .colorRange(['#e9f6f7', '#218380'])
+            .tooltipEnabled(true)
+          if (this.prefersDark.matches) {
+            // replace with better color
+            calHeatMap.colorRange(['#333333', '#218380'])
+          }
 
-        resolve(calHeatMap())
+          resolve(calHeatMap())
+        }, 0)
       })
     },
   },

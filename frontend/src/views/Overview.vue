@@ -4,7 +4,7 @@
       Here there, <span class="username">{{username}}</span>!
     </div>
     <IconBar @reload="reload" />
-    <SimpleHobbit v-for="hobbit in hobbits" :key='hobbit.id' :hobbit="hobbit" />
+    <SimpleHobbit v-for="hobbit in hobbits" :key='hobbit.id' :hobbit="hobbit" :withHeatmap=true  />
   </div>
 </template>
 

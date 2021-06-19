@@ -3,38 +3,17 @@
     <div class="header">
       <h2>{{title}}</h2>
     </div>
-    <div class="subcard">
-      <template v-if="isHobbitCreated">
-          <h1>
-            <router-link :to="`/hobbits/${hobbit.id}`">{{
-              hobbit.name
-            }}</router-link>
-          </h1>
-          <div class="by">by {{ hobbit.user.username }}</div>
-          <div>
-            {{ hobbit.description }}
-          </div>
-          <div>
-            <img :src="hobbit.image" v-if="hobbit.image" />
-          </div>
-      </template >
-      <template v-if="isRecordCreated">
-          <h1>
-            <router-link :to="`/hobbits/${hobbit.id}`">{{
-              record.value
-            }}</router-link>
-          </h1>
-          <div class="by">
-            <router-link :to="`/hobbits/${hobbit.id}`">"{{
-              hobbit.name
-            }}"</router-link>
-            by {{ hobbit.user.username }}
-          </div>
-          <div>
-            <img :src="hobbit.image" v-if="hobbit.image" />
-          </div>
-      </template >
-  </div>
+    <template v-if="isHobbitCreated">
+      <SimpleHobbit :hobbit="hobbit" />
+    </template >
+    <template v-if="isRecordCreated">
+        <h1>
+          <router-link :to="`/hobbits/${hobbit.id}`">{{
+            record.value
+          }}</router-link>
+        </h1>
+      <SimpleHobbit :hobbit="hobbit" />
+    </template>
   </div>
 </template>
 
@@ -42,9 +21,13 @@
 import { defineComponent, PropType } from 'vue'
 import { FeedEvent, FeedEventTypus } from '@/store/modules/feed'
 import { Hobbit, NumericRecord, User } from '@/models'
+import SimpleHobbit from '@/components/SimpleHobbit.vue'
 
 export default defineComponent({
   name: 'FeedEvent',
+  components: {
+    SimpleHobbit,
+  },
   props: {
     feedEvent: Object as PropType<FeedEvent>,
   },
@@ -92,22 +75,13 @@ export default defineComponent({
 
   h2 {
     margin: 0;
-    font-size: 14pt;
+    font-size: 1.2em;
   }
-  .subcard {
-    border-radius: 0.5rem;
-    box-shadow: 0px 0px 5px -2px #000000;
-    padding: 1rem;
-    margin: 0.5rem 0.5rem;
-    display: grid;
 
-    h1 {
-      margin: 0;
-      font-size: 16pt;
-    }
-    .by {
-      color: var(--secondary-text);
-    }
+  h1 {
+    margin: 0;
+    font-size: 1.4em;
   }
+
 }
 </style>

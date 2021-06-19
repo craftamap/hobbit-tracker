@@ -33,24 +33,17 @@ export default defineComponent({
   methods: {
     async renderCalHeatMap() {
       return new Promise((resolve) => {
-        const id = Math.floor(Math.random() * 500)
-        console.debug(id, new Date())
-
         const calHeatMap = new CalendarHeatMap()
           .data(this.data)
           .selector(`[data-uid='${this.uid}']`)
           .colorRange(['#e9f6f7', '#218380'])
           .tooltipEnabled(true)
-          .onClick(function(data: any) {
-            console.log('onClick callback. Data:', data)
-          })
         if (this.prefersDark.matches) {
         // replace with better color
           calHeatMap.colorRange(['#333333', '#218380'])
         }
 
         resolve(calHeatMap())
-        console.debug(id, new Date())
       })
     },
   },

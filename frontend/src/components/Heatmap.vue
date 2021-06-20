@@ -53,7 +53,13 @@ export default defineComponent({
 </script>
 
 <style lang="scss">
-[data-uid] text {
-  fill: var(--primary-text);
+
+[data-uid] {
+  aspect-ratio: 5;
+
+  text {
+    fill: var(--primary-text);
+  }
 }
+
 </style>

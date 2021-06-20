@@ -2,6 +2,7 @@
   <div>
     <div id="nav">
       <router-link to="/">Home</router-link> |
+      <router-link to="/feed">Feed</router-link> |
       <template v-if="isAuthenticated">
         <router-link to="/profile/me">Profile</router-link> |
         <a href="/auth/logout">Logout</a>

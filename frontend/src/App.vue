@@ -101,7 +101,7 @@ body {
 #nav {
   padding: 30px;
 
-  a {
+  a, a:link,:hover,a:active,a:visited {
     font-weight: bold;
     color: var(--primary-text);
 
@@ -113,7 +113,7 @@ body {
 
 a {
   text-decoration: none;
-  &:visited {
+  &:link,&:hover,&:active,&:visited {
     color: inherit;
   }
 }

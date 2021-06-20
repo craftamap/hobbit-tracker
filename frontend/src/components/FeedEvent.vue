@@ -12,6 +12,9 @@
             record.value
           }}</router-link>
         </h1>
+        <blockquote class="comment" v-if="!!record.comment">
+          {{  record.comment  }}
+        </blockquote>
       <SimpleHobbit :hobbit="hobbit" />
     </template>
   </div>
@@ -20,7 +23,7 @@
 <script lang="ts">
 import { defineComponent, PropType } from 'vue'
 import { FeedEvent, FeedEventTypus } from '@/store/modules/feed'
-import { Hobbit, NumericRecord, User } from '@/models'
+import { Hobbit, NumericRecord } from '@/models'
 import SimpleHobbit from '@/components/SimpleHobbit.vue'
 
 export default defineComponent({
@@ -81,6 +84,11 @@ export default defineComponent({
   h1 {
     margin: 0;
     font-size: 1.4em;
+  }
+
+  .comment {
+    padding: 1em;
+    border-left: solid 3px var(--primary);
   }
 
 }

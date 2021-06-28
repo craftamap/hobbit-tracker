@@ -7,6 +7,9 @@
     </div>
     <div class="sidebar">
       <h1>Your hobbits:</h1>
+      <div>
+        <span class="icon-entry" @click="navigateAddHobbit"><PlusIcon class="w-24 h-24"/><span>Add Hobbit... </span></span>
+      </div>
       <SimpleHobbit  v-for="hobbit in hobbitsOfUser" :key="hobbit.id" :hobbit="hobbit"/>
     </div>
     <div class="events">
@@ -25,6 +28,7 @@ import { FeedState } from '../store/modules/feed'
 import FeedEvent from '@/components/FeedEvent.vue'
 import SimpleHobbit from '@/components/SimpleHobbit.vue'
 import { Hobbit } from '@/models'
+import { PlusIcon } from '@heroicons/vue/outline'
 
 const { mapState, mapActions } = createNamespacedHelpers('feed')
 
@@ -33,6 +37,7 @@ export default defineComponent({
   components: {
     FeedEvent,
     SimpleHobbit,
+    PlusIcon,
   },
   created() {
     this.fetchFeed()
@@ -61,6 +66,9 @@ export default defineComponent({
     }),
     fetchHobbitsByUser() {
       this.$store.dispatch('fetchHobbitsByUser', { userId: this.userId })
+    },
+    navigateAddHobbit() {
+      this.$router.push('/hobbits/add')
     },
   },
 })
@@ -108,5 +116,10 @@ export default defineComponent({
 }
 .events {
   grid-area: events;
+}
+.icon-entry {
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
 }
 </style>

@@ -68,6 +68,67 @@ func GetOthersUserInfo() http.HandlerFunc {
 	}
 }
 
+func PutFollowForUser() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		db := requestcontext.DB(r)
+		log := requestcontext.Log(r)
+
+		urlVariables := mux.Vars(r)
+		otherUserStrId, ok := urlVariables["id"]
+		if !ok {
+			log.Error("No user id found!")
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+
+		otherUserID, err := strconv.ParseUint(otherUserStrId, 10, 64)
+		if err != nil {
+			log.Error("user id is not numeric")
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+		// check if other user even exists
+
+		otherUser := models.User{
+			ID: uint(otherUserID),
+		}
+
+		if err := db.Where(&otherUser).First(&otherUser).Error; err != nil {
+			log.Error(err)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
+		authDetails := r.Context().Value(authtocontext.AuthDetailsContextKey).(authtocontext.AuthDetails)
+		thisUserID := authDetails.UserID
+
+		thisUser := models.User{
+			ID: thisUserID,
+		}
+		if err := db.Preload("Follows").Where(&thisUser).First(&thisUser).Error; err != nil {
+			log.Error(err)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		log.Infof("%+v", thisUser)
+
+		// check if we already follow the other user
+		for _, follow := range thisUser.Follows {
+			if follow.ID == uint(otherUserID) {
+				log.Errorf("User already follows user %d", otherUserID)
+				w.WriteHeader(http.StatusInternalServerError)
+				return
+			}
+		}
+
+		if err := db.Model(&thisUser).Association("Follows").Append(&otherUser); err != nil {
+			log.Error(err)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+	}
+}
+
 func GetOthersHobbits() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		db := requestcontext.DB(r)

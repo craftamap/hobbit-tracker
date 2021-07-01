@@ -25,5 +25,6 @@ func RegisterRoutes(profile *mux.Router) {
 
 	profileOthers := profile.PathPrefix("/{id:[0-9]+}").Subrouter()
 	profileOthers.HandleFunc("/", GetOthersUserInfo()).Methods(http.MethodGet)
+	profileOthers.HandleFunc("/follow", PutFollowForUser()).Methods(http.MethodPut)
 	profileOthers.HandleFunc("/hobbits", GetOthersHobbits()).Methods(http.MethodGet)
 }

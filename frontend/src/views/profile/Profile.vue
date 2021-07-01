@@ -14,6 +14,10 @@
       <div v-if="isMe" class="text-align-right">
         <CogIcon class="h-24 cursor-pointer" @click="navigateToAppPassword" />
       </div>
+      <div v-if="!isMe" class="text-align-right">
+        <UserAddIcon v-if="!follows" class="h-24 cursor-pointer" @click="follow" />
+        <UserRemoveIcon v-if="follows" class="h-24 cursor-pointer" @click="unfollow" />
+      </div>
       <div>Hobbits:</div>
       <SimpleHobbit v-for="hobbit in hobbitsOfUser" :key='hobbit.id' :hobbit="hobbit" :withHeatmap=true />
     </div>
@@ -23,23 +27,29 @@
 <script lang="ts">
 import { defineComponent } from 'vue'
 
-import { CogIcon } from '@heroicons/vue/outline'
+import { CogIcon, UserAddIcon, UserRemoveIcon } from '@heroicons/vue/outline'
 
 import { Hobbit, User } from '@/models/'
 import SimpleHobbit from '@/components/SimpleHobbit.vue'
 import { createNamespacedHelpers } from 'vuex'
 
-const { mapActions, mapGetters } = createNamespacedHelpers('users')
+const { mapActions: mapUsersActions, mapGetters: mapUsersGetters } = createNamespacedHelpers('users')
+const { mapActions: mapProfileActions, mapGetters: mapProfileGetters } = createNamespacedHelpers('profile')
 
 export default defineComponent({
   name: 'Profile',
   components: {
     SimpleHobbit,
     CogIcon,
+    UserAddIcon,
+    UserRemoveIcon,
   },
   created() {
     this.dispatchFetchHobbitsByUser()
     this.fetchUser({ id: this.userId })
+    if (!this.isMe) {
+      this.fetchFollow()
+    }
   },
   watch: {
     $route() {
@@ -48,10 +58,11 @@ export default defineComponent({
     },
   },
   computed: {
+    ...mapUsersGetters(['getUserById']),
+    ...mapProfileGetters(['followsUser']),
     isMe(): boolean {
       return !this.$route.params.id
     },
-    ...mapGetters(['getUserById']),
     user(): User | undefined {
       console.log(this.userId)
       return this.getUserById(this.userId)
@@ -66,16 +77,33 @@ export default defineComponent({
       console.log('hobbitsOfUser')
       return this.$store.getters.getHobbitsByUser(this.userId)
     },
+    follows(): boolean {
+      return this.followsUser(this.userId)
+    },
   },
   methods: {
-    ...mapActions({
+    ...mapUsersActions({
       fetchUser: 'fetchUser',
+    }),
+    ...mapProfileActions({
+      _fetchFollow: 'fetchFollow',
+      followUser: 'followUser',
+      unfollowUser: 'unfollowUser',
     }),
     dispatchFetchHobbitsByUser() {
       this.$store.dispatch('fetchHobbitsByUser', { userId: this.userId })
     },
     navigateToAppPassword() {
       this.$router.push('/profile/me/apppassword')
+    },
+    fetchFollow() {
+      this._fetchFollow({ id: this.userId })
+    },
+    follow() {
+      this.followUser({ id: this.userId })
+    },
+    unfollow() {
+      this.unfollowUser({ id: this.userId })
     },
   },
 })

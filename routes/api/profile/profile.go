@@ -67,7 +67,115 @@ func GetOthersUserInfo() http.HandlerFunc {
 		}
 	}
 }
+func GetFollowForUser() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		db := requestcontext.DB(r)
+		log := requestcontext.Log(r)
 
+		urlVariables := mux.Vars(r)
+		otherUserStrId, ok := urlVariables["id"]
+		if !ok {
+			log.Error("No user id found!")
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+
+		otherUserID, err := strconv.ParseUint(otherUserStrId, 10, 64)
+		if err != nil {
+			log.Error("user id is not numeric")
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+		// check if other user even exists
+
+		otherUser := models.User{
+			ID: uint(otherUserID),
+		}
+
+		if err := db.Where(&otherUser).First(&otherUser).Error; err != nil {
+			log.Error(err)
+			w.WriteHeader(http.StatusNotFound)
+			return
+		}
+
+		authDetails := r.Context().Value(authtocontext.AuthDetailsContextKey).(authtocontext.AuthDetails)
+		thisUserID := authDetails.UserID
+
+		thisUser := models.User{
+			ID: thisUserID,
+		}
+		if err := db.Preload("Follows").Where(&thisUser).First(&thisUser).Error; err != nil {
+			log.Error(err)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		log.Infof("%+v", thisUser)
+
+		count := db.Model(&thisUser).Where(&otherUser).Association("Follows").Count()
+
+		follows := count > 0
+
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"follows": follows,
+			"user":    otherUser,
+		})
+
+	}
+}
+
+func DeleteFollowForUser() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		db := requestcontext.DB(r)
+		log := requestcontext.Log(r)
+
+		urlVariables := mux.Vars(r)
+		otherUserStrId, ok := urlVariables["id"]
+		if !ok {
+			log.Error("No user id found!")
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+
+		otherUserID, err := strconv.ParseUint(otherUserStrId, 10, 64)
+		if err != nil {
+			log.Error("user id is not numeric")
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+		// check if other user even exists
+
+		otherUser := models.User{
+			ID: uint(otherUserID),
+		}
+
+		if err := db.Where(&otherUser).First(&otherUser).Error; err != nil {
+			log.Error(err)
+			w.WriteHeader(http.StatusNotFound)
+			return
+		}
+
+		authDetails := r.Context().Value(authtocontext.AuthDetailsContextKey).(authtocontext.AuthDetails)
+		thisUserID := authDetails.UserID
+
+		thisUser := models.User{
+			ID: thisUserID,
+		}
+		if err := db.Preload("Follows").Where(&thisUser).First(&thisUser).Error; err != nil {
+			log.Error(err)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		log.Infof("%+v", thisUser)
+
+		if err := db.Model(&thisUser).Association("Follows").Delete(&otherUser); err != nil {
+			log.Error(err)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
+		json.NewEncoder(w).Encode(otherUser)
+	}
+}
 func PutFollowForUser() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		db := requestcontext.DB(r)
@@ -126,6 +234,8 @@ func PutFollowForUser() http.HandlerFunc {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
+
+		json.NewEncoder(w).Encode(otherUser)
 	}
 }
 

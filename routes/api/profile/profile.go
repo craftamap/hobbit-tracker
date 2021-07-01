@@ -37,11 +37,11 @@ func GetOthersUserInfo() http.HandlerFunc {
 		}
 
 		// If userId is the userId of current user, redirect to /me
-		authDetails := r.Context().Value(authtocontext.AuthDetailsContextKey).(authtocontext.AuthDetails)
-		if authDetails.Authenticated && authDetails.UserID == uint(otherUserID) {
-			http.Redirect(w, r, "../me", http.StatusTemporaryRedirect)
-			return
-		}
+		//	authDetails := r.Context().Value(authtocontext.AuthDetailsContextKey).(authtocontext.AuthDetails)
+		//	if authDetails.Authenticated && authDetails.UserID == uint(otherUserID) {
+		//		http.Redirect(w, r, "../me", http.StatusTemporaryRedirect)
+		//		return
+		//	}
 
 		otherUser := models.User{}
 		if err = db.Where(models.User{ID: uint(otherUserID)}).First(&otherUser).Error; err != nil {
@@ -89,15 +89,15 @@ func GetOthersHobbits() http.HandlerFunc {
 		}
 
 		// If userId is the userId of current user, redirect to /me
-		authDetails := r.Context().Value(authtocontext.AuthDetailsContextKey).(authtocontext.AuthDetails)
-		if authDetails.Authenticated && authDetails.UserID == uint(otherUserID) {
-			http.Redirect(w, r, "../me/hobbits", http.StatusTemporaryRedirect)
-			return
-		}
+		// authDetails := r.Context().Value(authtocontext.AuthDetailsContextKey).(authtocontext.AuthDetails)
+		// if authDetails.Authenticated && authDetails.UserID == uint(otherUserID) {
+		// 	http.Redirect(w, r, "../me/hobbits", http.StatusTemporaryRedirect)
+		// 	return
+		// }
 
 		hobbits := []models.Hobbit{}
 
-		err = db.Where(&models.Hobbit{UserID: uint(otherUserID)}).Find(&hobbits).Error
+		err = db.Joins("User").Where(&models.Hobbit{UserID: uint(otherUserID)}).Find(&hobbits).Error
 		if err != nil {
 			log.Error(err)
 			w.WriteHeader(http.StatusInternalServerError)

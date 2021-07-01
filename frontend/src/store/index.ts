@@ -2,6 +2,7 @@ import { createStore } from 'vuex'
 import { Hobbit, NumericRecord } from '../models/index'
 import profile from './modules/profile'
 import feed from './modules/feed'
+import users from './modules/users'
 
 export interface State {
   hobbits: {
@@ -20,6 +21,7 @@ export const store = createStore<State>({
   modules: {
     profile: profile,
     feed: feed,
+    users: users,
   },
   state: {
     hobbits: {
@@ -56,16 +58,13 @@ export const store = createStore<State>({
   },
   mutations: {
     setAuth(state, payload) {
-      console.log(payload)
       state.auth = payload
-      console.log(state)
     },
     setInitialLoaded(state, { load }) {
       state.hobbits.initialLoaded = load
     },
     setHobbits(state, hobbits: Hobbit[]) {
       state.hobbits.hobbits = Object.assign({}, state.hobbits.hobbits, ...hobbits.map((x: Hobbit) => ({ [x.id]: Object.assign({}, state.hobbits.hobbits[x.id], x) })))
-      console.log(state)
     },
     setHobbit(state, hobbit: Hobbit) {
       state.hobbits.hobbits[hobbit.id] = Object.assign({}, state.hobbits.hobbits[hobbit.id], hobbit)
@@ -73,13 +72,10 @@ export const store = createStore<State>({
     setRecordsForHobbit(state, { hobbitId, records }: {hobbitId: number; records: NumericRecord[]}) {
       const selectedHobbit = state.hobbits.hobbits[hobbitId]
       selectedHobbit.records = records
-      console.log(state)
     },
     setRecordsForHeatmapForHobbit(state, { hobbitId, records }: {hobbitId: number; records: NumericRecord[]}) {
       const selectedHobbit = state.hobbits.hobbits[hobbitId]
-      console.log('selectedHobbit', selectedHobbit.id)
       selectedHobbit.heatmap = records
-      console.log(state)
     },
     deleteRecordForHobbit(state, { hobbitId, recordId }: {hobbitId: number; recordId: number}) {
       const selectedHobbit = state.hobbits.hobbits[hobbitId]
@@ -93,9 +89,10 @@ export const store = createStore<State>({
   },
   actions: {
     async fetchHobbitsByUser({ commit }, { userId }) {
-      // TODO: Add endpoint for this
-      console.log(userId)
-      await fetch('/api/profile/me/hobbits/')
+      if (!userId) {
+        userId = 'me'
+      }
+      await fetch(`/api/profile/${userId}/hobbits/`)
         .then(res => {
           return res.json()
         }).then(json => {
@@ -136,7 +133,6 @@ export const store = createStore<State>({
         })
     },
     async fetchRecords({ commit }, payload) {
-      console.log('fetchRecords')
       return fetch(`/api/hobbits/${payload}/records/`)
         .then(res => {
           return res.json()

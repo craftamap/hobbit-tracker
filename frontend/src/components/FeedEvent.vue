@@ -1,12 +1,17 @@
 <template>
   <div class="card">
-    <div class="header">
-      <h2>{{title}}</h2>
-    </div>
     <template v-if="isHobbitCreated">
+    <div class="header">
+      <router-link :to="`/profile/${hobbit.user.id}`">{{hobbit.user.username}}</router-link>has created a new Hobbit.
+    </div>
       <SimpleHobbit :hobbit="hobbit" />
     </template >
     <template v-if="isRecordCreated">
+    <div class="header">
+      <router-link :to="`/profile/${record?.hobbit.user.id}`">{{record?.hobbit?.user?.username}}</router-link>
+      has created a new entry in
+      <router-link :to="`/hobbits/${record?.hobbit.user.id}`">"{{record?.hobbit?.name}}".</router-link>
+    </div>
         <h1>
           <router-link :to="`/hobbits/${hobbit.id}`">{{
             record.value
@@ -15,7 +20,6 @@
         <blockquote class="comment" v-if="!!record.comment">
           {{  record.comment  }}
         </blockquote>
-      <SimpleHobbit :hobbit="hobbit" />
     </template>
   </div>
 </template>
@@ -35,16 +39,6 @@ export default defineComponent({
     feedEvent: Object as PropType<FeedEvent>,
   },
   computed: {
-    title(): string {
-      if (this.feedEvent?.FeedEventTypus === FeedEventTypus.HobbitCreated) {
-        const hobbit = this.feedEvent.Payload as Hobbit
-        return `${hobbit.user.username} has created a new Hobbit.`
-      } else if (this.feedEvent?.FeedEventTypus === FeedEventTypus.RecordCreated) {
-        const record = this.feedEvent.Payload as NumericRecord
-        return `${record?.hobbit?.user?.username} has created a new entry in "${record?.hobbit?.name}."`
-      }
-      return ''
-    },
     isHobbitCreated(): boolean {
       return this.feedEvent?.FeedEventTypus === FeedEventTypus.HobbitCreated
     },

@@ -5,13 +5,13 @@ import Feed from '../views/Feed.vue'
 const routes: Array<RouteRecordRaw> = [
   {
     path: '/',
-    name: 'Overview',
-    component: Overview,
-  },
-  {
-    path: '/feed',
     name: 'Feed',
     component: Feed,
+  },
+  {
+    path: '/overview',
+    name: 'Overview',
+    component: Overview,
   },
   {
     path: '/login',

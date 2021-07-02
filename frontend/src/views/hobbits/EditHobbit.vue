@@ -62,7 +62,7 @@ export default defineComponent({
   },
   computed: {
     id(): number {
-      return Number(this.$route.params.id)
+      return Number(this.$route.params.hobbitId)
     },
     hobbit(): Hobbit {
       return this.$store.getters.getHobbitById(this.id)

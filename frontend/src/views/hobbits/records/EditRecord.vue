@@ -58,7 +58,7 @@ export default defineComponent({
   },
   computed: {
     id(): number {
-      return Number(this.$route.params.id)
+      return Number(this.$route.params.hobbitId)
     },
     recordId(): number {
       return Number(this.$route.params.recordId)

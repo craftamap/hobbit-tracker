@@ -47,17 +47,17 @@
           <table>
             <thead>
               <tr>
-                <td>date</td>
                 <td>value</td>
                 <td>comment</td>
+                <td>date</td>
                 <td name="actions"></td>
               </tr>
             </thead>
             <tbody>
               <tr v-for="record in (hobbit.records || []).slice().reverse()" :key="record.id">
-                <td>{{formatDate(record.timestamp)}}</td>
                 <td>{{record.value}}</td>
                 <td>{{record.comment}}</td>
+                <td>{{formatDate(record.timestamp)}}</td>
                 <td class="table-actions">
                   <Pencil class="h-20 cursor-pointer" v-on:click="editRecord($event, record)" tabindex="0" />
                   <Trash class="h-20 cursor-pointer"  v-on:click="openDeleteRecordDialog($event, record)" tabindex="0" />
@@ -107,7 +107,7 @@ export default defineComponent({
   },
   computed: {
     id(): number {
-      return Number(this.$route.params.id)
+      return Number(this.$route.params.hobbitId)
     },
     hobbit(): Hobbit {
       return this.$store.getters.getHobbitById(Number(this.id))

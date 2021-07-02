@@ -61,17 +61,17 @@ export default defineComponent({
     ...mapUsersGetters(['getUserById']),
     ...mapProfileGetters(['followsUser']),
     isMe(): boolean {
-      return !this.$route.params.id
+      return !this.$route.params.profileId
     },
     user(): User | undefined {
       console.log(this.userId)
       return this.getUserById(this.userId)
     },
     userId(): number {
-      if (!this.$route.params.id) {
+      if (!this.$route.params.profileId) {
         return this.$store.state.auth.userId as number
       }
-      return Number(this.$route.params.id)
+      return Number(this.$route.params.profileId)
     },
     hobbitsOfUser(): Hobbit[] {
       console.log('hobbitsOfUser')

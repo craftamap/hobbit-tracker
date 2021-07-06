@@ -5,10 +5,10 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
+import { defineComponent } from 'vue'
 
 export default defineComponent({
-  name: "DialogWrapper",
+  name: 'DialogWrapper',
 })
 </script>
 

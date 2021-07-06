@@ -14,7 +14,7 @@
     </div>
     <div class="events">
       <h1>Your personal feed:</h1>
-      <div v-for="feedEvent, idx in feedEvents" :key="idx">
+      <div v-for="(feedEvent, idx) in feedEvents" v-bind:key="idx">
         <FeedEvent :feedEvent="feedEvent" />
       </div>
     </div>

@@ -4,6 +4,14 @@
   </div>
 </template>
 
+<script lang="ts">
+import { defineComponent } from "vue";
+
+export default defineComponent({
+  name: "DialogWrapper",
+})
+</script>
+
 <style lang="scss" scoped>
 .dialog-wrapper {
   position: fixed;

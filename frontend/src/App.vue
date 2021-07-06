@@ -35,7 +35,7 @@ export default defineComponent({
     DialogWrapper,
   },
   computed: {
-    isAuthenticated() {
+    isAuthenticated(): boolean {
       return this.$store.state.auth.authenticated
     },
   },

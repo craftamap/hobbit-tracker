@@ -3,22 +3,19 @@ import { Hobbit, NumericRecord } from '../models/index'
 import profile from './modules/profile'
 import feed from './modules/feed'
 import users from './modules/users'
+import auth from './modules/auth'
 
 export interface State {
   hobbits: {
     hobbits: {[key: number]: Hobbit};
     initialLoaded: boolean;
   };
-  auth: {
-    authenticated: boolean;
-    username?: string;
-    userId?: number;
-  };
   socket?: WebSocket;
 }
 
 export const store = createStore<State>({
   modules: {
+    auth: auth,
     profile: profile,
     feed: feed,
     users: users,
@@ -27,11 +24,6 @@ export const store = createStore<State>({
     hobbits: {
       hobbits: {},
       initialLoaded: false,
-    },
-    auth: {
-      authenticated: false,
-      username: undefined,
-      userId: undefined,
     },
     socket: undefined,
   },
@@ -57,9 +49,6 @@ export const store = createStore<State>({
     },
   },
   mutations: {
-    setAuth(state, payload) {
-      state.auth = payload
-    },
     setInitialLoaded(state, { load }) {
       state.hobbits.initialLoaded = load
     },
@@ -114,14 +103,6 @@ export const store = createStore<State>({
           return res.json()
         }).then(json => {
           commit('setHobbit', json)
-        })
-    },
-    async fetchAuth({ commit }) {
-      await fetch('/api/auth')
-        .then(res => {
-          return res.json()
-        }).then(json => {
-          commit('setAuth', json)
         })
     },
     async fetchHeatmapData({ commit }, payload) {

@@ -32,9 +32,11 @@ import { CogIcon, UserAddIcon, UserRemoveIcon } from '@heroicons/vue/outline'
 import { Hobbit, User } from '@/models/'
 import SimpleHobbit from '@/components/SimpleHobbit.vue'
 import { createNamespacedHelpers } from 'vuex'
+import { AuthenticationState } from '@/store/modules/auth'
 
 const { mapActions: mapUsersActions, mapGetters: mapUsersGetters } = createNamespacedHelpers('users')
 const { mapActions: mapProfileActions, mapGetters: mapProfileGetters } = createNamespacedHelpers('profile')
+const { mapState: mapAuthState } = createNamespacedHelpers('auth')
 
 export default defineComponent({
   name: 'Profile',
@@ -45,21 +47,22 @@ export default defineComponent({
     UserRemoveIcon,
   },
   created() {
-    this.dispatchFetchHobbitsByUser()
-    this.fetchUser({ id: this.userId })
-    if (!this.isMe) {
-      this.fetchFollow()
-    }
+    this.defferedInit()
   },
   watch: {
     $route() {
-      this.dispatchFetchHobbitsByUser()
-      this.fetchUser({ id: this.userId })
+      this.defferedInit()
+    },
+    userId() {
+      this.defferedInit()
     },
   },
   computed: {
     ...mapUsersGetters(['getUserById']),
     ...mapProfileGetters(['followsUser']),
+    ...mapAuthState({
+      myUserId: state => (state as AuthenticationState).userId,
+    }),
     isMe(): boolean {
       return !this.$route.params.profileId
     },
@@ -69,7 +72,7 @@ export default defineComponent({
     },
     userId(): number {
       if (!this.$route.params.profileId) {
-        return this.$store.state.auth.userId as number
+        return this.myUserId as number
       }
       return Number(this.$route.params.profileId)
     },
@@ -90,7 +93,7 @@ export default defineComponent({
       followUser: 'followUser',
       unfollowUser: 'unfollowUser',
     }),
-    dispatchFetchHobbitsByUser() {
+    fetchHobbits() {
       this.$store.dispatch('fetchHobbitsByUser', { userId: this.userId })
     },
     navigateToAppPassword() {
@@ -104,6 +107,12 @@ export default defineComponent({
     },
     unfollow() {
       this.unfollowUser({ id: this.userId })
+    },
+    defferedInit() {
+      if (this.userId) {
+        this.fetchUser({ id: this.userId })
+        this.fetchHobbits()
+      }
     },
   },
 })

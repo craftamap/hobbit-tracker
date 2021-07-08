@@ -13,6 +13,10 @@ import { defineComponent } from 'vue'
 import SimpleHobbit from '../components/SimpleHobbit.vue'
 import IconBar from '@/components/IconBar.vue'
 import { Hobbit } from '@/models'
+import { createNamespacedHelpers } from 'vuex'
+import { AuthenticationState } from '@/store/modules/auth'
+
+const { mapState: authMapState } = createNamespacedHelpers('auth')
 
 export default defineComponent({
   name: 'Overview',
@@ -21,12 +25,10 @@ export default defineComponent({
     this.dispatchFetchHobbits()
   },
   computed: {
-    username(): string {
-      return this.$store.state.auth.username as string
-    },
-    isAuthenticated() {
-      return this.$store.state.auth.authenticated
-    },
+    ...authMapState({
+      isAuthenticated: state => (state as AuthenticationState).authenticated,
+      username: state => (state as AuthenticationState).username,
+    }),
     hobbits(): Hobbit[] {
       return this.$store.getters.getHobbits()
     },

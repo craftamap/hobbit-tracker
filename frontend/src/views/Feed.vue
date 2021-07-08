@@ -27,10 +27,12 @@ import { createNamespacedHelpers } from 'vuex'
 import { FeedState } from '../store/modules/feed'
 import FeedEvent from '@/components/FeedEvent.vue'
 import SimpleHobbit from '@/components/SimpleHobbit.vue'
-import { Hobbit } from '@/models'
 import { PlusIcon } from '@heroicons/vue/outline'
+import { AuthenticationState } from '@/store/modules/auth'
+import { Hobbit } from '@/models'
 
-const { mapState, mapActions } = createNamespacedHelpers('feed')
+const { mapState: feedMapState, mapActions: feedMapActions } = createNamespacedHelpers('feed')
+const { mapState: authMapState } = createNamespacedHelpers('auth')
 
 export default defineComponent({
   name: 'Feed',
@@ -44,24 +46,20 @@ export default defineComponent({
     this.fetchHobbitsByUser()
   },
   computed: {
-    ...mapState({
+    ...feedMapState({
       feedEvents: state => (state as FeedState).feedEvents,
     }),
-    isAuthenticated(): boolean {
-      return this.$store.state.auth.authenticated
-    },
-    username(): string {
-      return this.$store.state.auth.username as string
-    },
-    userId(): number {
-      return this.$store.state.auth.userId as number
-    },
+    ...authMapState({
+      isAuthenticated: state => (state as AuthenticationState).authenticated,
+      username: state => (state as AuthenticationState).username,
+      userId: state => (state as AuthenticationState).userId,
+    }),
     hobbitsOfUser(): Hobbit[] {
       return this.$store.getters.getHobbitsByUser(this.userId)
     },
   },
   methods: {
-    ...mapActions({
+    ...feedMapActions({
       fetchFeed: 'fetchFeed',
     }),
     fetchHobbitsByUser() {

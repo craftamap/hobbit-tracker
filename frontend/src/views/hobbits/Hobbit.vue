@@ -32,7 +32,7 @@
           </div>
         </div>
         <div>
-          <div class="buttons" v-if="auth.authenticated && auth.userId === hobbit.user.id">
+          <div class="buttons" v-if="isAuthenticated && userId === hobbit.user.id">
             <router-link :to="`/hobbits/${$route.params.id}/records/add`"
               custom
               v-slot="{ navigate }">
@@ -79,8 +79,10 @@ import VButton from '@/components/form/Button.vue'
 import DDialog from '@/components/Dialog.vue'
 import FormWrapper from '@/components/form/FormWrapper.vue'
 import moment from 'moment'
-import { State } from '@/store'
 import { TrashIcon as Trash, PencilIcon as Pencil } from '@heroicons/vue/outline'
+import { createNamespacedHelpers } from 'vuex'
+import { AuthenticationState } from '@/store/modules/auth'
+const { mapState: authMapState } = createNamespacedHelpers('auth')
 
 export default defineComponent({
   name: 'Hobbit',
@@ -112,9 +114,10 @@ export default defineComponent({
     hobbit(): Hobbit {
       return this.$store.getters.getHobbitById(Number(this.id))
     },
-    auth(): State['auth'] {
-      return this.$store.state.auth
-    },
+    ...authMapState({
+      isAuthenticated: state => (state as AuthenticationState).authenticated,
+      userId: state => (state as AuthenticationState).userId,
+    }),
   },
   created() {
     if (!this.hobbit) {

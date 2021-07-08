@@ -1,2 +1,5 @@
 hobbit-tracker
 hobbits.sqlite
+
+coverage.out
+profile.cov

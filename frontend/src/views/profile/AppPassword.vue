@@ -41,7 +41,7 @@
         Add App Password...
       </div>
     </div>
-    <AppPasswordItem v-for="appPassword in appPasswords" :key="appPassword.ID" :appPassword="appPassword" @delete="openDeleteDialog($event)" />
+    <AppPasswordItem v-for="appPassword in appPasswords" :key="`appPassword-${appPassword.id}`" :appPassword="appPassword" @delete="openDeleteDialog($event)" />
   </div>
 </template>
 

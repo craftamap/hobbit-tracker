@@ -1,5 +1,7 @@
 package models
 
+import "time"
+
 type Hobbit struct {
 	ID          uint            `gorm:"primaryKey,autoIncrement" json:"id"`
 	UserID      uint            `json:"-"`
@@ -8,4 +10,6 @@ type Hobbit struct {
 	Image       string          `json:"image,omitempty"`
 	Description string          `json:"description,omitempty"`
 	Records     []NumericRecord `gorm:"foreignKey:HobbitID" json:"records,omitempty"`
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
 }

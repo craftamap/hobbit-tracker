@@ -8,10 +8,11 @@ import (
 )
 
 type User struct {
-	ID       uint   `gorm:"primaryKey,autoIncrement" json:"id,omitempty"`
-	Username string `json:"username,omitempty"`
-	Secret   string `json:"-"`
-	Image    string `json:"image,omitempty"`
+	ID       uint    `gorm:"primaryKey,autoIncrement" json:"id,omitempty"`
+	Username string  `json:"username,omitempty"`
+	Secret   string  `json:"-"`
+	Image    string  `json:"image,omitempty"`
+	Follows  []*User `json:"-" gorm:"many2many:user_follows;"`
 }
 
 type AppPassword struct {

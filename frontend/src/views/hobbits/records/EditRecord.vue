@@ -32,7 +32,7 @@
               <textarea name="comment" id="comment" rows="5" v-model="data.comment"></textarea>
             </div>
             <div>
-              <Button value="Edit record" @click="dispatchPutRecord()" type="primary" :loading="submitting"/>
+              <Button value="Edit record" @click="putRecord()" type="primary" :loading="submitting"/>
               <Button value="Go back" @click="goBack()"/>
             </div>
           </form>
@@ -49,6 +49,9 @@ import { Hobbit, NumericRecord } from '@/models'
 import Loading from '@/components/Loading.vue'
 import moment from 'moment'
 import Button from '@/components/form/Button.vue'
+import { createNamespacedHelpers } from 'vuex'
+
+const { mapActions: mapHobbitsActions, mapGetters: mapHobbitsGetters } = createNamespacedHelpers('hobbits')
 
 export default defineComponent({
   components: {
@@ -57,25 +60,29 @@ export default defineComponent({
     FormWrapper,
   },
   computed: {
+    ...mapHobbitsGetters({
+      hobbitById: 'getHobbitById',
+      recordById: 'getRecordById',
+    }),
     id(): number {
-      return Number(this.$route.params.id)
+      return Number(this.$route.params.hobbitId)
     },
     recordId(): number {
       return Number(this.$route.params.recordId)
     },
     hobbit(): Hobbit {
-      return this.$store.getters.getHobbitById(this.id)
+      return this.hobbitById(this.id)
     },
     record(): NumericRecord {
-      return this.$store.getters.getRecordById(this.id, this.recordId)
+      return this.recordById(this.id, this.recordId)
     },
   },
   async created() {
     if (!this.hobbit) {
-      await this.dispatchFetchHobbit()
+      await this.fetchHobbit()
     }
     if (!this.record) {
-      await this.dispatchFetchRecords()
+      await this.fetchRecords()
     }
 
     console.log(this.data, this.record)
@@ -93,12 +100,18 @@ export default defineComponent({
     }
   },
   methods: {
+    ...mapHobbitsActions({
+      _putRecord: 'putRecord',
+      _fetchHobbit: 'fetchHobbit',
+      _fetchRecords: 'fetchRecords',
+      fetchHeatmapData: 'fetchHeatmapData',
+    }),
     parseAndFormatDate(date: string) {
       return moment(date).format('YYYY-MM-DDTHH:mm')
     },
-    dispatchPutRecord() {
+    putRecord() {
       this.submitting = true
-      this.$store.dispatch('putRecord', {
+      this._putRecord({
         id: this.id,
         recordId: this.recordId,
         timestamp: moment(this.data.timestamp).toDate(),
@@ -106,18 +119,18 @@ export default defineComponent({
         comment: this.data.comment,
       }).then(() => {
         return Promise.all([
-          this.$store.dispatch('fetchRecords', this.id),
-          this.$store.dispatch('fetchHeatmapData', this.id),
+          this._fetchRecords(this.id),
+          this.fetchHeatmapData(this.id),
         ])
       }).then(() => {
         this.submitting = false
       })
     },
-    async dispatchFetchHobbit() {
-      return this.$store.dispatch('fetchHobbit', { id: this.id })
+    async fetchHobbit() {
+      return this._fetchHobbit({ id: this.id })
     },
-    async dispatchFetchRecords() {
-      return this.$store.dispatch('fetchRecords', Number(this.id))
+    async fetchRecords() {
+      return this._fetchRecords(Number(this.id))
     },
     goBack() {
       this.$router.push('/hobbits/' + this.id)

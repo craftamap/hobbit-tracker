@@ -32,13 +32,13 @@
           </div>
         </div>
         <div>
-          <div class="buttons" v-if="auth.authenticated && auth.userId === hobbit.user.id">
-            <router-link :to="`/hobbits/${$route.params.id}/records/add`"
+          <div class="buttons" v-if="isAuthenticated && userId === hobbit.user.id">
+            <router-link :to="`/hobbits/${id}/records/add`"
               custom
               v-slot="{ navigate }">
               <VButton value="Add Record" type="primary" @click="navigate" />
             </router-link>
-            <router-link :to="`/hobbits/${$route.params.id}/edit`"
+            <router-link :to="`/hobbits/${id}/edit`"
               custom
               v-slot="{ navigate }">
               <VButton value="Edit" @click="navigate" />
@@ -47,17 +47,17 @@
           <table>
             <thead>
               <tr>
-                <td>date</td>
                 <td>value</td>
                 <td>comment</td>
+                <td>date</td>
                 <td name="actions"></td>
               </tr>
             </thead>
             <tbody>
-              <tr v-for="record in (hobbit.records || []).slice().reverse()" :key="record.id">
-                <td>{{formatDate(record.timestamp)}}</td>
+              <tr v-for="record in (hobbit.records || []).slice().reverse()" :key="`record-${record.id}`">
                 <td>{{record.value}}</td>
                 <td>{{record.comment}}</td>
+                <td>{{formatDate(record.timestamp)}}</td>
                 <td class="table-actions">
                   <Pencil class="h-20 cursor-pointer" v-on:click="editRecord($event, record)" tabindex="0" />
                   <Trash class="h-20 cursor-pointer"  v-on:click="openDeleteRecordDialog($event, record)" tabindex="0" />
@@ -79,8 +79,12 @@ import VButton from '@/components/form/Button.vue'
 import DDialog from '@/components/Dialog.vue'
 import FormWrapper from '@/components/form/FormWrapper.vue'
 import moment from 'moment'
-import { State } from '@/store'
 import { TrashIcon as Trash, PencilIcon as Pencil } from '@heroicons/vue/outline'
+import { createNamespacedHelpers } from 'vuex'
+import { AuthenticationState } from '@/store/modules/auth'
+
+const { mapState: authMapState } = createNamespacedHelpers('auth')
+const { mapActions: mapHobbitsActions, mapGetters: mapHobbitsGetters } = createNamespacedHelpers('hobbits')
 
 export default defineComponent({
   name: 'Hobbit',
@@ -107,30 +111,40 @@ export default defineComponent({
   },
   computed: {
     id(): number {
-      return Number(this.$route.params.id)
+      return Number(this.$route.params.hobbitId)
     },
+    ...mapHobbitsGetters({
+      hobbitById: 'getHobbitById',
+    }),
     hobbit(): Hobbit {
-      return this.$store.getters.getHobbitById(Number(this.id))
+      return this.hobbitById(this.id)
     },
-    auth(): State['auth'] {
-      return this.$store.state.auth
-    },
+    ...authMapState({
+      isAuthenticated: state => (state as AuthenticationState).authenticated,
+      userId: state => (state as AuthenticationState).userId,
+    }),
   },
   created() {
     if (!this.hobbit) {
-      this.dispatchFetchHobbits().then(() => {
-        this.dispatchFetchRecords()
+      this.fetchHobbit().then(() => {
+        this.fetchRecords()
       })
     } else {
-      this.dispatchFetchRecords()
+      this.fetchRecords()
     }
   },
   methods: {
-    dispatchFetchHobbits() {
-      return this.$store.dispatch('fetchHobbit', { id: Number(this.id) })
+    ...mapHobbitsActions({
+      _putRecord: 'putRecord',
+      _fetchRecords: 'fetchRecords',
+      _fetchHobbit: 'fetchHobbit',
+      _deleteRecord: 'deleteRecord',
+    }),
+    fetchHobbit() {
+      return this._fetchHobbit({ id: Number(this.id) })
     },
-    dispatchFetchRecords() {
-      return this.$store.dispatch('fetchRecords', Number(this.id))
+    fetchRecords() {
+      return this._fetchRecords(Number(this.id))
     },
     formatDate(date: string) {
       return moment(date).format('YYYY-MM-DD HH:mm')
@@ -140,7 +154,7 @@ export default defineComponent({
       return this.$router.push(`/hobbits/${this.id}/records/${recordId}/edit`)
     },
     deleteRecord() {
-      return this.$store.dispatch('deleteRecord', {
+      return this._deleteRecord({
         hobbitId: Number(this.id),
         recordId: Number(this.deleteDialog.record?.id),
       })

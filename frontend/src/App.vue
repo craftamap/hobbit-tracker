@@ -2,6 +2,7 @@
   <div>
     <div id="nav">
       <router-link to="/">Home</router-link> |
+      <router-link to="/overview">Overview</router-link> |
       <template v-if="isAuthenticated">
         <router-link to="/profile/me">Profile</router-link> |
         <a href="/auth/logout">Logout</a>
@@ -24,24 +25,28 @@
 import '@fontsource/lato/index.css' /* weight 400 */
 import { defineComponent } from 'vue'
 import DialogWrapper from '@/components/DialogWrapper.vue'
+import { createNamespacedHelpers } from 'vuex'
+import { AuthenticationState } from './store/modules/auth'
+
+const { mapState: authMapState, mapActions: authMapActions } = createNamespacedHelpers('auth')
 
 export default defineComponent({
   created() {
-    this.dispatchFetchAuth()
+    this.fetchAuthenticationDetails()
     this.dispatchCreateSocket()
   },
   components: {
     DialogWrapper,
   },
   computed: {
-    isAuthenticated() {
-      return this.$store.state.auth.authenticated
-    },
+    ...authMapState({
+      isAuthenticated: state => (state as AuthenticationState).authenticated,
+    }),
   },
   methods: {
-    dispatchFetchAuth() {
-      this.$store.dispatch('fetchAuth')
-    },
+    ...authMapActions({
+      fetchAuthenticationDetails: 'fetchAuthenticationDetails',
+    }),
     dispatchCreateSocket() {
       this.$store.dispatch('createWebSocketConnection')
     },
@@ -100,7 +105,7 @@ body {
 #nav {
   padding: 30px;
 
-  a {
+  a, a:link,:hover,a:active,a:visited {
     font-weight: bold;
     color: var(--primary-text);
 
@@ -112,7 +117,7 @@ body {
 
 a {
   text-decoration: none;
-  &:visited {
+  &:link,&:hover,&:active,&:visited {
     color: inherit;
   }
 }

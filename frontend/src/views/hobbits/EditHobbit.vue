@@ -22,7 +22,7 @@
               <input id="image" name="image" type="file" @change="changeImage" />
             </div>
             <div>
-              <Button value="Add Hobbit" @click="dispatchPutHobbit()" type="primary" :loading="submitting"/>
+              <Button value="Add Hobbit" @click="putHobbit()" type="primary" :loading="submitting"/>
               <Button value="Go back" @click="goBack()"/>
             </div>
           </form>
@@ -37,6 +37,9 @@ import { defineComponent } from 'vue'
 import Button from '../../components/form/Button.vue'
 import Loading from '../../components/Loading.vue'
 import FormWrapper from '@/components/form/FormWrapper.vue'
+import { createNamespacedHelpers } from 'vuex'
+
+const { mapActions: mapHobbitsActions, mapGetters: mapHobbitsGetters } = createNamespacedHelpers('hobbits')
 
 export default defineComponent({
   name: 'AddHobbit',
@@ -47,7 +50,7 @@ export default defineComponent({
   },
   created() {
     if (!this.hobbit) {
-      this.$store.dispatch('fetchHobbit', { id: this.id })
+      this._fetchHobbit({ id: this.id })
     }
   },
   data() {
@@ -61,11 +64,14 @@ export default defineComponent({
     }
   },
   computed: {
+    ...mapHobbitsGetters({
+      hobbitById: 'getHobbitById',
+    }),
     id(): number {
-      return Number(this.$route.params.id)
+      return Number(this.$route.params.hobbitId)
     },
     hobbit(): Hobbit {
-      return this.$store.getters.getHobbitById(this.id)
+      return this.hobbitById(this.id)
     },
   },
   watch: {
@@ -82,6 +88,11 @@ export default defineComponent({
     },
   },
   methods: {
+    ...mapHobbitsActions({
+      _putHobbit: 'putHobbit',
+      _fetchRecords: 'fetchRecords',
+      _fetchHobbit: 'fetchHobbit',
+    }),
     goBack() {
       this.$router.push(`/hobbits/${this.id}`)
     },
@@ -107,9 +118,9 @@ export default defineComponent({
       this.form.image = await this.readUploadedFileAsDataURL(firstFile)
       console.log(this.form.image)
     },
-    dispatchPutHobbit() {
+    putHobbit() {
       this.submitting = true
-      this.$store.dispatch('putHobbit', {
+      this._putHobbit({
         id: this.id,
         name: this.form.name,
         description: this.form.description,

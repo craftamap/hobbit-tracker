@@ -21,6 +21,7 @@ import (
 	"github.com/wader/gormstore/v2"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
+	gormLogger "gorm.io/gorm/logger"
 )
 
 var (
@@ -85,12 +86,19 @@ func (c *customRecoveryLogger) Println(msgs ...interface{}) {
 
 func main() {
 	var err error
-	db, err = gorm.Open(sqlite.Open("hobbits.sqlite"), &gorm.Config{})
+
+	gormConfig := &gorm.Config{}
+	if flagVerbose {
+		gormConfig.Logger = gormLogger.Default.LogMode(gormLogger.Info)
+	}
+
+	db, err = gorm.Open(sqlite.Open("hobbits.sqlite"), gormConfig)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-
+	log.Info("Migrating DB")
+	// Manual Migration
 	log.Info("AutoMigrating DB")
 	err = db.AutoMigrate(&models.Hobbit{})
 	if err != nil {
@@ -112,7 +120,22 @@ func main() {
 		fmt.Println(err)
 		return
 	}
+
 	log.Info("AutoMigrated DB")
+	log.Info("Checking for manual migrations")
+	{
+		// Migration from v0.2.1 to above
+		records := []models.NumericRecord{}
+		db.Where("created_at IS NULL").Find(&records)
+		if len(records) > 0 {
+			log.Info("Found migration from v0.2.1, performing migration")
+			db.Model(&models.NumericRecord{}).Where("created_at IS NULL").Updates(&models.NumericRecord{CreatedAt: time.Now()})
+
+			db.Model(&models.Hobbit{}).Where("created_at IS NULL").Updates(&models.Hobbit{CreatedAt: time.Now()})
+			log.Info("Found migration from v0.2.1, done")
+		}
+	}
+	log.Info("Migrated DB")
 
 	// key must be 16, 24 or 32 bytes long (AES-128, AES-192 or AES-256)
 	key := []byte("jMcBBEBKAzw89XNb")

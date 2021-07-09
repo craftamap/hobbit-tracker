@@ -16,9 +16,9 @@
         <img :src="hobbit.image" v-if="hobbit.image" />
       </div>
     </div>
-    <div>
-      <Loading v-if="loading" />
-      <Heatmap v-if="!loading" :data="getHeatmapData" class="heatmap" />
+    <div v-if="withHeatmap">
+      <Loading v-if="loadingHeatmapData" />
+      <Heatmap v-if="!loadingHeatmapData" :data="heatmapData" class="heatmap" />
     </div>
   </div>
 </template>
@@ -27,12 +27,18 @@
 import { Hobbit, NumericRecord } from '../models/index'
 import { defineComponent, PropType } from 'vue'
 import Loading from './Loading.vue'
-import moment from 'moment'
 import Heatmap from './Heatmap.vue'
+import { createNamespacedHelpers } from 'vuex'
+
+const { mapState: mapHobbitsState, mapGetters: mapHobbitsGetters, mapActions: mapHobbitsActions } = createNamespacedHelpers('hobbits')
 
 export default defineComponent({
   props: {
     hobbit: Object as PropType<Hobbit>,
+    withHeatmap: {
+      type: Boolean as PropType<boolean>,
+      default: false,
+    },
   },
   components: {
     Loading,
@@ -40,19 +46,19 @@ export default defineComponent({
   },
   data() {
     return {
-      loading: true,
-      calHeatMap: undefined as any,
+      loadingHeatmapData: true,
     }
   },
   created() {
-    console.log('created', this.loading)
-    this.dispatchFetchHeatmapData()
+    if (this.withHeatmap) {
+      this.fetchHeatmapData()
+    }
   },
   computed: {
     getRecords(): NumericRecord[] {
       return (this?.hobbit?.records as NumericRecord[]) || []
     },
-    getHeatmapData(): object[] {
+    heatmapData(): object[] {
       const retVal = (
         (this?.hobbit?.heatmap as NumericRecord[]) || [
           {
@@ -70,15 +76,17 @@ export default defineComponent({
     },
   },
   methods: {
-    dispatchFetchHeatmapData() {
+    ...mapHobbitsActions({
+      _fetchHeatmapData: 'fetchHeatmapData',
+    }),
+    fetchHeatmapData() {
       if (!this.$props.hobbit?.heatmap) {
-        this.$store
-          .dispatch('fetchHeatmapData', this.$props.hobbit?.id)
+        this._fetchHeatmapData(this.$props.hobbit?.id)
           .then(() => {
-            this.$data.loading = false
+            this.$data.loadingHeatmapData = false
           })
       } else {
-        this.$data.loading = false
+        this.$data.loadingHeatmapData = false
       }
     },
   },

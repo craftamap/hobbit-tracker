@@ -14,10 +14,19 @@ func RegisterRoutes(profile *mux.Router) {
 	profileMe := profile.PathPrefix("/me").Subrouter()
 	profileMe.Use(authMiddlewareBuilder.Build)
 	profileMe.Handle("/", apiAuth.BuildHandleAPIGetAuth())
-	profileMe.Handle("/hobbits", http.HandlerFunc(BuildHandleProfileGetHobbits())).Methods("GET")
+	profileMe.HandleFunc("/hobbits", BuildHandleProfileGetHobbits()).Methods("GET")
+	profileMe.HandleFunc("/feed", GetMyFeed()).Methods(http.MethodGet)
+
 	profileMeAppPassword := profileMe.PathPrefix("/apppassword").Subrouter()
 	profileMeAppPassword.Use(authMiddlewareBuilder.Build) //.WithPermitAppPasswordAuth(false).Build)
 	profileMeAppPassword.HandleFunc("/", BuildHandleGetAppPasswords()).Methods("GET")
 	profileMeAppPassword.HandleFunc("/", BuildHandlePostAppPassword()).Methods("POST")
 	profileMeAppPassword.HandleFunc("/{id:[0-9a-zA-Z\\-]+}", BuildHandleDeleteAppPassword()).Methods("DELETE")
+
+	profileOthers := profile.PathPrefix("/{id:[0-9]+}").Subrouter()
+	profileOthers.HandleFunc("/", GetOthersUserInfo()).Methods(http.MethodGet)
+	profileOthers.HandleFunc("/follow", GetFollowForUser()).Methods(http.MethodGet)
+	profileOthers.HandleFunc("/follow", PutFollowForUser()).Methods(http.MethodPut)
+	profileOthers.HandleFunc("/follow", DeleteFollowForUser()).Methods(http.MethodDelete)
+	profileOthers.HandleFunc("/hobbits", GetOthersHobbits()).Methods(http.MethodGet)
 }

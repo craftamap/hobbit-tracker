@@ -4,7 +4,7 @@
       Here there, <span class="username">{{username}}</span>!
     </div>
     <IconBar @reload="reload" />
-    <SimpleHobbit v-for="hobbit in hobbits" :key='hobbit.id' :hobbit="hobbit" />
+    <SimpleHobbit v-for="hobbit in hobbits" :key='`hobbit-${hobbit.id}`' :hobbit="hobbit" :withHeatmap=true  />
   </div>
 </template>
 
@@ -12,7 +12,12 @@
 import { defineComponent } from 'vue'
 import SimpleHobbit from '../components/SimpleHobbit.vue'
 import IconBar from '@/components/IconBar.vue'
-import { Hobbit } from '@/models'
+import { createNamespacedHelpers } from 'vuex'
+import { AuthenticationState } from '@/store/modules/auth'
+import { HobbitsState } from '@/store/modules/hobbits'
+
+const { mapState: mapAuthState } = createNamespacedHelpers('auth')
+const { mapState: mapHobbitsState, mapGetters: mapHobbitsGetters, mapActions: mapHobbitsActions } = createNamespacedHelpers('hobbits')
 
 export default defineComponent({
   name: 'Overview',
@@ -21,24 +26,28 @@ export default defineComponent({
     this.dispatchFetchHobbits()
   },
   computed: {
-    username(): string {
-      return this.$store.state.auth.username as string
-    },
-    isAuthenticated() {
-      return this.$store.state.auth.authenticated
-    },
-    hobbits(): Hobbit[] {
-      return this.$store.getters.getHobbits()
-    },
+    ...mapAuthState({
+      isAuthenticated: state => (state as AuthenticationState).authenticated,
+      username: state => (state as AuthenticationState).username,
+    }),
+    ...mapHobbitsState({
+      initialLoaded: (state) => (state as HobbitsState).initialLoaded,
+    }),
+    ...mapHobbitsGetters({
+      hobbits: 'getHobbits',
+    }),
   },
   methods: {
+    ...mapHobbitsActions({
+      _fetchHobbits: 'fetchHobbits',
+    }),
     dispatchFetchHobbits() {
-      if (!this.$store.state.hobbits.initialLoaded) {
-        this.$store.dispatch('fetchHobbits')
+      if (!this.initialLoaded) {
+        this._fetchHobbits()
       }
     },
     reload() {
-      this.$store.dispatch('fetchHobbits')
+      this._fetchHobbits()
     },
   },
 })

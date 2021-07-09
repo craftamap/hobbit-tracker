@@ -29,7 +29,10 @@
 <script lang="ts">
 import FormWrapper from '@/components/form/FormWrapper.vue'
 import { defineComponent } from 'vue'
+import { createNamespacedHelpers } from 'vuex'
 import Button from '../../components/form/Button.vue'
+
+const { mapActions: mapHobbitsActions } = createNamespacedHelpers('hobbits')
 
 export default defineComponent({
   name: 'AddHobbit',
@@ -48,6 +51,9 @@ export default defineComponent({
     }
   },
   methods: {
+    ...mapHobbitsActions({
+      _postHobbit: 'postHobbit',
+    }),
     goBack() {
       this.$router.push('/')
     },
@@ -73,9 +79,9 @@ export default defineComponent({
       this.form.image = await this.readUploadedFileAsDataURL(firstFile)
       console.log(this.form.image)
     },
-    dispatchPostHobbit() {
+    async dispatchPostHobbit() {
       this.submitting = true
-      this.$store.dispatch('postHobbit', {
+      return this._postHobbit({
         name: this.form.name,
         description: this.form.description,
         image: this.form.image,

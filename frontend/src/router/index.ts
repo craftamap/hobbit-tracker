@@ -1,9 +1,15 @@
 import { createRouter, createWebHashHistory, RouteRecordRaw } from 'vue-router'
 import Overview from '../views/Overview.vue'
+import Feed from '../views/Feed.vue'
 
 const routes: Array<RouteRecordRaw> = [
   {
     path: '/',
+    name: 'Feed',
+    component: Feed,
+  },
+  {
+    path: '/overview',
     name: 'Overview',
     component: Overview,
   },
@@ -20,20 +26,24 @@ const routes: Array<RouteRecordRaw> = [
     component: () => import(/* webpackChunkName: "hobbits" */ '../views/hobbits/AddHobbit.vue'),
   },
   {
-    path: '/hobbits/:id',
+    path: '/hobbits/:hobbitId',
     component: () => import(/* webpackChunkName: "hobbits" */ '../views/hobbits/Hobbit.vue'),
   },
   {
-    path: '/hobbits/:id/edit',
+    path: '/hobbits/:hobbitId/edit',
     component: () => import(/* webpackChunkName: "hobbits" */ '../views/hobbits/EditHobbit.vue'),
   },
   {
-    path: '/hobbits/:id/records/add',
+    path: '/hobbits/:hobbitId/records/add',
     component: () => import(/* webpackChunkName: "records" */ '../views/hobbits/records/AddRecord.vue'),
   },
   {
-    path: '/hobbits/:id/records/:recordId/edit',
+    path: '/hobbits/:hobbitId/records/:recordId/edit',
     component: () => import(/* webpackChunkName: "records" */ '../views/hobbits/records/EditRecord.vue'),
+  },
+  {
+    path: '/profile/:profileId',
+    component: () => import(/* webpackChunkName: "profile" */ '../views/profile/Profile.vue'),
   },
   {
     path: '/profile/me',

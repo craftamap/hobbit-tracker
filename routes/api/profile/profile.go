@@ -3,6 +3,9 @@ package profile
 import (
 	"encoding/json"
 	"net/http"
+	"sort"
+	"strconv"
+	"time"
 
 	"github.com/craftamap/hobbit-tracker/middleware/authtocontext"
 	"github.com/craftamap/hobbit-tracker/middleware/requestcontext"
@@ -12,6 +15,273 @@ import (
 	"github.com/sethvargo/go-password/password"
 	"golang.org/x/crypto/bcrypt"
 )
+
+func GetOthersUserInfo() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		db := requestcontext.DB(r)
+		log := requestcontext.Log(r)
+
+		urlVariables := mux.Vars(r)
+		otherUserStrId, ok := urlVariables["id"]
+		if !ok {
+			log.Error("No user id found!")
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+
+		otherUserID, err := strconv.ParseUint(otherUserStrId, 10, 64)
+		if err != nil {
+			log.Error("user id is not numeric")
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+
+		// If userId is the userId of current user, redirect to /me
+		//	authDetails := r.Context().Value(authtocontext.AuthDetailsContextKey).(authtocontext.AuthDetails)
+		//	if authDetails.Authenticated && authDetails.UserID == uint(otherUserID) {
+		//		http.Redirect(w, r, "../me", http.StatusTemporaryRedirect)
+		//		return
+		//	}
+
+		otherUser := models.User{}
+		if err = db.Where(models.User{ID: uint(otherUserID)}).First(&otherUser).Error; err != nil {
+			log.Error("user could not be found")
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+
+		// sanitise otherUser for save output
+
+		sanitisedOtherUser := models.User{
+			ID:       otherUser.ID,
+			Username: otherUser.Username,
+			Image:    otherUser.Image,
+		}
+
+		w.Header().Add("Content-Type", "application/json")
+		err = json.NewEncoder(w).Encode(sanitisedOtherUser)
+		if err != nil {
+			log.Error(err)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+	}
+}
+func GetFollowForUser() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		db := requestcontext.DB(r)
+		log := requestcontext.Log(r)
+
+		urlVariables := mux.Vars(r)
+		otherUserStrId, ok := urlVariables["id"]
+		if !ok {
+			log.Error("No user id found!")
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+
+		otherUserID, err := strconv.ParseUint(otherUserStrId, 10, 64)
+		if err != nil {
+			log.Error("user id is not numeric")
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+		// check if other user even exists
+
+		otherUser := models.User{
+			ID: uint(otherUserID),
+		}
+
+		if err := db.Where(&otherUser).First(&otherUser).Error; err != nil {
+			log.Error(err)
+			w.WriteHeader(http.StatusNotFound)
+			return
+		}
+
+		authDetails := r.Context().Value(authtocontext.AuthDetailsContextKey).(authtocontext.AuthDetails)
+		thisUserID := authDetails.UserID
+
+		thisUser := models.User{
+			ID: thisUserID,
+		}
+		if err := db.Preload("Follows").Where(&thisUser).First(&thisUser).Error; err != nil {
+			log.Error(err)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		log.Infof("%+v", thisUser)
+
+		count := db.Model(&thisUser).Where(&otherUser).Association("Follows").Count()
+
+		follows := count > 0
+
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"follows": follows,
+			"user":    otherUser,
+		})
+
+	}
+}
+
+func DeleteFollowForUser() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		db := requestcontext.DB(r)
+		log := requestcontext.Log(r)
+
+		urlVariables := mux.Vars(r)
+		otherUserStrId, ok := urlVariables["id"]
+		if !ok {
+			log.Error("No user id found!")
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+
+		otherUserID, err := strconv.ParseUint(otherUserStrId, 10, 64)
+		if err != nil {
+			log.Error("user id is not numeric")
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+		// check if other user even exists
+
+		otherUser := models.User{
+			ID: uint(otherUserID),
+		}
+
+		if err := db.Where(&otherUser).First(&otherUser).Error; err != nil {
+			log.Error(err)
+			w.WriteHeader(http.StatusNotFound)
+			return
+		}
+
+		authDetails := r.Context().Value(authtocontext.AuthDetailsContextKey).(authtocontext.AuthDetails)
+		thisUserID := authDetails.UserID
+
+		thisUser := models.User{
+			ID: thisUserID,
+		}
+		if err := db.Preload("Follows").Where(&thisUser).First(&thisUser).Error; err != nil {
+			log.Error(err)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		log.Infof("%+v", thisUser)
+
+		if err := db.Model(&thisUser).Association("Follows").Delete(&otherUser); err != nil {
+			log.Error(err)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
+		json.NewEncoder(w).Encode(otherUser)
+	}
+}
+func PutFollowForUser() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		db := requestcontext.DB(r)
+		log := requestcontext.Log(r)
+
+		urlVariables := mux.Vars(r)
+		otherUserStrId, ok := urlVariables["id"]
+		if !ok {
+			log.Error("No user id found!")
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+
+		otherUserID, err := strconv.ParseUint(otherUserStrId, 10, 64)
+		if err != nil {
+			log.Error("user id is not numeric")
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+		// check if other user even exists
+
+		otherUser := models.User{
+			ID: uint(otherUserID),
+		}
+
+		if err := db.Where(&otherUser).First(&otherUser).Error; err != nil {
+			log.Error(err)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
+		authDetails := r.Context().Value(authtocontext.AuthDetailsContextKey).(authtocontext.AuthDetails)
+		thisUserID := authDetails.UserID
+
+		thisUser := models.User{
+			ID: thisUserID,
+		}
+		if err := db.Preload("Follows").Where(&thisUser).First(&thisUser).Error; err != nil {
+			log.Error(err)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		log.Infof("%+v", thisUser)
+
+		// check if we already follow the other user
+		for _, follow := range thisUser.Follows {
+			if follow.ID == uint(otherUserID) {
+				log.Errorf("User already follows user %d", otherUserID)
+				w.WriteHeader(http.StatusInternalServerError)
+				return
+			}
+		}
+
+		if err := db.Model(&thisUser).Association("Follows").Append(&otherUser); err != nil {
+			log.Error(err)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
+		json.NewEncoder(w).Encode(otherUser)
+	}
+}
+
+func GetOthersHobbits() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		db := requestcontext.DB(r)
+		log := requestcontext.Log(r)
+
+		urlVariables := mux.Vars(r)
+		otherUserStrId, ok := urlVariables["id"]
+		if !ok {
+			log.Error("No user id found!")
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+
+		otherUserID, err := strconv.ParseUint(otherUserStrId, 10, 64)
+		if err != nil {
+			log.Error("user id is not numeric")
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+
+		// If userId is the userId of current user, redirect to /me
+		// authDetails := r.Context().Value(authtocontext.AuthDetailsContextKey).(authtocontext.AuthDetails)
+		// if authDetails.Authenticated && authDetails.UserID == uint(otherUserID) {
+		// 	http.Redirect(w, r, "../me/hobbits", http.StatusTemporaryRedirect)
+		// 	return
+		// }
+
+		hobbits := []models.Hobbit{}
+
+		err = db.Joins("User").Where(&models.Hobbit{UserID: uint(otherUserID)}).Find(&hobbits).Error
+		if err != nil {
+			log.Error(err)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
+		err = json.NewEncoder(w).Encode(hobbits)
+		if err != nil {
+			log.Error(err)
+			w.WriteHeader(http.StatusInternalServerError)
+		}
+	}
+}
 
 func BuildHandleGetAppPasswords() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -215,6 +485,91 @@ func BuildHandleProfileGetHobbits() http.HandlerFunc {
 		}
 
 		err = json.NewEncoder(w).Encode(hobbits)
+		if err != nil {
+			log.Error(err)
+			w.WriteHeader(http.StatusInternalServerError)
+		}
+	}
+}
+
+type FeedEventTypus string
+
+const (
+	FeedEventTypusHobbitCreated FeedEventTypus = "HobbitCreated"
+	FeedEventTypusRecordCreated FeedEventTypus = "RecordCreated"
+)
+
+type FeedEvent struct {
+	FeedEventTypus FeedEventTypus
+	CreatedAt      time.Time
+	Payload        interface{}
+}
+
+func GetMyFeed() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		db := requestcontext.DB(r)
+		log := requestcontext.Log(r)
+		authDetails := authtocontext.Get(r)
+
+		user := models.User{}
+
+		err := db.Preload("Follows").Where("ID = ?", authDetails.UserID).First(&user).Error
+		if err != nil {
+			log.Error(err)
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+
+		userIdsOfFollows := []uint{}
+		for _, follow := range user.Follows {
+			userIdsOfFollows = append(userIdsOfFollows, follow.ID)
+		}
+
+		/** TODO: This is kind of sub-optimal, as we fetch both 25 hobbits as well as records. Optimaly, we would only fetch
+		the 25 items we need from the db. This would also allow us to continue the feed with pages.
+		*/
+		// First, fetch all records of people you follow
+		recentRecordsOfFollowers := []*models.NumericRecord{}
+		err = db.Preload("Hobbit.User").Joins("Hobbit").Joins("LEFT JOIN Users on hobbit.user_id = users.id").Where("hobbit.user_id IN ?", userIdsOfFollows).Limit(25).Order("numeric_records.created_at DESC").Find(&recentRecordsOfFollowers).Error
+		if err != nil {
+			log.Error(err)
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+
+		// Then we fetch all of the hobbits of people you follow
+		recentHobbitsOfFollowers := []*models.Hobbit{}
+		err = db.Joins("User").Where("user_id in ?", userIdsOfFollows).Limit(25).Order("created_at DESC").Find(&recentHobbitsOfFollowers).Error
+
+		relevantEvents := []FeedEvent{}
+
+		for _, r := range recentRecordsOfFollowers {
+			relevantEvents = append(relevantEvents, FeedEvent{
+				FeedEventTypus: FeedEventTypusRecordCreated,
+				CreatedAt:      r.CreatedAt,
+				Payload:        r,
+			})
+		}
+		for _, h := range recentHobbitsOfFollowers {
+			relevantEvents = append(relevantEvents, FeedEvent{
+				FeedEventTypus: FeedEventTypusHobbitCreated,
+				CreatedAt:      h.CreatedAt,
+				Payload:        h,
+			})
+		}
+
+		sort.Slice(relevantEvents, func(i, j int) bool {
+			return relevantEvents[i].CreatedAt.After(relevantEvents[j].CreatedAt)
+		})
+
+		upperMax := len(relevantEvents) - 1
+		if upperMax >= 25 {
+			upperMax = 25
+		}
+
+		relevantEvents = relevantEvents[0:upperMax]
+
+		err = json.NewEncoder(w).Encode(relevantEvents)
 		if err != nil {
 			log.Error(err)
 			w.WriteHeader(http.StatusInternalServerError)

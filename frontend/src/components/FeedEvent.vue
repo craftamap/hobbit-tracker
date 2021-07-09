@@ -2,7 +2,7 @@
   <div class="card">
     <template v-if="isHobbitCreated">
     <div class="header">
-      <router-link :to="`/profile/${hobbit.user.id}`">{{hobbit.user.username}}</router-link>has created a new Hobbit.
+      <router-link :to="`/profile/${hobbit.user.id}`">{{hobbit.user.username}}</router-link> has created a new Hobbit.
     </div>
       <SimpleHobbit :hobbit="hobbit" />
     </template >

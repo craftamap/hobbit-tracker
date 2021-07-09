@@ -54,11 +54,11 @@ export const store = createStore<State>({
         case 'RecordDeleted':
         case 'RecordModified':
         case 'RecordCreated':
-          dispatch('fetchRecords', optionalData?.hobbit_id)
+          dispatch('hobbits/fetchRecords', optionalData?.hobbit_id)
           break
         case 'HobbitCreated':
         case 'HobbitModified':
-          dispatch('fetchHobbit', { id: optionalData?.id })
+          dispatch('hobbits/fetchHobbit', { id: optionalData?.id })
           break
         case 'HobbitDeleted':
           // TODO:

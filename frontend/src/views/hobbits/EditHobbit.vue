@@ -89,7 +89,7 @@ export default defineComponent({
   },
   methods: {
     ...mapHobbitsActions({
-      _putRecord: 'putRecord',
+      _putHobbit: 'putHobbit',
       _fetchRecords: 'fetchRecords',
       _fetchHobbit: 'fetchHobbit',
     }),
@@ -120,7 +120,7 @@ export default defineComponent({
     },
     putHobbit() {
       this.submitting = true
-      this._putRecord({
+      this._putHobbit({
         id: this.id,
         name: this.form.name,
         description: this.form.description,

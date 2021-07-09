@@ -33,12 +33,12 @@
         </div>
         <div>
           <div class="buttons" v-if="isAuthenticated && userId === hobbit.user.id">
-            <router-link :to="`/hobbits/${$route.params.id}/records/add`"
+            <router-link :to="`/hobbits/${id}/records/add`"
               custom
               v-slot="{ navigate }">
               <VButton value="Add Record" type="primary" @click="navigate" />
             </router-link>
-            <router-link :to="`/hobbits/${$route.params.id}/edit`"
+            <router-link :to="`/hobbits/${id}/edit`"
               custom
               v-slot="{ navigate }">
               <VButton value="Edit" @click="navigate" />

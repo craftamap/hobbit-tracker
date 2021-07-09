@@ -181,12 +181,18 @@ func BuildHandleAPIPutHobbit() http.HandlerFunc {
 			Image:       strings.TrimSpace(recievedHobbit.Image),
 			Description: strings.TrimSpace(recievedHobbit.Description),
 		}
-		db.Model(&currentHobbit).Updates(sanitizedHobbit)
-		log.Infof("Updated hobbit %+v", sanitizedHobbit)
+		db.Model(&currentHobbit).Updates(&sanitizedHobbit)
+                log.Infof("Updated hobbit %+v with values %+v", currentHobbit, sanitizedHobbit)
+
+		err = json.NewEncoder(w).Encode(currentHobbit)
+		if err != nil {
+			log.Error(err)
+			w.WriteHeader(http.StatusInternalServerError)
+		}
 
 		eventHub.Broadcast(hub.ServerSideEvent{
 			Typus:        hub.HobbitModified,
-			OptionalData: sanitizedHobbit,
+			OptionalData: currentHobbit,
 		})
 	}
 }

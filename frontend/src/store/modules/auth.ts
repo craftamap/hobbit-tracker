@@ -23,6 +23,16 @@ export const getters: GetterTree<AuthenticationState, rootState> = {
 }
 
 export const actions: ActionTree<AuthenticationState, rootState> = {
+  async extractAuthenticationDetails({ commit }) {
+    const text = document?.querySelector('#data')?.textContent
+    if (!text) {
+      return
+    }
+    const parsed = JSON.parse(text)
+
+    commit('setAuthenticationDetails', parsed.auth)
+    console.log('parsed', parsed)
+  },
   async fetchAuthenticationDetails({ commit }) {
     const response = await fetch('/api/auth')
     if (!response.ok) {

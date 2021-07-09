@@ -29,9 +29,12 @@ import { createNamespacedHelpers } from 'vuex'
 import { AuthenticationState } from './store/modules/auth'
 
 const { mapState: authMapState, mapActions: authMapActions } = createNamespacedHelpers('auth')
+const { mapActions: mapHobbitsActions } = createNamespacedHelpers('hobbits')
 
 export default defineComponent({
   created() {
+    this.extractAuthenticationDetails()
+    this.extractHobbits()
     this.fetchAuthenticationDetails()
     this.dispatchCreateSocket()
   },
@@ -46,6 +49,10 @@ export default defineComponent({
   methods: {
     ...authMapActions({
       fetchAuthenticationDetails: 'fetchAuthenticationDetails',
+      extractAuthenticationDetails: 'extractAuthenticationDetails',
+    }),
+    ...mapHobbitsActions({
+      extractHobbits: 'extractHobbits',
     }),
     dispatchCreateSocket() {
       this.$store.dispatch('createWebSocketConnection')

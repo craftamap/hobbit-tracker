@@ -57,6 +57,16 @@ export const getters: GetterTree<HobbitsState, rootState> = {
 }
 
 export const actions: ActionTree<HobbitsState, rootState> = {
+  async extractHobbits({ commit }) {
+    const text = document?.querySelector('#data')?.textContent
+    if (!text) {
+      return
+    }
+    const parsed = JSON.parse(text)
+    console.log('parsed', parsed)
+
+    commit('setHobbits', parsed.hobbits)
+  },
   async fetchHobbitsByUser({ commit }, { userId }) {
     if (!userId) {
       userId = 'me'

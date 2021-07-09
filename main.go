@@ -4,7 +4,9 @@ import (
 	"embed"
 	"flag"
 	"fmt"
+	"html/template"
 	"io/fs"
+	"io/ioutil"
 	"net/http"
 	"os"
 	"time"
@@ -164,6 +166,44 @@ func main() {
 		fmt.Println(err)
 		return
 	}
+        contentStatic := os.DirFS("frontend/dist")
+        f, err := contentStatic.Open("index.html")
+        if err != nil {
+                return
+        }
+        body, err := ioutil.ReadAll(f)
+	tmpl, err := template.New("index").Parse(string(body))
+	r.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		start := time.Now()
+		c := r.Context()
+
+
+		contextAuthDetails := c.Value(authtocontext.AuthDetailsContextKey)
+
+		authDetails, ok := contextAuthDetails.(authtocontext.AuthDetails)
+		if !ok {
+			authDetails = authtocontext.AuthDetails{
+				Authenticated: false,
+			}
+		}
+
+		hobbits := []models.Hobbit{}
+		if authDetails.Authenticated {
+			err = db.Joins("User").Where(&models.Hobbit{UserID: authDetails.UserID}).Limit(3).Find(&hobbits).Error
+			if err != nil {
+				log.Error(err)
+				w.WriteHeader(http.StatusInternalServerError)
+				return
+			}
+		}
+
+		initialState := map[string]interface{}{
+			"auth":    authDetails,
+			"hobbits": hobbits,
+		}
+		tmpl.Execute(w, map[string]interface{}{"initialState": initialState})
+        log.Infof("Time: %s",time.Since(start))
+	})
 	r.PathPrefix("/").Handler(frontend)
 	listeningOn := fmt.Sprintf(":%d", flagPort)
 	log.Infof("Listening on %s", listeningOn)

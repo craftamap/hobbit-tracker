@@ -54,7 +54,7 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-for="record in (hobbit.records || []).slice().reverse()" :key="record.id">
+              <tr v-for="record in (hobbit.records || []).slice().reverse()" :key="`record-${record.id}`">
                 <td>{{record.value}}</td>
                 <td>{{record.comment}}</td>
                 <td>{{formatDate(record.timestamp)}}</td>

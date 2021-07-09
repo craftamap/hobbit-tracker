@@ -10,13 +10,13 @@
       <div>
         <span class="icon-entry" @click="navigateAddHobbit"><PlusIcon class="w-24 h-24"/><span>Add Hobbit... </span></span>
       </div>
-      <SimpleHobbit  v-for="hobbit in hobbitsOfUser" :key="hobbit.id" :hobbit="hobbit"/>
+      <SimpleHobbit  v-for="hobbit in hobbitsOfUser" :key="`hobbit-${hobbit.id}`" :hobbit="hobbit"/>
     </div>
     <div class="events">
       <h1>Your personal feed:</h1>
-      <div v-for="(feedEvent, idx) in feedEvents" v-bind:key="idx">
+      <template v-for="(feedEvent, idx) in feedEvents" v-bind:key="`feedEvent-${idx}`">
         <FeedEvent :feedEvent="feedEvent" />
-      </div>
+      </template>
     </div>
   </div>
 </template>

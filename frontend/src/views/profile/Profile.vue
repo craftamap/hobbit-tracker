@@ -19,7 +19,7 @@
         <UserRemoveIcon v-if="follows" class="h-24 cursor-pointer" @click="unfollow" />
       </div>
       <div>Hobbits:</div>
-      <SimpleHobbit v-for="hobbit in hobbitsOfUser" :key='hobbit.id' :hobbit="hobbit" :withHeatmap=true />
+      <SimpleHobbit v-for="hobbit in hobbitsOfUser" :key='`hobbit-${hobbit.id}`' :hobbit="hobbit" :withHeatmap=true />
     </div>
   </div>
 </template>

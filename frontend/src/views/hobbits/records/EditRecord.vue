@@ -61,8 +61,8 @@ export default defineComponent({
   },
   computed: {
     ...mapHobbitsGetters({
-      hobbitByUser: 'hobbitByUser',
-      recordById: 'recordById',
+      hobbitById: 'getHobbitById',
+      recordById: 'getRecordById',
     }),
     id(): number {
       return Number(this.$route.params.hobbitId)
@@ -71,7 +71,7 @@ export default defineComponent({
       return Number(this.$route.params.recordId)
     },
     hobbit(): Hobbit {
-      return this.hobbitByUser(this.id)
+      return this.hobbitById(this.id)
     },
     record(): NumericRecord {
       return this.recordById(this.id, this.recordId)

@@ -61,7 +61,7 @@ export const actions: ActionTree<HobbitsState, rootState> = {
     if (!userId) {
       userId = 'me'
     }
-    const res = await fetch(`/api/profile/${userId}/hobbits/`)
+    const res = await fetch(`/api/profile/${userId}/hobbits`)
     if (!res.ok) {
       throw new Error(res.statusText)
     }
@@ -78,7 +78,7 @@ export const actions: ActionTree<HobbitsState, rootState> = {
     commit('setInitialLoaded', { load: true })
   },
   async fetchHobbit({ commit }, { id }) {
-    const res = await fetch(`/api/hobbits/${id}`)
+    const res = await fetch(`/api/hobbits/${id}/`)
     if (!res.ok) {
       throw new Error(res.statusText)
     }

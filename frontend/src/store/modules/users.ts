@@ -31,7 +31,7 @@ export const getters: GetterTree<UsersState, rootState> = {
 
 export const actions: ActionTree<UsersState, rootState> = {
   async fetchUser({ commit }, { id }: {id: number}) {
-    const response = await fetch(`/api/profile/${id}`)
+    const response = await fetch(`/api/profile/${id}/`)
     if (!response.ok) {
       throw new Error(response.statusText)
     }

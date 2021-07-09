@@ -82,7 +82,9 @@ import moment from 'moment'
 import { TrashIcon as Trash, PencilIcon as Pencil } from '@heroicons/vue/outline'
 import { createNamespacedHelpers } from 'vuex'
 import { AuthenticationState } from '@/store/modules/auth'
+
 const { mapState: authMapState } = createNamespacedHelpers('auth')
+const { mapActions: mapHobbitsActions, mapGetters: mapHobbitsGetters } = createNamespacedHelpers('hobbits')
 
 export default defineComponent({
   name: 'Hobbit',
@@ -111,8 +113,11 @@ export default defineComponent({
     id(): number {
       return Number(this.$route.params.hobbitId)
     },
+    ...mapHobbitsGetters({
+      hobbitById: 'getHobbitById',
+    }),
     hobbit(): Hobbit {
-      return this.$store.getters.getHobbitById(Number(this.id))
+      return this.hobbitById(this.id)
     },
     ...authMapState({
       isAuthenticated: state => (state as AuthenticationState).authenticated,
@@ -121,19 +126,25 @@ export default defineComponent({
   },
   created() {
     if (!this.hobbit) {
-      this.dispatchFetchHobbits().then(() => {
-        this.dispatchFetchRecords()
+      this.fetchHobbit().then(() => {
+        this.fetchRecords()
       })
     } else {
-      this.dispatchFetchRecords()
+      this.fetchRecords()
     }
   },
   methods: {
-    dispatchFetchHobbits() {
-      return this.$store.dispatch('fetchHobbit', { id: Number(this.id) })
+    ...mapHobbitsActions({
+      _putRecord: 'putRecord',
+      _fetchRecords: 'fetchRecords',
+      _fetchHobbit: 'fetchHobbit',
+      _deleteRecord: 'deleteRecord',
+    }),
+    fetchHobbit() {
+      return this._fetchHobbit({ id: Number(this.id) })
     },
-    dispatchFetchRecords() {
-      return this.$store.dispatch('fetchRecords', Number(this.id))
+    fetchRecords() {
+      return this._fetchRecords(Number(this.id))
     },
     formatDate(date: string) {
       return moment(date).format('YYYY-MM-DD HH:mm')
@@ -143,7 +154,7 @@ export default defineComponent({
       return this.$router.push(`/hobbits/${this.id}/records/${recordId}/edit`)
     },
     deleteRecord() {
-      return this.$store.dispatch('deleteRecord', {
+      return this._deleteRecord({
         hobbitId: Number(this.id),
         recordId: Number(this.deleteDialog.record?.id),
       })

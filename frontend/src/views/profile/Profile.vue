@@ -37,6 +37,7 @@ import { AuthenticationState } from '@/store/modules/auth'
 const { mapActions: mapUsersActions, mapGetters: mapUsersGetters } = createNamespacedHelpers('users')
 const { mapActions: mapProfileActions, mapGetters: mapProfileGetters } = createNamespacedHelpers('profile')
 const { mapState: mapAuthState } = createNamespacedHelpers('auth')
+const { mapActions: mapHobbitsActions, mapGetters: mapHobbitsGetters } = createNamespacedHelpers('hobbits')
 
 export default defineComponent({
   name: 'Profile',
@@ -63,6 +64,9 @@ export default defineComponent({
     ...mapAuthState({
       myUserId: state => (state as AuthenticationState).userId,
     }),
+    ...mapHobbitsGetters({
+      _hobbitsByUser: 'getHobbitsByUser',
+    }),
     isMe(): boolean {
       return !this.$route.params.profileId
     },
@@ -78,7 +82,7 @@ export default defineComponent({
     },
     hobbitsOfUser(): Hobbit[] {
       console.log('hobbitsOfUser')
-      return this.$store.getters.getHobbitsByUser(this.userId)
+      return this._hobbitsByUser(this.userId)
     },
     follows(): boolean {
       return this.followsUser(this.userId)
@@ -93,8 +97,11 @@ export default defineComponent({
       followUser: 'followUser',
       unfollowUser: 'unfollowUser',
     }),
+    ...mapHobbitsActions({
+      _fetchHobbitsByUser: 'fetchHobbitsByUser',
+    }),
     fetchHobbits() {
-      this.$store.dispatch('fetchHobbitsByUser', { userId: this.userId })
+      this._fetchHobbitsByUser({ userId: this.userId })
     },
     navigateToAppPassword() {
       this.$router.push('/profile/me/apppassword')

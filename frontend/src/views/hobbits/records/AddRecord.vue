@@ -32,7 +32,7 @@
               <textarea name="comment" id="comment" rows="5" v-model="data.comment"></textarea>
             </div>
             <div>
-              <Button value="Add record" @click="dispatchPostRecord()" type="primary" :loading="submitting"/>
+              <Button value="Add record" @click="postRecord()" type="primary" :loading="submitting"/>
               <Button value="Go back" @click="goBack()"/>
             </div>
           </form>
@@ -49,6 +49,9 @@ import { Hobbit } from '@/models'
 import Loading from '@/components/Loading.vue'
 import moment from 'moment'
 import Button from '@/components/form/Button.vue'
+import { createNamespacedHelpers } from 'vuex'
+
+const { mapActions: mapHobbitsActions, mapGetters: mapHobbitsGetters } = createNamespacedHelpers('hobbits')
 
 export default defineComponent({
   components: {
@@ -57,16 +60,19 @@ export default defineComponent({
     FormWrapper,
   },
   computed: {
+    ...mapHobbitsGetters({
+      hobbitById: 'getHobbitById',
+    }),
     id(): number {
       return Number(this.$route.params.hobbitId)
     },
     hobbit(): Hobbit {
-      return this.$store.getters.getHobbitById(Number(this.$route.params.id))
+      return this.hobbitById(this.id)
     },
   },
   created() {
     if (!this.hobbit) {
-      this.dispatchFetchHobbit()
+      this.fetchHobbit()
     }
   },
   data() {
@@ -80,27 +86,33 @@ export default defineComponent({
     }
   },
   methods: {
+    ...mapHobbitsActions({
+      _postRecord: 'postRecord',
+      _fetchRecords: 'fetchRecords',
+      _fetchHobbit: 'fetchHobbit',
+      fetchHeatmapData: 'fetchHeatmapData',
+    }),
     getToday() {
       return moment().format('YYYY-MM-DDTHH:mm')
     },
-    dispatchPostRecord() {
+    postRecord() {
       this.submitting = true
-      this.$store.dispatch('postRecord', {
+      this._postRecord({
         id: this.id,
         timestamp: moment(this.data.timestamp).toDate(),
         value: Number(this.data.value),
         comment: this.data.comment,
       }).then(() => {
         return Promise.all([
-          this.$store.dispatch('fetchRecords', this.id),
-          this.$store.dispatch('fetchHeatmapData', this.id),
+          this._fetchRecords(this.id),
+          this.fetchHeatmapData(this.id),
         ])
       }).then(() => {
         this.submitting = false
       })
     },
-    dispatchFetchHobbit() {
-      this.$store.dispatch('fetchHobbit', { id: this.id })
+    async fetchHobbit() {
+      return this._fetchHobbit({ id: this.id })
     },
     goBack() {
       this.$router.push('/hobbits/' + this.id)

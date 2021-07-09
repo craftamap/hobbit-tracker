@@ -33,6 +33,7 @@ import { Hobbit } from '@/models'
 
 const { mapState: feedMapState, mapActions: feedMapActions } = createNamespacedHelpers('feed')
 const { mapState: authMapState } = createNamespacedHelpers('auth')
+const { mapActions: mapHobbitsActions, mapGetters: mapHobbitsGetters } = createNamespacedHelpers('hobbits')
 
 export default defineComponent({
   name: 'Feed',
@@ -54,16 +55,22 @@ export default defineComponent({
       username: state => (state as AuthenticationState).username,
       userId: state => (state as AuthenticationState).userId,
     }),
+    ...mapHobbitsGetters({
+      _hobbitsByUser: 'getHobbitsByUser',
+    }),
     hobbitsOfUser(): Hobbit[] {
-      return this.$store.getters.getHobbitsByUser(this.userId)
+      return this._hobbitsByUser(this.userId)
     },
   },
   methods: {
     ...feedMapActions({
       fetchFeed: 'fetchFeed',
     }),
+    ...mapHobbitsActions({
+      _fetchHobbitsByUser: 'fetchHobbitsByUser',
+    }),
     fetchHobbitsByUser() {
-      this.$store.dispatch('fetchHobbitsByUser', { userId: this.userId })
+      this._fetchHobbitsByUser({ userId: this.userId })
     },
     navigateAddHobbit() {
       this.$router.push('/hobbits/add')

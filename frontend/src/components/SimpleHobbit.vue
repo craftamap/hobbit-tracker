@@ -28,6 +28,9 @@ import { Hobbit, NumericRecord } from '../models/index'
 import { defineComponent, PropType } from 'vue'
 import Loading from './Loading.vue'
 import Heatmap from './Heatmap.vue'
+import { createNamespacedHelpers } from 'vuex'
+
+const { mapState: mapHobbitsState, mapGetters: mapHobbitsGetters, mapActions: mapHobbitsActions } = createNamespacedHelpers('hobbits')
 
 export default defineComponent({
   props: {
@@ -73,10 +76,12 @@ export default defineComponent({
     },
   },
   methods: {
+    ...mapHobbitsActions({
+      _fetchHeatmapData: 'fetchHeatmapData',
+    }),
     fetchHeatmapData() {
       if (!this.$props.hobbit?.heatmap) {
-        this.$store
-          .dispatch('fetchHeatmapData', this.$props.hobbit?.id)
+        this._fetchHeatmapData(this.$props.hobbit?.id)
           .then(() => {
             this.$data.loadingHeatmapData = false
           })

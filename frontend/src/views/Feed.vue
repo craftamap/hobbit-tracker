@@ -5,18 +5,18 @@
         Here there, <span class="username">{{username}}</span>!
       </div>
     </div>
+    <div class="events">
+      <h1>Your personal feed:</h1>
+      <template v-for="(feedEvent, idx) in feedEvents" v-bind:key="`feedEvent-${idx}`">
+        <FeedEvent :feedEvent="feedEvent" />
+      </template>
+    </div>
     <div class="sidebar">
       <h1>Your hobbits:</h1>
       <div>
         <span class="icon-entry" @click="navigateAddHobbit"><PlusIcon class="w-24 h-24"/><span>Add Hobbit... </span></span>
       </div>
       <SimpleHobbit  v-for="hobbit in hobbitsOfUser" :key="`hobbit-${hobbit.id}`" :hobbit="hobbit"/>
-    </div>
-    <div class="events">
-      <h1>Your personal feed:</h1>
-      <template v-for="(feedEvent, idx) in feedEvents" v-bind:key="`feedEvent-${idx}`">
-        <FeedEvent :feedEvent="feedEvent" />
-      </template>
     </div>
   </div>
 </template>
@@ -97,7 +97,7 @@ export default defineComponent({
   grid-template-columns: 1fr 1fr 1fr;
   grid-template-areas:
     "greeting greeting greeting"
-    "sidebar events events";
+    "events events sidebar";
   justify-items: stretch;
   align-items: stretch;
   @media (max-width: 1000px) {

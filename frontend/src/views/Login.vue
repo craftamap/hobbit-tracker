@@ -28,8 +28,8 @@
 </template>
 
 <script>
-import Button from '../components/form/Button'
-import FormWrapper from '../components/form/FormWrapper'
+import Button from '../components/form/Button.vue'
+import FormWrapper from '../components/form/FormWrapper.vue'
 
 export default {
   name: 'Login',

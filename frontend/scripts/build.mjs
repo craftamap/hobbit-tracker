@@ -2,9 +2,10 @@ import esbuild from 'esbuild'
 import vuePlugin from 'esbuild-plugin-vue3'
 import { htmlPlugin } from '@craftamap/esbuild-plugin-html'
 import fs from 'node:fs/promises'
-import workboxBuild from 'workbox-build'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
+import { workboxBuildPlugin } from './workbox-build.mjs'
+import { manifestGeneratorPlugin } from './manifest-generator.mjs'
 
 const options = yargs(hideBin(process.argv))
   .option('mode', {
@@ -23,8 +24,15 @@ const options = yargs(hideBin(process.argv))
 
 if (options?.cleanFirst) {
   console.log('cleanFirst')
-  const r = await fs.rm('dist', { recursive: true })
-  console.log('cleanFirst', r)
+  await fs.rm('dist', { recursive: true })
+  console.log('cleanFirst', 'done')
+}
+
+const noopPlugin = {
+  name: 'noop',
+  setup(build) {
+    build.onEnd(() => { console.log('  \u001b[37;1m! skipping workboxBuildPlugin\u001b[0m') })
+  },
 }
 
 esbuild.build({
@@ -39,27 +47,34 @@ esbuild.build({
   logLevel: 'info',
   outdir: 'dist/',
   loader: { '.woff2': 'file', '.woff': 'file' },
-  plugins: [vuePlugin(), htmlPlugin({
-    files: [
-      {
-        entryPoints: 'src/main.ts',
-        filename: 'index.html',
-        htmlTemplate: (await fs.readFile('public/index.html')).toString(),
-        scriptLoading: 'module',
-      },
-    ],
-  }), {
-    name: 'workbox-build',
-    setup(build) {
-      build.onEnd(async() => {
-        console.log('workbox-build', 'building')
-        const result = await workboxBuild.generateSW({
-          globDirectory: 'dist',
-          globPatterns: ['**/*.{html,js,css,woff,woff2}'],
-          swDest: 'dist/service-worker.js',
+  plugins: [
+    vuePlugin(),
+    htmlPlugin({
+      files: [
+        {
+          entryPoints: ['src/main.ts'],
+          filename: 'index.html',
+          htmlTemplate: (await fs.readFile('public/index.html')).toString(),
+          scriptLoading: 'module',
+        },
+      ],
+    }),
+    {
+      name: 'copy',
+      setup(build) {
+        build.onEnd(async() => {
+          await fs.copyFile('public/favicon.png', 'dist/favicon.png')
+          console.log('  copy:', 'public/favicon.png -> dist/favicon.png')
+
+          console.log()
         })
-        console.log('workbox-build', result)
-      })
+      },
     },
-  }],
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+    options.mode === 'production' ? workboxBuildPlugin() : noopPlugin,
+    manifestGeneratorPlugin({
+      name: 'Hobbit Tracker',
+      // eslint-disable-next-line @typescript-eslint/camelcase
+      background_color: '#111d1f',
+    })],
 })

@@ -32,11 +32,11 @@ import { CogIcon, UserAddIcon, UserRemoveIcon } from '@heroicons/vue/outline'
 import { Hobbit, User } from '@/models/'
 import SimpleHobbit from '@/components/SimpleHobbit.vue'
 import { createNamespacedHelpers } from 'vuex'
-import { AuthenticationState } from '@/store/modules/auth'
+import { mapState } from 'pinia'
+import { useAuthStore } from '@/store/auth'
 
 const { mapActions: mapUsersActions, mapGetters: mapUsersGetters } = createNamespacedHelpers('users')
 const { mapActions: mapProfileActions, mapGetters: mapProfileGetters } = createNamespacedHelpers('profile')
-const { mapState: mapAuthState } = createNamespacedHelpers('auth')
 const { mapActions: mapHobbitsActions, mapGetters: mapHobbitsGetters } = createNamespacedHelpers('hobbits')
 
 export default defineComponent({
@@ -48,22 +48,20 @@ export default defineComponent({
     UserRemoveIcon,
   },
   created() {
-    this.defferedInit()
+    this.deferredInit()
   },
   watch: {
     $route() {
-      this.defferedInit()
+      this.deferredInit()
     },
     userId() {
-      this.defferedInit()
+      this.deferredInit()
     },
   },
   computed: {
     ...mapUsersGetters(['getUserById']),
     ...mapProfileGetters(['followsUser']),
-    ...mapAuthState({
-      myUserId: state => (state as AuthenticationState).userId,
-    }),
+    ...mapState(useAuthStore, { myUserId: 'userId' }),
     ...mapHobbitsGetters({
       _hobbitsByUser: 'getHobbitsByUser',
     }),
@@ -74,9 +72,9 @@ export default defineComponent({
       console.log(this.userId)
       return this.getUserById(this.userId)
     },
-    userId(): number {
+    userId(): number | null {
       if (!this.$route.params.profileId) {
-        return this.myUserId as number
+        return this.myUserId
       }
       return Number(this.$route.params.profileId)
     },
@@ -115,7 +113,7 @@ export default defineComponent({
     unfollow() {
       this.unfollowUser({ id: this.userId })
     },
-    defferedInit() {
+    deferredInit() {
       if (this.userId) {
         this.fetchUser({ id: this.userId })
         this.fetchHobbits()

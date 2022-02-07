@@ -28,11 +28,11 @@ import { FeedState } from '../store/modules/feed'
 import FeedEvent from '@/components/FeedEvent.vue'
 import SimpleHobbit from '@/components/SimpleHobbit.vue'
 import { PlusIcon } from '@heroicons/vue/outline'
-import { AuthenticationState } from '@/store/modules/auth'
 import { Hobbit } from '@/models'
+import { useAuthStore } from '@/store/auth'
+import { mapState } from 'pinia'
 
 const { mapState: feedMapState, mapActions: feedMapActions } = createNamespacedHelpers('feed')
-const { mapState: authMapState } = createNamespacedHelpers('auth')
 const { mapActions: mapHobbitsActions, mapGetters: mapHobbitsGetters } = createNamespacedHelpers('hobbits')
 
 export default defineComponent({
@@ -50,11 +50,7 @@ export default defineComponent({
     ...feedMapState({
       feedEvents: state => (state as FeedState).feedEvents,
     }),
-    ...authMapState({
-      isAuthenticated: state => (state as AuthenticationState).authenticated,
-      username: state => (state as AuthenticationState).username,
-      userId: state => (state as AuthenticationState).userId,
-    }),
+    ...mapState(useAuthStore, { isAuthenticated: 'authenticated', username: 'username', userId: 'userId' }),
     ...mapHobbitsGetters({
       _hobbitsByUser: 'getHobbitsByUser',
     }),

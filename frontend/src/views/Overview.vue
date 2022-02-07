@@ -13,10 +13,10 @@ import { defineComponent } from 'vue'
 import SimpleHobbit from '../components/SimpleHobbit.vue'
 import IconBar from '@/components/IconBar.vue'
 import { createNamespacedHelpers } from 'vuex'
-import { AuthenticationState } from '@/store/modules/auth'
 import { HobbitsState } from '@/store/modules/hobbits'
+import { mapState } from 'pinia'
+import { useAuthStore } from '@/store/auth'
 
-const { mapState: mapAuthState } = createNamespacedHelpers('auth')
 const { mapState: mapHobbitsState, mapGetters: mapHobbitsGetters, mapActions: mapHobbitsActions } = createNamespacedHelpers('hobbits')
 
 export default defineComponent({
@@ -26,10 +26,7 @@ export default defineComponent({
     this.dispatchFetchHobbits()
   },
   computed: {
-    ...mapAuthState({
-      isAuthenticated: state => (state as AuthenticationState).authenticated,
-      username: state => (state as AuthenticationState).username,
-    }),
+    ...mapState(useAuthStore, { isAuthenticated: 'authenticated', username: 'username' }),
     ...mapHobbitsState({
       initialLoaded: (state) => (state as HobbitsState).initialLoaded,
     }),

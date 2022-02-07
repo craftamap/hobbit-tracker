@@ -25,31 +25,24 @@
 import '@fontsource/lato/index.css' /* weight 400 */
 import { defineComponent } from 'vue'
 import DialogWrapper from '@/components/DialogWrapper.vue'
-import { createNamespacedHelpers } from 'vuex'
-import { AuthenticationState } from './store/modules/auth'
-
-const { mapState: authMapState, mapActions: authMapActions } = createNamespacedHelpers('auth')
+import { mapActions, mapState } from 'pinia'
+import { useSocketStore } from './store/socket'
+import { useAuthStore } from './store/auth'
 
 export default defineComponent({
   created() {
-    this.fetchAuthenticationDetails()
-    this.dispatchCreateSocket()
+    this.fetchAuthDetails()
+    this.createWebsocketConnection()
   },
   components: {
     DialogWrapper,
   },
   computed: {
-    ...authMapState({
-      isAuthenticated: state => (state as AuthenticationState).authenticated,
-    }),
+    ...mapState(useAuthStore, { isAuthenticated: 'authenticated' }),
   },
   methods: {
-    ...authMapActions({
-      fetchAuthenticationDetails: 'fetchAuthenticationDetails',
-    }),
-    dispatchCreateSocket() {
-      this.$store.dispatch('createWebSocketConnection')
-    },
+    ...mapActions(useAuthStore, ['fetchAuthDetails']),
+    ...mapActions(useSocketStore, ['createWebsocketConnection']),
   },
 })
 </script>

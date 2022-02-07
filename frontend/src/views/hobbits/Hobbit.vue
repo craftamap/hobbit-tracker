@@ -81,9 +81,9 @@ import FormWrapper from '@/components/form/FormWrapper.vue'
 import moment from 'moment'
 import { TrashIcon as Trash, PencilIcon as Pencil } from '@heroicons/vue/outline'
 import { createNamespacedHelpers } from 'vuex'
-import { AuthenticationState } from '@/store/modules/auth'
+import { useAuthStore } from '@/store/auth'
+import { mapState } from 'pinia'
 
-const { mapState: authMapState } = createNamespacedHelpers('auth')
 const { mapActions: mapHobbitsActions, mapGetters: mapHobbitsGetters } = createNamespacedHelpers('hobbits')
 
 export default defineComponent({
@@ -119,10 +119,7 @@ export default defineComponent({
     hobbit(): Hobbit {
       return this.hobbitById(this.id)
     },
-    ...authMapState({
-      isAuthenticated: state => (state as AuthenticationState).authenticated,
-      userId: state => (state as AuthenticationState).userId,
-    }),
+    ...mapState(useAuthStore, { isAuthenticated: 'authenticated', userId: 'userId' }),
   },
   created() {
     if (!this.hobbit) {

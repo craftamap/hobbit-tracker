@@ -1,19 +1,19 @@
 <template>
-  <div class="card" :data-id="hobbit.id">
+  <div class="card" :data-id="hobbit?.id">
     <div class="header">
       <div>
         <h1>
-          <router-link :to="`/hobbits/${hobbit.id}`">{{
-            hobbit.name
+          <router-link :to="`/hobbits/${hobbit?.id}`">{{
+            hobbit?.name
           }}</router-link>
         </h1>
-        <div class="by">by {{ hobbit.user.username }}</div>
+        <div class="by">by {{ hobbit?.user.username }}</div>
         <div>
-          {{ hobbit.description }}
+          {{ hobbit?.description }}
         </div>
       </div>
       <div>
-        <img :src="hobbit.image" v-if="hobbit.image" />
+        <img :src="hobbit?.image" v-if="hobbit?.image" />
       </div>
     </div>
     <div v-if="withHeatmap">
@@ -28,9 +28,8 @@ import { Hobbit, NumericRecord } from '../models/index'
 import { defineComponent, PropType } from 'vue'
 import Loading from './Icons/LoadingIcon.vue'
 import Heatmap from './Heatmap.vue'
-import { createNamespacedHelpers } from 'vuex'
-
-const { mapState: mapHobbitsState, mapGetters: mapHobbitsGetters, mapActions: mapHobbitsActions } = createNamespacedHelpers('hobbits')
+import { useHobbitsStore } from '@/store/hobbits'
+import { mapActions } from 'pinia'
 
 export default defineComponent({
   props: {
@@ -76,11 +75,11 @@ export default defineComponent({
     },
   },
   methods: {
-    ...mapHobbitsActions({
+    ...mapActions(useHobbitsStore, {
       _fetchHeatmapData: 'fetchHeatmapData',
     }),
     fetchHeatmapData() {
-      if (!this.$props.hobbit?.heatmap) {
+      if (!this.$props.hobbit?.heatmap && this.$props.hobbit?.id) {
         this._fetchHeatmapData(this.$props.hobbit?.id)
           .then(() => {
             this.$data.loadingHeatmapData = false

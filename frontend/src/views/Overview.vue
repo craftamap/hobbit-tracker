@@ -12,12 +12,9 @@
 import { defineComponent } from 'vue'
 import SimpleHobbit from '../components/SimpleHobbit.vue'
 import IconBar from '@/components/IconBar.vue'
-import { createNamespacedHelpers } from 'vuex'
-import { HobbitsState } from '@/store/modules/hobbits'
-import { mapState } from 'pinia'
+import { mapActions, mapState } from 'pinia'
 import { useAuthStore } from '@/store/auth'
-
-const { mapState: mapHobbitsState, mapGetters: mapHobbitsGetters, mapActions: mapHobbitsActions } = createNamespacedHelpers('hobbits')
+import { useHobbitsStore } from '@/store/hobbits'
 
 export default defineComponent({
   name: 'OverviewView',
@@ -27,15 +24,10 @@ export default defineComponent({
   },
   computed: {
     ...mapState(useAuthStore, { isAuthenticated: 'authenticated', username: 'username' }),
-    ...mapHobbitsState({
-      initialLoaded: (state) => (state as HobbitsState).initialLoaded,
-    }),
-    ...mapHobbitsGetters({
-      hobbits: 'getHobbits',
-    }),
+    ...mapState(useHobbitsStore, { initialLoaded: 'initialLoaded', hobbits: 'getHobbits' }),
   },
   methods: {
-    ...mapHobbitsActions({
+    ...mapActions(useHobbitsStore, {
       _fetchHobbits: 'fetchHobbits',
     }),
     dispatchFetchHobbits() {

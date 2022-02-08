@@ -37,9 +37,8 @@ import { defineComponent } from 'vue'
 import Button from '../../components/form/Button.vue'
 import Loading from '../../components/Icons/LoadingIcon.vue'
 import FormWrapper from '@/components/form/FormWrapper.vue'
-import { createNamespacedHelpers } from 'vuex'
-
-const { mapActions: mapHobbitsActions, mapGetters: mapHobbitsGetters } = createNamespacedHelpers('hobbits')
+import { useHobbitsStore } from '@/store/hobbits'
+import { mapActions, mapState } from 'pinia'
 
 export default defineComponent({
   name: 'AddHobbit',
@@ -50,7 +49,7 @@ export default defineComponent({
   },
   created() {
     if (!this.hobbit) {
-      this._fetchHobbit({ id: this.id })
+      this._fetchHobbit(this.id)
     }
   },
   data() {
@@ -64,7 +63,7 @@ export default defineComponent({
     }
   },
   computed: {
-    ...mapHobbitsGetters({
+    ...mapState(useHobbitsStore, {
       hobbitById: 'getHobbitById',
     }),
     id(): number {
@@ -88,7 +87,7 @@ export default defineComponent({
     },
   },
   methods: {
-    ...mapHobbitsActions({
+    ...mapActions(useHobbitsStore, {
       _putHobbit: 'putHobbit',
       _fetchRecords: 'fetchRecords',
       _fetchHobbit: 'fetchHobbit',

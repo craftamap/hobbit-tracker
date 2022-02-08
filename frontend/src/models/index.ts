@@ -28,3 +28,14 @@ export interface Hobbit {
   records: NumericRecord[];
   heatmap: NumericRecord[];
 }
+
+export enum FeedEventTypus {
+  HobbitCreated = 'HobbitCreated',
+  RecordCreated = 'RecordCreated',
+}
+
+export interface FeedEvent {
+  FeedEventTypus: FeedEventTypus;
+  CreatedAt: string;
+  Payload: Hobbit | NumericRecord;
+}

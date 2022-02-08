@@ -80,11 +80,9 @@ import DDialog from '@/components/Dialog.vue'
 import FormWrapper from '@/components/form/FormWrapper.vue'
 import moment from 'moment'
 import { TrashIcon as Trash, PencilIcon as Pencil } from '@heroicons/vue/outline'
-import { createNamespacedHelpers } from 'vuex'
 import { useAuthStore } from '@/store/auth'
-import { mapState } from 'pinia'
-
-const { mapActions: mapHobbitsActions, mapGetters: mapHobbitsGetters } = createNamespacedHelpers('hobbits')
+import { mapActions, mapState } from 'pinia'
+import { useHobbitsStore } from '@/store/hobbits'
 
 export default defineComponent({
   name: 'HobbitView',
@@ -113,12 +111,12 @@ export default defineComponent({
     id(): number {
       return Number(this.$route.params.hobbitId)
     },
-    ...mapHobbitsGetters({
-      hobbitById: 'getHobbitById',
-    }),
     hobbit(): Hobbit {
       return this.hobbitById(this.id)
     },
+    ...mapState(useHobbitsStore, {
+      hobbitById: 'getHobbitById',
+    }),
     ...mapState(useAuthStore, { isAuthenticated: 'authenticated', userId: 'userId' }),
   },
   created() {
@@ -131,14 +129,14 @@ export default defineComponent({
     }
   },
   methods: {
-    ...mapHobbitsActions({
+    ...mapActions(useHobbitsStore, {
       _putRecord: 'putRecord',
       _fetchRecords: 'fetchRecords',
       _fetchHobbit: 'fetchHobbit',
       _deleteRecord: 'deleteRecord',
     }),
     fetchHobbit() {
-      return this._fetchHobbit({ id: Number(this.id) })
+      return this._fetchHobbit(Number(this.id))
     },
     fetchRecords() {
       return this._fetchRecords(Number(this.id))

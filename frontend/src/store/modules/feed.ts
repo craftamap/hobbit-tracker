@@ -1,18 +1,8 @@
 import { Module, ActionTree, GetterTree, MutationTree } from 'vuex'
 
 import { State as rootState } from '@/store/index'
-import { Hobbit, NumericRecord } from '@/models'
+import { FeedEvent, Hobbit, NumericRecord } from '@/models'
 
-export enum FeedEventTypus {
-  HobbitCreated = 'HobbitCreated',
-  RecordCreated = 'RecordCreated',
-}
-
-export interface FeedEvent {
-  FeedEventTypus: FeedEventTypus;
-  CreatedAt: string;
-  Payload: Hobbit | NumericRecord;
-}
 
 export interface FeedState {
   feedEvents: FeedEvent[];

@@ -37,7 +37,6 @@ export const useProfileStore = defineStore('profile', {
         follows: boolean;
         user: User;
       } = await response.json()
-      console.log('content', content)
       if (content.follows) {
         this.addFollow({ user: content.user })
       }

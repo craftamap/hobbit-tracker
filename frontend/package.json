@@ -20,8 +20,7 @@
     "uuid": "^8.3.2",
     "vue": "^3.2.26",
     "vue-router": "^4.0.0-0",
-    "vuejs-heatmap": "^1.1.7",
-    "vuex": "^4.0.0-0"
+    "vuejs-heatmap": "^1.1.7"
   },
   "devDependencies": {
     "@craftamap/esbuild-plugin-html": "^0.2.1",

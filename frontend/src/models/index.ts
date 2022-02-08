@@ -6,12 +6,12 @@ export interface Hobbit {
   description: string;
   records: NumericRecord[];
   heatmap: NumericRecord[];
-};
+}
 
 export interface User {
   id: number;
   username: string;
-};
+}
 
 export interface NumericRecord {
   id: number;

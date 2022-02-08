@@ -1,14 +1,9 @@
 <template>
   <div>
     <div class="welcome">
-      <template v-if="isMe">
-        Here there,
-      </template>
-      <template v-if="!isMe">
-        This is
-      </template>
-      <span class="username">{{ user?.username }}</span
-      >!
+      <template v-if="isMe">Here there,</template>
+      <template v-if="!isMe">This is </template>
+      <span class="username">{{ user?.username }}</span>!
     </div>
     <div>
       <div v-if="isMe" class="text-align-right">
@@ -19,7 +14,12 @@
         <UserRemoveIcon v-if="follows" class="h-24 cursor-pointer" @click="unfollow" />
       </div>
       <div>Hobbits:</div>
-      <SimpleHobbit v-for="hobbit in hobbitsOfUser" :key='`hobbit-${hobbit.id}`' :hobbit="hobbit" :withHeatmap=true />
+      <SimpleHobbit
+        v-for="hobbit in hobbitsOfUser"
+        :key="`hobbit-${hobbit.id}`"
+        :hobbit="hobbit"
+        :withHeatmap="true"
+      />
     </div>
   </div>
 </template>
@@ -32,11 +32,11 @@ import { CogIcon, UserAddIcon, UserRemoveIcon } from '@heroicons/vue/outline'
 import { Hobbit, User } from '@/models/'
 import SimpleHobbit from '@/components/SimpleHobbit.vue'
 import { createNamespacedHelpers } from 'vuex'
-import { mapState } from 'pinia'
+import { mapActions, mapState } from 'pinia'
 import { useAuthStore } from '@/store/auth'
+import { useProfileStore } from '@/store/profile'
 
 const { mapActions: mapUsersActions, mapGetters: mapUsersGetters } = createNamespacedHelpers('users')
-const { mapActions: mapProfileActions, mapGetters: mapProfileGetters } = createNamespacedHelpers('profile')
 const { mapActions: mapHobbitsActions, mapGetters: mapHobbitsGetters } = createNamespacedHelpers('hobbits')
 
 export default defineComponent({
@@ -60,8 +60,8 @@ export default defineComponent({
   },
   computed: {
     ...mapUsersGetters(['getUserById']),
-    ...mapProfileGetters(['followsUser']),
     ...mapState(useAuthStore, { myUserId: 'userId' }),
+    ...mapState(useProfileStore, ['followsUser']),
     ...mapHobbitsGetters({
       _hobbitsByUser: 'getHobbitsByUser',
     }),
@@ -83,14 +83,17 @@ export default defineComponent({
       return this._hobbitsByUser(this.userId)
     },
     follows(): boolean {
-      return this.followsUser(this.userId)
+      if (this.userId) {
+        return this.followsUser(this.userId)
+      }
+      return false
     },
   },
   methods: {
     ...mapUsersActions({
       fetchUser: 'fetchUser',
     }),
-    ...mapProfileActions({
+    ...mapActions(useProfileStore, {
       _fetchFollow: 'fetchFollow',
       followUser: 'followUser',
       unfollowUser: 'unfollowUser',
@@ -105,17 +108,24 @@ export default defineComponent({
       this.$router.push('/profile/me/apppassword')
     },
     fetchFollow() {
-      this._fetchFollow({ id: this.userId })
+      if (this.userId) {
+        this._fetchFollow({ id: this.userId })
+      }
     },
     follow() {
-      this.followUser({ id: this.userId })
+      if (this.userId) {
+        this.followUser({ id: this.userId })
+      }
     },
     unfollow() {
-      this.unfollowUser({ id: this.userId })
+      if (this.userId) {
+        this.unfollowUser({ id: this.userId })
+      }
     },
     deferredInit() {
       if (this.userId) {
         this.fetchUser({ id: this.userId })
+        this.fetchFollow()
         this.fetchHobbits()
       }
     },

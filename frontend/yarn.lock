@@ -917,10 +917,10 @@
     "@babel/helper-validator-identifier" "^7.16.7"
     to-fast-properties "^2.0.0"
 
-"@craftamap/esbuild-plugin-html@^0.2.1":
-  version "0.2.1"
-  resolved "https://registry.yarnpkg.com/@craftamap/esbuild-plugin-html/-/esbuild-plugin-html-0.2.1.tgz#9a16d8e0324df51ec493d60c2c0495100f42ea53"
-  integrity sha512-2H3xAmbPjzsMNcDapzga4XDQLJt/A3Eqx12h4UH6lvmQQMF1p6YE0BWhv0nmTsQ3gXm5unB1YjasNUlA6af05A==
+"@craftamap/esbuild-plugin-html@^0.2.2":
+  version "0.2.2"
+  resolved "https://registry.yarnpkg.com/@craftamap/esbuild-plugin-html/-/esbuild-plugin-html-0.2.2.tgz#e62ef248b653d33256e5d7bb2ff2755626d3afb3"
+  integrity sha512-R2pUKHq8bjCLdRqaKyFYSKSsqGCGpUbWu9YwsBgn6gy2bm6V6NN3jZErH2+34apCGr6TfO0Zo/WauCPgy5p9qg==
   dependencies:
     "@types/jsdom" "^16.2.13"
     jsdom "^17.0.0"

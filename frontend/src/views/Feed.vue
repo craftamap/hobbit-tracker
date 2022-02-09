@@ -36,7 +36,7 @@ const { mapState: authMapState } = createNamespacedHelpers('auth')
 const { mapActions: mapHobbitsActions, mapGetters: mapHobbitsGetters } = createNamespacedHelpers('hobbits')
 
 export default defineComponent({
-  name: 'Feed',
+  name: 'FeedView',
   components: {
     FeedEvent,
     SimpleHobbit,

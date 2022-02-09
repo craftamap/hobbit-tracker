@@ -20,7 +20,7 @@ const { mapState: mapAuthState } = createNamespacedHelpers('auth')
 const { mapState: mapHobbitsState, mapGetters: mapHobbitsGetters, mapActions: mapHobbitsActions } = createNamespacedHelpers('hobbits')
 
 export default defineComponent({
-  name: 'Overview',
+  name: 'OverviewView',
   components: { SimpleHobbit, IconBar },
   created() {
     this.dispatchFetchHobbits()

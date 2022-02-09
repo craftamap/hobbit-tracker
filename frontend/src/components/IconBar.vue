@@ -12,9 +12,9 @@
 </template>
 
 <script lang="ts">
-import Add from '@/components/Icons/Add.vue'
+import Add from '@/components/Icons/AddIcon.vue'
 import { defineComponent } from 'vue'
-import Reload from './Icons/Reload.vue'
+import Reload from './Icons/ReloadIcon.vue'
 
 export default defineComponent({
   components: {

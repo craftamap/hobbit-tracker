@@ -46,7 +46,7 @@
 import FormWrapper from '@/components/form/FormWrapper.vue'
 import { defineComponent } from 'vue'
 import { Hobbit } from '@/models'
-import Loading from '@/components/Loading.vue'
+import Loading from '@/components/Icons/LoadingIcon.vue'
 import moment from 'moment'
 import Button from '@/components/form/Button.vue'
 import { createNamespacedHelpers } from 'vuex'

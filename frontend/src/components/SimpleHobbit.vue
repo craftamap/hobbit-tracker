@@ -26,7 +26,7 @@
 <script lang="ts">
 import { Hobbit, NumericRecord } from '../models/index'
 import { defineComponent, PropType } from 'vue'
-import Loading from './Loading.vue'
+import Loading from './Icons/LoadingIcon.vue'
 import Heatmap from './Heatmap.vue'
 import { createNamespacedHelpers } from 'vuex'
 

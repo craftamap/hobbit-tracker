@@ -11,6 +11,7 @@ import { defineComponent } from 'vue'
 import DialogWrapper from './DialogWrapper.vue'
 
 export default defineComponent({
+  name: 'OverlayDialog',
   components: {
     DialogWrapper,
   },

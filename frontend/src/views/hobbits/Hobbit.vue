@@ -74,7 +74,7 @@
 <script lang="ts">
 import { defineComponent } from 'vue'
 import { Hobbit, NumericRecord } from '@/models'
-import Loading from '@/components/Loading.vue'
+import Loading from '@/components/Icons/LoadingIcon.vue'
 import VButton from '@/components/form/Button.vue'
 import DDialog from '@/components/Dialog.vue'
 import FormWrapper from '@/components/form/FormWrapper.vue'
@@ -87,7 +87,7 @@ const { mapState: authMapState } = createNamespacedHelpers('auth')
 const { mapActions: mapHobbitsActions, mapGetters: mapHobbitsGetters } = createNamespacedHelpers('hobbits')
 
 export default defineComponent({
-  name: 'Hobbit',
+  name: 'HobbitView',
   components: {
     Loading,
     VButton,

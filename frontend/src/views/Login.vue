@@ -32,7 +32,7 @@ import Button from '../components/form/Button.vue'
 import FormWrapper from '../components/form/FormWrapper.vue'
 
 export default {
-  name: 'Login',
+  name: 'LoginView',
   components: {
     Button,
     FormWrapper,

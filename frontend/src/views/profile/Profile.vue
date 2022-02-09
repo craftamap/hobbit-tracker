@@ -40,7 +40,7 @@ const { mapState: mapAuthState } = createNamespacedHelpers('auth')
 const { mapActions: mapHobbitsActions, mapGetters: mapHobbitsGetters } = createNamespacedHelpers('hobbits')
 
 export default defineComponent({
-  name: 'Profile',
+  name: 'ProfileView',
   components: {
     SimpleHobbit,
     CogIcon,

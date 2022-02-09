@@ -2,7 +2,8 @@
   <div class="feed">
     <div class="greeting">
       <div class="welcome" v-if="isAuthenticated">
-        Here there, <span class="username">{{username}}</span>!
+        Here there,
+        <span class="username">{{ username }}</span>!
       </div>
     </div>
     <div class="events">
@@ -14,26 +15,26 @@
     <div class="sidebar">
       <h1>Your hobbits:</h1>
       <div>
-        <span class="icon-entry" @click="navigateAddHobbit"><PlusIcon class="w-24 h-24"/><span>Add Hobbit... </span></span>
+        <span class="icon-entry" @click="navigateAddHobbit">
+          <PlusIcon class="w-24 h-24" />
+          <span>Add Hobbit...</span>
+        </span>
       </div>
-      <SimpleHobbit  v-for="hobbit in hobbitsOfUser" :key="`hobbit-${hobbit.id}`" :hobbit="hobbit"/>
+      <SimpleHobbit v-for="hobbit in hobbitsOfUser" :key="`hobbit-${hobbit.id}`" :hobbit="hobbit" />
     </div>
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue'
-import { createNamespacedHelpers } from 'vuex'
-import { FeedState } from '../store/modules/feed'
 import FeedEvent from '@/components/FeedEvent.vue'
 import SimpleHobbit from '@/components/SimpleHobbit.vue'
 import { PlusIcon } from '@heroicons/vue/outline'
-import { AuthenticationState } from '@/store/modules/auth'
 import { Hobbit } from '@/models'
-
-const { mapState: feedMapState, mapActions: feedMapActions } = createNamespacedHelpers('feed')
-const { mapState: authMapState } = createNamespacedHelpers('auth')
-const { mapActions: mapHobbitsActions, mapGetters: mapHobbitsGetters } = createNamespacedHelpers('hobbits')
+import { useAuthStore } from '@/store/auth'
+import { mapActions, mapState } from 'pinia'
+import { useFeedStore } from '@/store/feed'
+import { useHobbitsStore } from '@/store/hobbits'
 
 export default defineComponent({
   name: 'FeedView',
@@ -47,30 +48,25 @@ export default defineComponent({
     this.fetchHobbitsByUser()
   },
   computed: {
-    ...feedMapState({
-      feedEvents: state => (state as FeedState).feedEvents,
-    }),
-    ...authMapState({
-      isAuthenticated: state => (state as AuthenticationState).authenticated,
-      username: state => (state as AuthenticationState).username,
-      userId: state => (state as AuthenticationState).userId,
-    }),
-    ...mapHobbitsGetters({
-      _hobbitsByUser: 'getHobbitsByUser',
-    }),
+    ...mapState(useFeedStore, ['feedEvents']),
+    ...mapState(useAuthStore, { isAuthenticated: 'authenticated', username: 'username', userId: 'userId' }),
+    ...mapState(useHobbitsStore, { _hobbitsByUser: 'getHobbitsByUser' }),
     hobbitsOfUser(): Hobbit[] {
-      return this._hobbitsByUser(this.userId)
+      if (this.userId) {
+        return this._hobbitsByUser(this.userId)
+      }
+      return []
     },
   },
   methods: {
-    ...feedMapActions({
-      fetchFeed: 'fetchFeed',
-    }),
-    ...mapHobbitsActions({
+    ...mapActions(useFeedStore, [
+      'fetchFeed',
+    ]),
+    ...mapActions(useHobbitsStore, {
       _fetchHobbitsByUser: 'fetchHobbitsByUser',
     }),
     fetchHobbitsByUser() {
-      this._fetchHobbitsByUser({ userId: this.userId })
+      this._fetchHobbitsByUser()
     },
     navigateAddHobbit() {
       this.$router.push('/hobbits/add')

@@ -12,12 +12,9 @@
 import { defineComponent } from 'vue'
 import SimpleHobbit from '../components/SimpleHobbit.vue'
 import IconBar from '@/components/IconBar.vue'
-import { createNamespacedHelpers } from 'vuex'
-import { AuthenticationState } from '@/store/modules/auth'
-import { HobbitsState } from '@/store/modules/hobbits'
-
-const { mapState: mapAuthState } = createNamespacedHelpers('auth')
-const { mapState: mapHobbitsState, mapGetters: mapHobbitsGetters, mapActions: mapHobbitsActions } = createNamespacedHelpers('hobbits')
+import { mapActions, mapState } from 'pinia'
+import { useAuthStore } from '@/store/auth'
+import { useHobbitsStore } from '@/store/hobbits'
 
 export default defineComponent({
   name: 'OverviewView',
@@ -26,19 +23,11 @@ export default defineComponent({
     this.dispatchFetchHobbits()
   },
   computed: {
-    ...mapAuthState({
-      isAuthenticated: state => (state as AuthenticationState).authenticated,
-      username: state => (state as AuthenticationState).username,
-    }),
-    ...mapHobbitsState({
-      initialLoaded: (state) => (state as HobbitsState).initialLoaded,
-    }),
-    ...mapHobbitsGetters({
-      hobbits: 'getHobbits',
-    }),
+    ...mapState(useAuthStore, { isAuthenticated: 'authenticated', username: 'username' }),
+    ...mapState(useHobbitsStore, { initialLoaded: 'initialLoaded', hobbits: 'getHobbits' }),
   },
   methods: {
-    ...mapHobbitsActions({
+    ...mapActions(useHobbitsStore, {
       _fetchHobbits: 'fetchHobbits',
     }),
     dispatchFetchHobbits() {

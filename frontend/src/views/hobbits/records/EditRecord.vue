@@ -5,13 +5,11 @@
     </template>
     <template v-if="hobbit">
       <div>
-      <div class="header">
+        <div class="header">
           <div>
-            <h1>{{hobbit.name}} - Edit record {{id}}</h1>
-            <div class="by">by {{hobbit.user.username}}</div>
-            <div>
-            {{hobbit.description}}
-            </div>
+            <h1>{{ hobbit.name }} - Edit record {{ id }}</h1>
+            <div class="by">by {{ hobbit.user.username }}</div>
+            <div>{{ hobbit.description }}</div>
           </div>
           <div>
             <img :src="hobbit.image" />
@@ -32,8 +30,13 @@
               <textarea name="comment" id="comment" rows="5" v-model="data.comment"></textarea>
             </div>
             <div>
-              <Button value="Edit record" @click="putRecord()" type="primary" :loading="submitting"/>
-              <Button value="Go back" @click="goBack()"/>
+              <Button
+                value="Edit record"
+                @click="putRecord()"
+                type="primary"
+                :loading="submitting"
+              />
+              <Button value="Go back" @click="goBack()" />
             </div>
           </form>
         </FormWrapper>
@@ -49,9 +52,8 @@ import { Hobbit, NumericRecord } from '@/models'
 import Loading from '@/components/Icons/LoadingIcon.vue'
 import moment from 'moment'
 import Button from '@/components/form/Button.vue'
-import { createNamespacedHelpers } from 'vuex'
-
-const { mapActions: mapHobbitsActions, mapGetters: mapHobbitsGetters } = createNamespacedHelpers('hobbits')
+import { useHobbitsStore } from '@/store/hobbits'
+import { mapActions, mapState } from 'pinia'
 
 export default defineComponent({
   components: {
@@ -60,7 +62,7 @@ export default defineComponent({
     FormWrapper,
   },
   computed: {
-    ...mapHobbitsGetters({
+    ...mapState(useHobbitsStore, {
       hobbitById: 'getHobbitById',
       recordById: 'getRecordById',
     }),
@@ -73,8 +75,11 @@ export default defineComponent({
     hobbit(): Hobbit {
       return this.hobbitById(this.id)
     },
-    record(): NumericRecord {
-      return this.recordById(this.id, this.recordId)
+    record(): NumericRecord | undefined {
+      if (this.id) {
+        return this.recordById(this.id, this.recordId)
+      }
+      return undefined
     },
   },
   async created() {
@@ -87,7 +92,7 @@ export default defineComponent({
 
     console.log(this.data, this.record)
 
-    this.data = Object.assign({}, this.record, { timestamp: this.parseAndFormatDate(this.record.timestamp) })
+    this.data = Object.assign({}, this.record, { timestamp: this.parseAndFormatDate(this.record?.timestamp) })
   },
   data() {
     return {
@@ -100,19 +105,22 @@ export default defineComponent({
     }
   },
   methods: {
-    ...mapHobbitsActions({
+    ...mapActions(useHobbitsStore, {
       _putRecord: 'putRecord',
       _fetchHobbit: 'fetchHobbit',
       _fetchRecords: 'fetchRecords',
       fetchHeatmapData: 'fetchHeatmapData',
     }),
-    parseAndFormatDate(date: string) {
-      return moment(date).format('YYYY-MM-DDTHH:mm')
+    parseAndFormatDate(date: string | undefined) {
+      if (date) {
+        return moment(date).format('YYYY-MM-DDTHH:mm')
+      }
+      return ''
     },
     putRecord() {
       this.submitting = true
       this._putRecord({
-        id: this.id,
+        hobbitId: this.id,
         recordId: this.recordId,
         timestamp: moment(this.data.timestamp).toDate(),
         value: Number(this.data.value),
@@ -127,7 +135,9 @@ export default defineComponent({
       })
     },
     async fetchHobbit() {
-      return this._fetchHobbit({ id: this.id })
+      if (this.id) {
+        return this._fetchHobbit(this.id)
+      }
     },
     async fetchRecords() {
       return this._fetchRecords(Number(this.id))
@@ -140,34 +150,34 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-  label {
-    width: 8rem;
-    display: inline-block;
-  }
+label {
+  width: 8rem;
+  display: inline-block;
+}
 
-  table {
-    width: 100%;
-    thead {
-      font-weight: bold;
-    }
+table {
+  width: 100%;
+  thead {
+    font-weight: bold;
   }
+}
 
-  h1 {
-    margin: 0;
-    font-size: 16pt;
+h1 {
+  margin: 0;
+  font-size: 16pt;
+}
+
+.by {
+  color: gray;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+
+  img {
+    width: 2rem;
+    height: 2rem;
   }
-
-  .by {
-    color: gray;
-  }
-
-  .header {
-    display: flex;
-    justify-content: space-between;
-
-    img {
-      width: 2rem;
-      height: 2rem;
-    }
-  }
+}
 </style>

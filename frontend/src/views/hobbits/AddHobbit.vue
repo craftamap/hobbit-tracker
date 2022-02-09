@@ -28,11 +28,10 @@
 
 <script lang="ts">
 import FormWrapper from '@/components/form/FormWrapper.vue'
+import { useHobbitsStore } from '@/store/hobbits'
+import { mapActions } from 'pinia'
 import { defineComponent } from 'vue'
-import { createNamespacedHelpers } from 'vuex'
 import Button from '../../components/form/Button.vue'
-
-const { mapActions: mapHobbitsActions } = createNamespacedHelpers('hobbits')
 
 export default defineComponent({
   name: 'AddHobbit',
@@ -51,7 +50,7 @@ export default defineComponent({
     }
   },
   methods: {
-    ...mapHobbitsActions({
+    ...mapActions(useHobbitsStore, {
       _postHobbit: 'postHobbit',
     }),
     goBack() {

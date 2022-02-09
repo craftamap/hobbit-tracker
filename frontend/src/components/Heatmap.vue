@@ -9,6 +9,7 @@ import { v4 as uuidv4 } from 'uuid'
 import CalendarHeatMap from 'calendar-heatmap-mini'
 
 export default defineComponent({
+  name: 'CalendarHeatmap',
   props: {
     data: Array,
   },

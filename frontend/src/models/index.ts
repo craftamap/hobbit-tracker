@@ -1,13 +1,3 @@
-export interface Hobbit {
-  id: number;
-  user: User;
-  name: string;
-  image: string;
-  description: string;
-  records: NumericRecord[];
-  heatmap: NumericRecord[];
-}
-
 export interface User {
   id: number;
   username: string;
@@ -18,6 +8,7 @@ export interface NumericRecord {
   timestamp: string;
   value: number;
   comment: string;
+  // eslint-disable-next-line no-use-before-define
   hobbit?: Hobbit;
 }
 
@@ -26,4 +17,14 @@ export interface AppPassword {
     description: string;
     secret: string;
     last_used_at: string;
+}
+
+export interface Hobbit {
+  id: number;
+  user: User;
+  name: string;
+  image: string;
+  description: string;
+  records: NumericRecord[];
+  heatmap: NumericRecord[];
 }

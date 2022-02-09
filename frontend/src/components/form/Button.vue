@@ -9,7 +9,7 @@
 
 <script lang="ts">
 import { defineComponent, PropType } from 'vue'
-import Loading from '../Loading.vue'
+import Loading from '@/components/Icons/LoadingIcon.vue'
 
 export default defineComponent({
   name: 'VButton',

@@ -27,22 +27,31 @@
   </FormWrapper>
 </template>
 
-<script>
+<script lang="ts">
+import { defineComponent, Ref, ref } from 'vue'
 import Button from '../components/form/Button.vue'
 import FormWrapper from '../components/form/FormWrapper.vue'
 
-export default {
+export default defineComponent({
   name: 'LoginView',
   components: {
     Button,
     FormWrapper,
   },
-  methods: {
-    submit() {
-      this.$refs.form.submit()
-    },
+  setup() {
+    const form: Ref<HTMLFormElement | null> = ref(null)
+
+    const submit = () => {
+      console.log(form)
+      form.value?.submit()
+    }
+
+    return {
+      form,
+      submit,
+    }
   },
-}
+})
 </script>
 
 <style lang="scss" scoped>

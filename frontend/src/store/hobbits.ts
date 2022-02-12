@@ -20,15 +20,19 @@ export const useHobbitsStore = defineStore('hobbits', {
         return value.user.id === userId
       })
     },
-    getRecordById: (state) => (id: number, recordId: number): NumericRecord | undefined => {
-      return state.hobbits[id]?.records?.find((value: NumericRecord) => {
+    getRecordById: (state) => (hobbitId: number, recordId: number): NumericRecord | undefined => {
+      return state.hobbits[hobbitId]?.records?.find((value: NumericRecord) => {
         return value.id === recordId
       })
     },
   },
   actions: {
     setHobbit(hobbit: Hobbit) {
+      console.log('setHobbit', hobbit)
       this.hobbits[hobbit.id] = Object.assign({}, this.hobbits[hobbit.id], hobbit)
+    },
+    setHobbits(hobbits: Hobbit[]) {
+      this.hobbits = Object.assign({}, this.hobbits, ...hobbits.map((x: Hobbit) => ({ [x.id]: Object.assign({}, this.hobbits[x.id], x) })))
     },
     deleteRecordForHobbit({ hobbitId, recordId }: { hobbitId: number; recordId: number }) {
       const selectedHobbit = this.hobbits[hobbitId]
@@ -36,16 +40,13 @@ export const useHobbitsStore = defineStore('hobbits', {
         return record.id !== recordId
       })
     },
-    async fetchHobbitsByUser(userId: number | string | undefined) {
-      if (!userId) {
-        userId = 'me'
-      }
+    async fetchHobbitsByUser(userId: number | string = 'me') {
       const res = await fetch(`/api/profile/${userId}/hobbits`)
       if (!res.ok) {
         throw new Error(res.statusText)
       }
       const resJson = await res.json()
-      this.hobbits = resJson
+      this.setHobbits(resJson)
     },
     async fetchHobbits() {
       const res = await fetch('/api/hobbits/')
@@ -53,7 +54,8 @@ export const useHobbitsStore = defineStore('hobbits', {
         throw new Error(res.statusText)
       }
       const resJson = await res.json()
-      this.hobbits = resJson
+      console.log('fetchHobbits', resJson)
+      this.setHobbits(resJson)
       this.initialLoaded = true
     },
     async fetchHobbit(hobbitId: number) {

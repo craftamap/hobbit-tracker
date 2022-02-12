@@ -61,47 +61,17 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
+import { defineComponent, ref } from 'vue'
 import AppPasswordItem from '@/components/profile/AppPasswordItem.vue'
 import Dialog from '@/components/Dialog.vue'
 import Button from '@/components/form/Button.vue'
 import FormWrapper from '@/components/form/FormWrapper.vue'
 import { AppPassword } from '@/models'
 import { PlusIcon as Add } from '@heroicons/vue/outline'
-import { mapActions, mapState } from 'pinia'
+import { mapActions, mapState, storeToRefs } from 'pinia'
 import { useAppPasswordStore } from '@/store/profile'
 
 export default defineComponent({
-  data(): {
-    deleteDialog: {
-      appPassword: AppPassword | undefined;
-      shown: boolean;
-      loading: boolean;
-    };
-    addDialog: {
-      description: string;
-      shown: boolean;
-      loading: boolean;
-      password: string;
-    };
-  } {
-    return {
-      deleteDialog: {
-        appPassword: undefined,
-        shown: false,
-        loading: false,
-      },
-      addDialog: {
-        description: '',
-        shown: false,
-        loading: false,
-        password: '',
-      },
-    }
-  },
-  created() {
-    this.fetchAppPasswords()
-  },
   components: {
     AppPasswordItem,
     Dialog,
@@ -109,51 +79,78 @@ export default defineComponent({
     FormWrapper,
     Add,
   },
-  computed: {
-    ...mapState(useAppPasswordStore, ['appPasswords']),
-  },
-  methods: {
-    openDeleteDialog({ id }: { id: string }) {
-      this.deleteDialog.appPassword = this.appPasswords.find((appPassword) => {
+  setup() {
+    const appPasswordStore = useAppPasswordStore()
+
+    const deleteDialog = ref({
+      appPassword: undefined as AppPassword | undefined,
+      shown: false,
+      loading: false,
+    })
+
+    const addDialog = ref({
+      description: '',
+      shown: false,
+      loading: false,
+      password: '',
+    })
+
+    const { appPasswords } = storeToRefs(appPasswordStore)
+
+    const openDeleteDialog = ({ id }: { id: string }) => {
+      deleteDialog.value.appPassword = appPasswords.value.find((appPassword) => {
         return appPassword.id === id
       })
-      this.deleteDialog.shown = true
-    },
-    closeDeleteDialog() {
-      this.deleteDialog.shown = false
-      this.deleteDialog.appPassword = undefined
-    },
-    async deleteAppPassword() {
-      this.deleteDialog.loading = true
-      if (this.deleteDialog.appPassword?.id) {
-        await this._deleteAppPassword({ id: this.deleteDialog.appPassword?.id })
+      deleteDialog.value.shown = true
+    }
+
+    const closeDeleteDialog = () => {
+      deleteDialog.value.shown = false
+      deleteDialog.value.appPassword = undefined
+    }
+
+    const deleteAppPassword = async() => {
+      deleteDialog.value.loading = true
+      if (deleteDialog.value.appPassword?.id) {
+        await appPasswordStore.deleteAppPassword({ id: deleteDialog.value.appPassword?.id })
       }
-      this.deleteDialog.loading = false
-      this.closeDeleteDialog()
-    },
-    async addAppPassword() {
-      this.addDialog.loading = true
-      const newPassword = await this._addAppPassword({
-        description: this.addDialog.description,
+      deleteDialog.value.loading = false
+      closeDeleteDialog()
+    }
+
+    const addAppPassword = async() => {
+      addDialog.value.loading = true
+      const newPassword = await appPasswordStore.postAppPassword({
+        description: addDialog.value.description,
       })
-      this.addDialog.loading = false
-      this.addDialog.password = newPassword
-    },
-    openAddDialog() {
-      this.addDialog.description = ''
-      this.addDialog.password = ''
-      this.addDialog.shown = true
-    },
-    closeAddDialog() {
-      this.addDialog.shown = false
-      this.addDialog.password = ''
-      this.addDialog.description = ''
-    },
-    ...mapActions(useAppPasswordStore, {
-      _deleteAppPassword: 'deleteAppPassword',
-      _addAppPassword: 'postAppPassword',
-      fetchAppPasswords: 'fetchAppPasswords',
-    }),
+      addDialog.value.loading = true
+      addDialog.value.password = newPassword
+    }
+
+    const openAddDialog = () => {
+      addDialog.value.description = ''
+      addDialog.value.password = ''
+      addDialog.value.shown = true
+    }
+    const closeAddDialog = () => {
+      addDialog.value.shown = false
+      addDialog.value.description = ''
+      addDialog.value.password = ''
+    }
+
+    appPasswordStore.fetchAppPasswords()
+
+    return {
+      deleteDialog,
+      addDialog,
+      appPasswords,
+      openDeleteDialog,
+      closeDeleteDialog,
+      deleteAppPassword,
+      addAppPassword,
+      openAddDialog,
+      closeAddDialog,
+    }
   },
 })
 </script>

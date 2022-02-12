@@ -24,12 +24,11 @@
 </template>
 
 <script lang="ts">
-import { Hobbit, NumericRecord } from '../models/index'
-import { defineComponent, PropType } from 'vue'
+import { Hobbit } from '../models/index'
+import { computed, defineComponent, PropType, ref, toRefs } from 'vue'
 import Loading from './Icons/LoadingIcon.vue'
 import Heatmap from './Heatmap.vue'
 import { useHobbitsStore } from '@/store/hobbits'
-import { mapActions } from 'pinia'
 
 export default defineComponent({
   props: {
@@ -43,51 +42,38 @@ export default defineComponent({
     Loading,
     Heatmap,
   },
-  data() {
-    return {
-      loadingHeatmapData: true,
-    }
-  },
-  created() {
-    if (this.withHeatmap) {
-      this.fetchHeatmapData()
-    }
-  },
-  computed: {
-    getRecords(): NumericRecord[] {
-      return (this?.hobbit?.records as NumericRecord[]) || []
-    },
-    heatmapData(): object[] {
-      const retVal = (
-        (this?.hobbit?.heatmap as NumericRecord[]) || [
-          {
-            timestamp: new Date(),
-            value: 0,
-          },
-        ]
-      ).map((record) => {
+  setup(props) {
+    const hobbitsStore = useHobbitsStore()
+
+    const loadingHeatmapData = ref(true)
+    const { hobbit } = toRefs(props)
+
+    const heatmapData = computed(() => {
+      return (hobbit.value?.heatmap || [{ timestamp: new Date(), value: 0 }]).map((record) => {
         return {
           date: new Date(record.timestamp),
           count: record.value,
         }
       })
-      return retVal
-    },
-  },
-  methods: {
-    ...mapActions(useHobbitsStore, {
-      _fetchHeatmapData: 'fetchHeatmapData',
-    }),
-    fetchHeatmapData() {
-      if (!this.$props.hobbit?.heatmap && this.$props.hobbit?.id) {
-        this._fetchHeatmapData(this.$props.hobbit?.id)
+    })
+
+    const fetchHeatmapData = () => {
+      if (!hobbit.value?.heatmap && hobbit.value?.id) {
+        hobbitsStore.fetchHeatmapData(hobbit.value?.id)
           .then(() => {
-            this.$data.loadingHeatmapData = false
+            loadingHeatmapData.value = false
           })
       } else {
-        this.$data.loadingHeatmapData = false
+        loadingHeatmapData.value = false
       }
-    },
+    }
+
+    fetchHeatmapData()
+
+    return {
+      loadingHeatmapData,
+      heatmapData,
+    }
   },
 })
 </script>

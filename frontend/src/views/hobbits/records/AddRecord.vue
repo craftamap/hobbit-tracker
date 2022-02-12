@@ -21,15 +21,15 @@
           <form>
             <div>
               <label for="timestamp">When:</label>
-              <input id="timestamp" name="timestamp" type="datetime-local" v-model="data.timestamp" />
+              <input id="timestamp" name="timestamp" type="datetime-local" v-model="recordData.timestamp" />
             </div>
             <div>
               <label for="value">Value:</label>
-              <input type="number" name="number" id="number" v-model="data.value" />
+              <input type="number" name="number" id="number" v-model="recordData.value" />
             </div>
             <div>
               <label for="comment">Comment:</label>
-              <textarea name="comment" id="comment" rows="5" v-model="data.comment"></textarea>
+              <textarea name="comment" id="comment" rows="5" v-model="recordData.comment"></textarea>
             </div>
             <div>
               <Button value="Add record" @click="postRecord()" type="primary" :loading="submitting"/>
@@ -44,13 +44,13 @@
 
 <script lang="ts">
 import FormWrapper from '@/components/form/FormWrapper.vue'
-import { defineComponent } from 'vue'
-import { Hobbit } from '@/models'
+import { computed, defineComponent, ref } from 'vue'
 import Loading from '@/components/Icons/LoadingIcon.vue'
 import moment from 'moment'
 import Button from '@/components/form/Button.vue'
 import { useHobbitsStore } from '@/store/hobbits'
-import { mapActions, mapState } from 'pinia'
+import { useHobbitFromRoute } from '@/composables/hobbitFromRoute'
+import { useRoute, useRouter } from 'vue-router'
 
 export default defineComponent({
   components: {
@@ -58,66 +58,50 @@ export default defineComponent({
     Button,
     FormWrapper,
   },
-  computed: {
-    ...mapState(useHobbitsStore, {
-      hobbitById: 'getHobbitById',
-    }),
-    id(): number {
-      return Number(this.$route.params.hobbitId)
-    },
-    hobbit(): Hobbit {
-      return this.hobbitById(this.id)
-    },
-  },
-  created() {
-    if (!this.hobbit) {
-      this.fetchHobbit()
-    }
-  },
-  data() {
-    return {
-      submitting: false,
-      data: {
-        timestamp: this.getToday(),
-        value: 10,
-        comment: '',
-      },
-    }
-  },
-  methods: {
-    ...mapActions(useHobbitsStore, {
-      _postRecord: 'postRecord',
-      _fetchRecords: 'fetchRecords',
-      _fetchHobbit: 'fetchHobbit',
-      fetchHeatmapData: 'fetchHeatmapData',
-    }),
-    getToday() {
-      return moment().format('YYYY-MM-DDTHH:mm')
-    },
-    postRecord() {
-      this.submitting = true
-      this._postRecord({
-        id: this.id,
-        timestamp: moment(this.data.timestamp).toDate(),
-        value: Number(this.data.value),
-        comment: this.data.comment,
+  setup() {
+    const hobbits = useHobbitsStore()
+    const router = useRouter()
+
+    const submitting = ref(false)
+    const recordData = ref({
+      timestamp: moment().format('YYYY-MM-DDTHH:mm'),
+      value: 10,
+      comment: '',
+    })
+
+    const { id, hobbit } = useHobbitFromRoute()
+
+    const postRecord = () => {
+      submitting.value = true
+      hobbits.postRecord({
+        id: id.value,
+        timestamp: moment(recordData.value.timestamp).toDate(),
+        value: Number(recordData.value.value),
+        comment: recordData.value.comment,
       }).then(() => {
         return Promise.all([
-          this._fetchRecords(this.id),
-          this.fetchHeatmapData(this.id),
+          hobbits.fetchRecords(id.value),
+          hobbits.fetchHeatmapData(id.value),
         ])
       }).then(() => {
-        this.submitting = false
+        submitting.value = false
       })
-    },
-    async fetchHobbit() {
-      return this._fetchHobbit(this.id)
-    },
-    goBack() {
-      this.$router.push('/hobbits/' + this.id)
-    },
+    }
+
+    const goBack = () => {
+      router.push(`/hobbits/${id.value}`)
+    }
+
+    return {
+      submitting,
+      recordData,
+      hobbit,
+      postRecord,
+      goBack,
+    }
   },
 })
+
 </script>
 
 <style lang="scss" scoped>

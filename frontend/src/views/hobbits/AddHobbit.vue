@@ -18,7 +18,7 @@
           <input id="image" name="image" type="file" @change="changeImage" />
         </div>
         <div>
-          <Button value="Add Hobbit" @click="dispatchPostHobbit()" type="primary" :loading="submitting"/>
+          <Button value="Add Hobbit" @click="postHobbit()" type="primary" :loading="submitting"/>
           <Button value="Go back" @click="goBack()"/>
         </div>
       </form>
@@ -29,8 +29,8 @@
 <script lang="ts">
 import FormWrapper from '@/components/form/FormWrapper.vue'
 import { useHobbitsStore } from '@/store/hobbits'
-import { mapActions } from 'pinia'
-import { defineComponent } from 'vue'
+import { defineComponent, ref } from 'vue'
+import { useRouter } from 'vue-router'
 import Button from '../../components/form/Button.vue'
 
 export default defineComponent({
@@ -39,24 +39,14 @@ export default defineComponent({
     Button,
     FormWrapper,
   },
-  data() {
-    return {
-      submitting: false,
-      form: {
-        name: '',
-        description: '',
-        image: '',
-      },
-    }
-  },
-  methods: {
-    ...mapActions(useHobbitsStore, {
-      _postHobbit: 'postHobbit',
-    }),
-    goBack() {
-      this.$router.push('/')
-    },
-    readUploadedFileAsDataURL(inputFile: File): Promise<string> {
+  setup() {
+    const router = useRouter()
+    const hobbits = useHobbitsStore()
+
+    const submitting = ref(false)
+    const form = ref({ name: '', description: '', image: '' })
+
+    const readUploadedFileAsDataURL = (inputFile: File): Promise<string> => {
       const temporaryFileReader = new FileReader()
 
       return new Promise((resolve, reject) => {
@@ -70,24 +60,37 @@ export default defineComponent({
         }
         temporaryFileReader.readAsDataURL(inputFile)
       })
-    },
-    async changeImage(event: Event) {
+    }
+    const changeImage = async(event: Event) => {
       // TODO: Add validation
-      const fileList = (event?.target as any).files as FileList
+      const fileList = (event?.target as HTMLInputElement).files!
       const firstFile = fileList[0]
-      this.form.image = await this.readUploadedFileAsDataURL(firstFile)
-      console.log(this.form.image)
-    },
-    async dispatchPostHobbit() {
-      this.submitting = true
-      return this._postHobbit({
-        name: this.form.name,
-        description: this.form.description,
-        image: this.form.image,
+      form.value.image = await readUploadedFileAsDataURL(firstFile)
+      console.log(form.value.image)
+    }
+
+    const postHobbit = async() => {
+      submitting.value = true
+      return hobbits.postHobbit({
+        name: form.value.name,
+        description: form.value.description,
+        image: form.value.image,
       }).then(() => {
-        this.submitting = false
+        submitting.value = false
       })
-    },
+    }
+
+    const goBack = () => {
+      router.push('/')
+    }
+
+    return {
+      submitting,
+      form,
+      changeImage,
+      goBack,
+      postHobbit,
+    }
   },
 })
 </script>

@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="header">
-      <h1>Add Hobbit</h1>
+      <h1>Edit Hobbit</h1>
     </div>
       <template v-if="!hobbit">
         <Loading />
@@ -22,7 +22,7 @@
               <input id="image" name="image" type="file" @change="changeImage" />
             </div>
             <div>
-              <Button value="Add Hobbit" @click="putHobbit()" type="primary" :loading="submitting"/>
+              <Button value="Edit Hobbit" @click="putHobbit()" type="primary" :loading="submitting"/>
               <Button value="Go back" @click="goBack()"/>
             </div>
           </form>
@@ -32,13 +32,13 @@
 </template>
 
 <script lang="ts">
-import { Hobbit } from '@/models'
-import { defineComponent } from 'vue'
+import { defineComponent, ref, watch } from 'vue'
 import Button from '../../components/form/Button.vue'
 import Loading from '../../components/Icons/LoadingIcon.vue'
 import FormWrapper from '@/components/form/FormWrapper.vue'
 import { useHobbitsStore } from '@/store/hobbits'
-import { mapActions, mapState } from 'pinia'
+import { useHobbitFromRoute } from '@/composables/hobbitFromRoute'
+import { useRouter } from 'vue-router'
 
 export default defineComponent({
   name: 'AddHobbit',
@@ -47,55 +47,26 @@ export default defineComponent({
     Loading,
     FormWrapper,
   },
-  created() {
-    if (!this.hobbit) {
-      this._fetchHobbit(this.id)
-    }
-  },
-  data() {
-    return {
-      submitting: false,
-      form: {
-        name: '',
-        description: '',
-        image: '',
-      },
-    }
-  },
-  computed: {
-    ...mapState(useHobbitsStore, {
-      hobbitById: 'getHobbitById',
-    }),
-    id(): number {
-      return Number(this.$route.params.hobbitId)
-    },
-    hobbit(): Hobbit {
-      return this.hobbitById(this.id)
-    },
-  },
-  watch: {
-    hobbit: {
-      handler(newValue: Hobbit, oldValue) {
-        console.log('WATCH', newValue, oldValue)
-        if (newValue && newValue !== oldValue) {
-          this.form.name = newValue.name
-          this.form.description = newValue.description
-          this.form.image = newValue.image
-        }
-      },
-      immediate: true,
-    },
-  },
-  methods: {
-    ...mapActions(useHobbitsStore, {
-      _putHobbit: 'putHobbit',
-      _fetchRecords: 'fetchRecords',
-      _fetchHobbit: 'fetchHobbit',
-    }),
-    goBack() {
-      this.$router.push(`/hobbits/${this.id}`)
-    },
-    readUploadedFileAsDataURL(inputFile: File): Promise<string> {
+  setup() {
+    const hobbits = useHobbitsStore()
+    const router = useRouter()
+
+    const submitting = ref(false)
+    const form = ref({ name: '', description: '', image: '' })
+
+    const { hobbit, id } = useHobbitFromRoute()
+
+    watch(hobbit, (newValue, oldValue) => {
+      console.log('foo 1')
+      if (newValue && newValue !== oldValue) {
+        console.log('foo 2')
+        form.value.name = newValue.name
+        form.value.description = newValue.description
+        form.value.image = newValue.image
+      }
+    }, { immediate: true })
+
+    const readUploadedFileAsDataURL = (inputFile: File): Promise<string> => {
       const temporaryFileReader = new FileReader()
 
       return new Promise((resolve, reject) => {
@@ -109,25 +80,38 @@ export default defineComponent({
         }
         temporaryFileReader.readAsDataURL(inputFile)
       })
-    },
-    async changeImage(event: Event) {
+    }
+    const changeImage = async(event: Event) => {
       // TODO: Add validation
-      const fileList = (event?.target as any).files as FileList
+      const fileList = (event?.target as HTMLInputElement).files!
       const firstFile = fileList[0]
-      this.form.image = await this.readUploadedFileAsDataURL(firstFile)
-      console.log(this.form.image)
-    },
-    putHobbit() {
-      this.submitting = true
-      this._putHobbit({
-        id: this.id,
-        name: this.form.name,
-        description: this.form.description,
-        image: this.form.image,
-      }).then(() => {
-        this.submitting = false
+      form.value.image = await readUploadedFileAsDataURL(firstFile)
+      console.log(form.value.image)
+    }
+
+    const goBack = () => {
+      router.push(`/hobbits/${id.value}`)
+    }
+
+    const putHobbit = async() => {
+      submitting.value = true
+      await hobbits.putHobbit({
+        id: id.value,
+        name: form.value.name,
+        description: form.value.description,
+        image: form.value.image,
       })
-    },
+      submitting.value = false
+    }
+
+    return {
+      changeImage,
+      submitting,
+      form,
+      hobbit,
+      goBack,
+      putHobbit,
+    }
   },
 })
 </script>

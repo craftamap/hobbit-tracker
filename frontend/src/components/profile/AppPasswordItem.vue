@@ -1,20 +1,24 @@
 <template>
   <div class="app-password">
     <div class="description-wrapper">
-      <span class="description">{{appPassword.description}}</span> · <span class="id">{{appPassword.id}}</span>
+      <span class="description">{{ appPassword?.description }}</span> ·
+      <span class="id">{{ appPassword?.id }}</span>
     </div>
     <div class="last-used-wrapper">
-      <span class="last-used-at-label">Last Used At: </span>{{ formatDate(appPassword.last_used_at) }} ({{ formatDateAgo(appPassword.last_used_at) }})
+      <span class="last-used-at-label">Last Used At:</span>
+      {{ formatDate(appPassword?.last_used_at) }} ({{ formatDateAgo(appPassword?.last_used_at) }})
     </div>
     <div class="icons-wrapper">
-      <span tabindex="0"><Trash class="h-16 cursor-pointer"  @click="emitDelete($event)"/></span>
+      <span tabindex="0">
+        <Trash class="h-16 cursor-pointer" @click="emitDelete()" />
+      </span>
     </div>
   </div>
 </template>
 
 <script lang="ts">
 import moment from 'moment'
-import { defineComponent, PropType } from 'vue'
+import { defineComponent, PropType, toRefs } from 'vue'
 import { AppPassword } from '../../models'
 import { TrashIcon as Trash } from '@heroicons/vue/outline'
 
@@ -28,26 +32,36 @@ export default defineComponent({
       type: Object as PropType<AppPassword>,
     },
   },
-  methods: {
-    formatDate(date: string): string {
+  setup(props, { emit }) {
+    const { appPassword } = toRefs(props)
+
+    const formatDate = (date: string | undefined): string => {
       const d = moment(date)
       if (d.year() === 1) {
         return 'never'
       }
       return d.format('YYYY-MM-DD HH:mm')
-    },
-    formatDateAgo(date: string): string {
+    }
+
+    const formatDateAgo = (date: string | undefined): string => {
       const d = moment(date)
       if (d.year() === 1) {
         return 'never'
       }
       return moment.duration(d.diff(moment())).humanize() + ' ago'
-    },
-    emitDelete() {
-      this.$emit('delete', {
-        id: this?.appPassword?.id,
+    }
+
+    const emitDelete = () => {
+      emit('delete', {
+        id: appPassword.value?.id,
       })
-    },
+    }
+
+    return {
+      formatDate,
+      formatDateAgo,
+      emitDelete,
+    }
   },
 })
 </script>
@@ -71,15 +85,20 @@ export default defineComponent({
     text-align: right;
   }
 
-  .description-wrapper { grid-area: description; }
+  .description-wrapper {
+    grid-area: description;
+  }
 
-  .last-used-wrapper { grid-area: last-used; }
+  .last-used-wrapper {
+    grid-area: last-used;
+  }
 
   .description {
     font-weight: bold;
   }
 
-  .id, .last-used-at-label {
+  .id,
+  .last-used-at-label {
     color: var(--secondary-text);
   }
 }

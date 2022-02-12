@@ -15,8 +15,7 @@
       </transition>
     </router-view>
     <div>
-      <div id="dialog-target">
-      </div>
+      <div id="dialog-target"></div>
     </div>
   </div>
 </template>
@@ -25,24 +24,26 @@
 import '@fontsource/lato/index.css' /* weight 400 */
 import { defineComponent } from 'vue'
 import DialogWrapper from '@/components/DialogWrapper.vue'
-import { mapActions, mapState } from 'pinia'
+import { storeToRefs } from 'pinia'
 import { useSocketStore } from './store/socket'
 import { useAuthStore } from './store/auth'
 
 export default defineComponent({
-  created() {
-    this.fetchAuthDetails()
-    this.createWebsocketConnection()
-  },
   components: {
     DialogWrapper,
   },
-  computed: {
-    ...mapState(useAuthStore, { isAuthenticated: 'authenticated' }),
-  },
-  methods: {
-    ...mapActions(useAuthStore, ['fetchAuthDetails']),
-    ...mapActions(useSocketStore, ['createWebsocketConnection']),
+  setup() {
+    const auth = useAuthStore()
+    const socket = useSocketStore()
+
+    const { authenticated: isAuthenticated } = storeToRefs(auth)
+
+    auth.fetchAuthDetails()
+    socket.createWebsocketConnection()
+
+    return {
+      isAuthenticated,
+    }
   },
 })
 </script>
@@ -98,7 +99,11 @@ body {
 #nav {
   padding: 30px;
 
-  a, a:link,:hover,a:active,a:visited {
+  a,
+  a:link,
+  :hover,
+  a:active,
+  a:visited {
     font-weight: bold;
     color: var(--primary-text);
 
@@ -110,7 +115,10 @@ body {
 
 a {
   text-decoration: none;
-  &:link,&:hover,&:active,&:visited {
+  &:link,
+  &:hover,
+  &:active,
+  &:visited {
     color: inherit;
   }
 }

@@ -7,7 +7,7 @@
       <div>
         <div class="header">
           <div>
-            <h1>{{ hobbit.name }} - Edit record {{ id }}</h1>
+            <h1>{{ hobbit.name }} - Edit record {{ recordId }}</h1>
             <div class="by">by {{ hobbit.user.username }}</div>
             <div>{{ hobbit.description }}</div>
           </div>
@@ -19,15 +19,20 @@
           <form>
             <div>
               <label for="timestamp">When:</label>
-              <input id="timestamp" name="timestamp" type="datetime-local" v-model="data.timestamp" />
+              <input
+                id="timestamp"
+                name="timestamp"
+                type="datetime-local"
+                v-model="recordData.timestamp"
+              />
             </div>
             <div>
               <label for="value">Value:</label>
-              <input type="number" name="number" id="number" v-model="data.value" />
+              <input type="number" name="number" id="number" v-model="recordData.value" />
             </div>
             <div>
               <label for="comment">Comment:</label>
-              <textarea name="comment" id="comment" rows="5" v-model="data.comment"></textarea>
+              <textarea name="comment" id="comment" rows="5" v-model="recordData.comment"></textarea>
             </div>
             <div>
               <Button
@@ -47,13 +52,13 @@
 
 <script lang="ts">
 import FormWrapper from '@/components/form/FormWrapper.vue'
-import { defineComponent } from 'vue'
-import { Hobbit, NumericRecord } from '@/models'
+import { computed, defineComponent, ref } from 'vue'
 import Loading from '@/components/Icons/LoadingIcon.vue'
 import moment from 'moment'
 import Button from '@/components/form/Button.vue'
 import { useHobbitsStore } from '@/store/hobbits'
-import { mapActions, mapState } from 'pinia'
+import { useHobbitFromRoute } from '@/composables/hobbitFromRoute'
+import { useRoute, useRouter } from 'vue-router'
 
 export default defineComponent({
   components: {
@@ -61,90 +66,75 @@ export default defineComponent({
     Button,
     FormWrapper,
   },
-  computed: {
-    ...mapState(useHobbitsStore, {
-      hobbitById: 'getHobbitById',
-      recordById: 'getRecordById',
-    }),
-    id(): number {
-      return Number(this.$route.params.hobbitId)
-    },
-    recordId(): number {
-      return Number(this.$route.params.recordId)
-    },
-    hobbit(): Hobbit {
-      return this.hobbitById(this.id)
-    },
-    record(): NumericRecord | undefined {
-      if (this.id) {
-        return this.recordById(this.id, this.recordId)
+  setup() {
+    const hobbits = useHobbitsStore()
+    const router = useRouter()
+    const route = useRoute()
+
+    const submitting = ref(false)
+    const recordData = ref({
+      timestamp: '',
+      value: 10,
+      comment: '',
+    })
+
+    const { id, hobbit } = useHobbitFromRoute()
+    const recordId = computed(() => {
+      const recordIdParam = route.params.recordId
+      if (Array.isArray(recordIdParam)) {
+        if (recordIdParam.length > 0) {
+          return Number(recordIdParam[0])
+        }
+        return -1
       }
-      return undefined
-    },
-  },
-  async created() {
-    if (!this.hobbit) {
-      await this.fetchHobbit()
-    }
-    if (!this.record) {
-      await this.fetchRecords()
-    }
+      return Number(recordIdParam)
+    })
 
-    console.log(this.data, this.record)
+    const record = computed(() => {
+      return hobbits.getRecordById(id.value, recordId.value)
+    })
 
-    this.data = Object.assign({}, this.record, { timestamp: this.parseAndFormatDate(this.record?.timestamp) })
-  },
-  data() {
-    return {
-      submitting: false,
-      data: {
-        timestamp: '',
-        value: 0,
-        comment: '',
-      },
-    }
-  },
-  methods: {
-    ...mapActions(useHobbitsStore, {
-      _putRecord: 'putRecord',
-      _fetchHobbit: 'fetchHobbit',
-      _fetchRecords: 'fetchRecords',
-      fetchHeatmapData: 'fetchHeatmapData',
-    }),
-    parseAndFormatDate(date: string | undefined) {
+    const parseAndFormatDate = (date: string | undefined) => {
       if (date) {
         return moment(date).format('YYYY-MM-DDTHH:mm')
       }
       return ''
-    },
-    putRecord() {
-      this.submitting = true
-      this._putRecord({
-        hobbitId: this.id,
-        recordId: this.recordId,
-        timestamp: moment(this.data.timestamp).toDate(),
-        value: Number(this.data.value),
-        comment: this.data.comment,
+    }
+
+    const putRecord = () => {
+      submitting.value = true
+      hobbits.putRecord({
+        hobbitId: id.value,
+        recordId: recordId.value,
+        timestamp: moment(recordData.value.timestamp).toDate(),
+        value: Number(recordData.value.value),
+        comment: recordData.value.comment,
       }).then(() => {
         return Promise.all([
-          this._fetchRecords(this.id),
-          this.fetchHeatmapData(this.id),
+          hobbits.fetchRecords(id.value),
+          hobbits.fetchHeatmapData(id.value),
         ])
       }).then(() => {
-        this.submitting = false
+        submitting.value = false
       })
-    },
-    async fetchHobbit() {
-      if (this.id) {
-        return this._fetchHobbit(this.id)
-      }
-    },
-    async fetchRecords() {
-      return this._fetchRecords(Number(this.id))
-    },
-    goBack() {
-      this.$router.push('/hobbits/' + this.id)
-    },
+    }
+
+    const goBack = () => {
+      router.push(`/hobbits/${id.value}`)
+    }
+
+    hobbits.fetchRecords(id.value).then(() => {
+      recordData.value = Object.assign({}, record.value, { timestamp: parseAndFormatDate(record.value?.timestamp) })
+    })
+
+    return {
+      recordData,
+      submitting,
+      hobbit,
+      recordId,
+      goBack,
+      putRecord,
+    }
   },
 })
 </script>

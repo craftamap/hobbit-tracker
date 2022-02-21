@@ -18,7 +18,7 @@
     "pinia": "^2.0.11",
     "register-service-worker": "^1.7.1",
     "uuid": "^8.3.2",
-    "vue": "^3.2.26",
+    "vue": "^3.2.31",
     "vue-router": "^4.0.0-0",
     "vuejs-heatmap": "^1.1.7"
   },
@@ -29,7 +29,7 @@
     "@vue/eslint-config-typescript": "^10.0.0",
     "@volar/server": "^0.31.2",
     "@vue/compiler-sfc": "^3.2.22",
-    "esbuild": "^0.14.14",
+    "esbuild": "^0.14.23",
     "esbuild-plugin-vue3": "^0.3.0",
     "eslint": "^8.8.0",
     "eslint-config-standard": "^16.0.3",

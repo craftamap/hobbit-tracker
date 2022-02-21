@@ -15,6 +15,6 @@ require (
 	github.com/wader/gormstore/v2 v2.0.0
 	golang.org/x/crypto v0.0.0-20210220033148-5ea612d1eb83
 	golang.org/x/sys v0.0.0-20210521203332-0cec03c779c1 // indirect
-	gorm.io/driver/sqlite v1.2.6
-	gorm.io/gorm v1.22.4
+	gorm.io/driver/sqlite v1.3.1
+	gorm.io/gorm v1.23.1
 )

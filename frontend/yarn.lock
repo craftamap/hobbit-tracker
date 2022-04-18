@@ -917,10 +917,10 @@
     "@babel/helper-validator-identifier" "^7.16.7"
     to-fast-properties "^2.0.0"
 
-"@craftamap/esbuild-plugin-html@^0.3.1":
-  version "0.3.1"
-  resolved "https://registry.yarnpkg.com/@craftamap/esbuild-plugin-html/-/esbuild-plugin-html-0.3.1.tgz#d16363f57c0200db81df2184c729f55042d1e004"
-  integrity sha512-Ru6m6RjkDRvD1yOg0GB4BJuwBRNiLt3Z4D68G4P9ByDtKxc0+9jjHsaMDOLHL8kM5npFiypZwUwjS+HaNpDHWw==
+"@craftamap/esbuild-plugin-html@^0.3.2":
+  version "0.3.2"
+  resolved "https://registry.yarnpkg.com/@craftamap/esbuild-plugin-html/-/esbuild-plugin-html-0.3.2.tgz#a67cec1340f2f0ae861d3459ccff11e794e5928b"
+  integrity sha512-LlLTR2ecK2/ZROm8vR1yCFN4ZjSiZmrtrAmWjXh7LLrFJ4bEjYRJPylpx8zeX+s0SSYiQ+Fs2XNXsIZb4BdyeA==
   dependencies:
     jsdom "^17.0.0"
     lodash.template "^4.5.0"

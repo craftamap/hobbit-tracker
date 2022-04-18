@@ -1,7 +1,7 @@
 <template>
   <div class="feed">
     <div class="greeting">
-      <div class="welcome" v-if="isAuthenticated">
+      <div class="welcome" v-if="authenticated">
         Here there,
         <span class="username">{{ username }}</span>!
       </div>
@@ -15,7 +15,7 @@
     <div class="sidebar">
       <h1>Your hobbits:</h1>
       <div>
-        <span class="icon-entry" @click="navigateAddHobbit">
+        <span class="icon-entry" @click="goToAddHobbit">
           <PlusIcon class="w-24 h-24" />
           <span>Add Hobbit...</span>
         </span>
@@ -26,15 +26,15 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
+import { computed, defineComponent, toRefs, watch } from 'vue'
 import FeedEvent from '@/components/FeedEvent.vue'
 import SimpleHobbit from '@/components/SimpleHobbit.vue'
 import { PlusIcon } from '@heroicons/vue/outline'
-import { Hobbit } from '@/models'
 import { useAuthStore } from '@/store/auth'
-import { mapActions, mapState } from 'pinia'
+import { mapActions, storeToRefs } from 'pinia'
 import { useFeedStore } from '@/store/feed'
 import { useHobbitsStore } from '@/store/hobbits'
+import { useRouter } from 'vue-router'
 
 export default defineComponent({
   name: 'FeedView',
@@ -43,34 +43,38 @@ export default defineComponent({
     SimpleHobbit,
     PlusIcon,
   },
-  created() {
-    this.fetchFeed()
-    this.fetchHobbitsByUser()
-  },
-  computed: {
-    ...mapState(useFeedStore, ['feedEvents']),
-    ...mapState(useAuthStore, { isAuthenticated: 'authenticated', username: 'username', userId: 'userId' }),
-    ...mapState(useHobbitsStore, { _hobbitsByUser: 'getHobbitsByUser' }),
-    hobbitsOfUser(): Hobbit[] {
-      if (this.userId) {
-        return this._hobbitsByUser(this.userId)
+  setup() {
+    const hobbits = useHobbitsStore()
+    const router = useRouter()
+
+    const feed = useFeedStore()
+    const { feedEvents } = storeToRefs(feed)
+
+    const auth = useAuthStore()
+    const { userId, authenticated, username } = storeToRefs(auth)
+
+    const hobbitsOfUser = computed(() => {
+      if (userId) {
+        return hobbits.getHobbitsByUser(userId.value!)
       }
       return []
-    },
-  },
-  methods: {
-    ...mapActions(useFeedStore, [
-      'fetchFeed',
-    ]),
-    ...mapActions(useHobbitsStore, {
-      _fetchHobbitsByUser: 'fetchHobbitsByUser',
-    }),
-    fetchHobbitsByUser() {
-      this._fetchHobbitsByUser()
-    },
-    navigateAddHobbit() {
-      this.$router.push('/hobbits/add')
-    },
+    })
+
+    feed.fetchFeed()
+
+    hobbits.fetchHobbitsByUser()
+
+    const goToAddHobbit = () => {
+      router.push('/hobbits/add')
+    }
+
+    return {
+      feedEvents,
+      authenticated,
+      username,
+      hobbitsOfUser,
+      goToAddHobbit,
+    }
   },
 })
 </script>

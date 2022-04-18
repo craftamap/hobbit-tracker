@@ -4,7 +4,7 @@
       Here there, <span class="username">{{username}}</span>!
     </div>
     <IconBar @reload="reload" />
-    <SimpleHobbit v-for="hobbit in hobbits" :key='`hobbit-${hobbit.id}`' :hobbit="hobbit" :withHeatmap=true  />
+    <SimpleHobbit v-for="hobbit in hobbits" :key='`hobbit-${hobbit?.id}`' :hobbit="hobbit" :withHeatmap=true  />
   </div>
 </template>
 
@@ -12,32 +12,32 @@
 import { defineComponent } from 'vue'
 import SimpleHobbit from '../components/SimpleHobbit.vue'
 import IconBar from '@/components/IconBar.vue'
-import { mapActions, mapState } from 'pinia'
+import { storeToRefs } from 'pinia'
 import { useAuthStore } from '@/store/auth'
 import { useHobbitsStore } from '@/store/hobbits'
 
 export default defineComponent({
   name: 'OverviewView',
   components: { SimpleHobbit, IconBar },
-  created() {
-    this.dispatchFetchHobbits()
-  },
-  computed: {
-    ...mapState(useAuthStore, { isAuthenticated: 'authenticated', username: 'username' }),
-    ...mapState(useHobbitsStore, { initialLoaded: 'initialLoaded', hobbits: 'getHobbits' }),
-  },
-  methods: {
-    ...mapActions(useHobbitsStore, {
-      _fetchHobbits: 'fetchHobbits',
-    }),
-    dispatchFetchHobbits() {
-      if (!this.initialLoaded) {
-        this._fetchHobbits()
-      }
-    },
-    reload() {
-      this._fetchHobbits()
-    },
+  setup() {
+    const auth = useAuthStore()
+    const hobbits = useHobbitsStore()
+
+    const { getHobbits } = storeToRefs(hobbits)
+    const { authenticated: isAuthenticated, username } = storeToRefs(auth)
+
+    const reload = () => {
+      hobbits.fetchHobbits()
+    }
+
+    hobbits.fetchHobbits()
+
+    return {
+      hobbits: getHobbits,
+      reload,
+      username,
+      isAuthenticated,
+    }
   },
 })
 </script>

@@ -1,31 +1,26 @@
 <template>
   <div class="card">
     <template v-if="isHobbitCreated">
-    <div class="header">
-      <router-link :to="`/profile/${hobbit?.user.id}`">{{hobbit?.user.username}}</router-link> has created a new Hobbit.
-    </div>
+      <div class="header">
+        <router-link :to="`/profile/${hobbit?.user.id}`">{{ hobbit?.user.username }}</router-link> has created a new Hobbit.
+      </div>
       <SimpleHobbit :hobbit="hobbit" />
-    </template >
+    </template>
     <template v-if="isRecordCreated">
-    <div class="header">
-      <router-link :to="`/profile/${record?.hobbit?.user.id}`">{{record?.hobbit?.user?.username}}</router-link>
-      has created a new entry in
-      <router-link :to="`/hobbits/${record?.hobbit?.user.id}`">"{{record?.hobbit?.name}}".</router-link>
-    </div>
-        <h1>
-          <router-link :to="`/hobbits/${hobbit?.id}`">{{
-            record?.value
-          }}</router-link>
-        </h1>
-        <blockquote class="comment" v-if="!!record?.comment">
-          {{  record?.comment  }}
-        </blockquote>
+      <div class="header">
+        <router-link :to="`/profile/${hobbit?.user.id}`">{{ hobbit?.user?.username }}</router-link> has created a new entry in
+        <router-link :to="`/hobbits/${hobbit?.user.id}`">"{{ hobbit?.name }}".</router-link>
+      </div>
+      <h1>
+        <router-link :to="`/hobbits/${hobbit?.id}`">{{ record?.value }}</router-link>
+      </h1>
+      <blockquote class="comment" v-if="!!record?.comment">{{ record?.comment }}</blockquote>
     </template>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from 'vue'
+import { computed, defineComponent, PropType, toRefs } from 'vue'
 import { FeedEvent, FeedEventTypus, Hobbit, NumericRecord } from '@/models'
 import SimpleHobbit from '@/components/SimpleHobbit.vue'
 
@@ -37,27 +32,38 @@ export default defineComponent({
   props: {
     feedEvent: Object as PropType<FeedEvent>,
   },
-  computed: {
-    isHobbitCreated(): boolean {
-      return this.feedEvent?.FeedEventTypus === FeedEventTypus.HobbitCreated
-    },
-    isRecordCreated(): boolean {
-      return this.feedEvent?.FeedEventTypus === FeedEventTypus.RecordCreated
-    },
-    hobbit(): Hobbit | null | undefined {
-      if (this.isHobbitCreated) {
-        return this?.feedEvent?.Payload as Hobbit
-      } else if (this.isRecordCreated) {
-        return (this?.feedEvent?.Payload as NumericRecord)?.hobbit
+  setup(props) {
+    const { feedEvent } = toRefs(props)
+
+    const isHobbitCreated = computed(() => {
+      return feedEvent.value?.FeedEventTypus === FeedEventTypus.HobbitCreated
+    })
+    const isRecordCreated = computed(() => {
+      return feedEvent.value?.FeedEventTypus === FeedEventTypus.RecordCreated
+    })
+
+    const hobbit = computed(() => {
+      if (isHobbitCreated.value) {
+        return feedEvent.value?.Payload as Hobbit
+      } else if (isRecordCreated.value) {
+        return (feedEvent.value?.Payload as NumericRecord)?.hobbit
       }
-      return null
-    },
-    record(): NumericRecord | null {
-      if (this.isRecordCreated) {
-        return this?.feedEvent?.Payload as NumericRecord
+      return undefined
+    })
+
+    const record = computed(() => {
+      if (isRecordCreated.value) {
+        return feedEvent.value?.Payload as NumericRecord
       }
-      return null
-    },
+      return undefined
+    })
+
+    return {
+      isHobbitCreated,
+      isRecordCreated,
+      hobbit,
+      record,
+    }
   },
 })
 </script>
@@ -83,6 +89,5 @@ export default defineComponent({
     padding: 1em;
     border-left: solid 3px var(--primary);
   }
-
 }
 </style>

@@ -11,7 +11,7 @@ export const useFeedStore = defineStore('feed', {
         .then(res => {
           return res.json()
         }).then(json => {
-          this.feedEvents = json
+          this.$patch({ feedEvents: json })
         })
     },
   },

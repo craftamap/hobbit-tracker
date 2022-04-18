@@ -14,20 +14,28 @@
 <script lang="ts">
 import Add from '@/components/Icons/AddIcon.vue'
 import { defineComponent } from 'vue'
+import { useRouter } from 'vue-router'
 import Reload from './Icons/ReloadIcon.vue'
 
 export default defineComponent({
+  name: 'IconBar',
   components: {
     Add: Add,
     Reload: Reload,
   },
-  methods: {
-    navigateAddHobbit() {
-      this.$router.push('/hobbits/add')
-    },
-    reload() {
-      this.$emit('reload')
-    },
+  setup(_, { emit }) {
+    const router = useRouter()
+
+    const navigateAddHobbit = () => {
+      router.push('/hobbits/add')
+    }
+    const reload = () => {
+      emit('reload')
+    }
+    return {
+      navigateAddHobbit,
+      reload,
+    }
   },
 })
 </script>

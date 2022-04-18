@@ -7,7 +7,7 @@
     </div>
     <div>
       <div v-if="isMe" class="text-align-right">
-        <CogIcon class="h-24 cursor-pointer" @click="navigateToAppPassword" />
+        <CogIcon class="h-24 cursor-pointer" @click="goToAppPassword" />
       </div>
       <div v-if="!isMe" class="text-align-right">
         <UserAddIcon v-if="!follows" class="h-24 cursor-pointer" @click="follow" />
@@ -25,17 +25,16 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
+import { computed, defineComponent, watch } from 'vue'
 
 import { CogIcon, UserAddIcon, UserRemoveIcon } from '@heroicons/vue/outline'
 
-import { Hobbit, User } from '@/models/'
 import SimpleHobbit from '@/components/SimpleHobbit.vue'
-import { mapActions, mapState } from 'pinia'
 import { useAuthStore } from '@/store/auth'
 import { useProfileStore } from '@/store/profile'
 import { useHobbitsStore } from '@/store/hobbits'
 import { useUsersStore } from '@/store/users'
+import { useRoute, useRouter } from 'vue-router'
 
 export default defineComponent({
   name: 'ProfileView',
@@ -45,98 +44,101 @@ export default defineComponent({
     UserAddIcon,
     UserRemoveIcon,
   },
-  created() {
-    this.deferredInit()
-  },
-  watch: {
-    $route() {
-      this.deferredInit()
-    },
-    userId() {
-      this.deferredInit()
-    },
-  },
-  computed: {
-    ...mapState(useUsersStore, ['getUserById']),
-    ...mapState(useAuthStore, { myUserId: 'userId' }),
-    ...mapState(useProfileStore, ['followsUser']),
-    ...mapState(useHobbitsStore, {
-      _hobbitsByUser: 'getHobbitsByUser',
-    }),
-    isMe(): boolean {
-      return !this.$route.params.profileId
-    },
-    user(): User | undefined {
-      console.log(this.userId)
-      if (this.userId) {
-        return this.getUserById(this.userId)
+  setup() {
+    const route = useRoute()
+    const router = useRouter()
+    const auth = useAuthStore()
+    const users = useUsersStore()
+    const hobbits = useHobbitsStore()
+    const profiles = useProfileStore()
+
+    const userId = computed(() => {
+      if (!route.params.profileId) {
+        return auth.userId
+      } else {
+        if (Array.isArray(route.params.profileId)) {
+          return Number(route.params.profileId[0])
+        }
+        return Number(route.params.profileId)
       }
-      return undefined
-    },
-    userId(): number | null {
-      if (!this.$route.params.profileId) {
-        return this.myUserId
+    })
+
+    const user = computed(() => {
+      if (userId.value) {
+        return users.getUserById(userId.value)
       }
-      return Number(this.$route.params.profileId)
-    },
-    hobbitsOfUser(): Hobbit[] {
-      console.log('hobbitsOfUser')
-      if (this.userId) {
-        return this._hobbitsByUser(this.userId)
+      return null
+    })
+
+    const isMe = computed(() => {
+      // TODO: also check the id
+      return !route.params.profileId
+    })
+
+    const hobbitsOfUser = computed(() => {
+      if (userId.value) {
+        return hobbits.getHobbitsByUser(userId.value)
       }
-      return []
-    },
-    follows(): boolean {
-      if (this.userId) {
-        return this.followsUser(this.userId)
+      return null
+    })
+
+    const follows = computed(() => {
+      if (userId.value) {
+        return profiles.followsUser(userId.value)
       }
       return false
-    },
-  },
-  methods: {
-    ...mapActions(useUsersStore, {
-      fetchUser: 'fetchUser',
-    }),
-    ...mapActions(useProfileStore, {
-      _fetchFollow: 'fetchFollow',
-      followUser: 'followUser',
-      unfollowUser: 'unfollowUser',
-    }),
-    ...mapActions(useHobbitsStore, {
-      _fetchHobbitsByUser: 'fetchHobbitsByUser',
-    }),
-    fetchHobbits() {
-      if (this.userId) {
-        this._fetchHobbitsByUser(this.userId)
+    })
+
+    const fetchHobbits = () => {
+      if (userId.value) {
+        hobbits.fetchHobbitsByUser(userId.value)
       }
-    },
-    navigateToAppPassword() {
-      this.$router.push('/profile/me/apppassword')
-    },
-    fetchFollow() {
-      if (this.userId) {
-        this._fetchFollow({ id: this.userId })
+    }
+    const fetchFollow = () => {
+      if (userId.value) {
+        profiles.fetchFollow({ id: userId.value })
       }
-    },
-    follow() {
-      if (this.userId) {
-        this.followUser({ id: this.userId })
+    }
+
+    const follow = () => {
+      if (userId.value) {
+        profiles.followUser({ id: userId.value })
       }
-    },
-    unfollow() {
-      if (this.userId) {
-        this.unfollowUser({ id: this.userId })
+    }
+    const unfollow = () => {
+      if (userId.value) {
+        profiles.unfollowUser({ id: userId.value })
       }
-    },
-    deferredInit() {
-      if (this.userId) {
-        this.fetchUser({ id: this.userId })
-        this.fetchFollow()
-        this.fetchHobbits()
+    }
+
+    const goToAppPassword = () => {
+      router.push('/profile/me/apppassword')
+    }
+
+    const deferredInit = () => {
+      if (userId.value) {
+        users.fetchUser({ id: userId.value })
+        fetchFollow()
+        fetchHobbits()
       }
-    },
+    }
+
+    watch(userId, () => {
+      deferredInit()
+    }, { immediate: true })
+
+    return {
+      user,
+      isMe,
+      hobbitsOfUser,
+      follows,
+      follow,
+      unfollow,
+      goToAppPassword,
+    }
   },
 })
+
 </script>
 
 <style lang="scss" scoped>

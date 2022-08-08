@@ -8,7 +8,7 @@
     "lint": "eslint src --ext .js --ext .vue --ext .ts --fix"
   },
   "dependencies": {
-    "@fontsource/lato": "^4.2.2",
+    "@fontsource/lato": "^4.5.9",
     "@heroicons/vue": "^1.0.5",
     "@types/cal-heatmap": "^3.5.35",
     "@types/uuid": "^8.3.0",

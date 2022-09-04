@@ -10,10 +10,14 @@ import (
 	"github.com/craftamap/hobbit-tracker/middleware/requestcontext"
 	"github.com/craftamap/hobbit-tracker/models"
 	"github.com/gorilla/mux"
+	"go.opentelemetry.io/otel"
 )
 
 func BuildHandleAPIPostRecord() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		_, span := otel.Tracer("hobbit").Start(r.Context(), "PostRecord")
+		defer span.End()
+
 		db := requestcontext.DB(r)
 		log := requestcontext.Log(r)
 		eventHub := requestcontext.Hub(r)
@@ -283,6 +287,9 @@ func BuildHandleAPIDeleteRecord() http.HandlerFunc {
 
 func BuildHandleAPIGetRecords() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		_, span := otel.Tracer("hobbit").Start(r.Context(), "GetRecords")
+		defer span.End()
+
 		db := requestcontext.DB(r)
 		log := requestcontext.Log(r)
 
@@ -301,6 +308,7 @@ func BuildHandleAPIGetRecords() http.HandlerFunc {
 		}
 
 		var records []models.NumericRecord
+		span.AddEvent("DB")
 		err = db.Where(models.NumericRecord{
 			HobbitID: uint(numericHobbitID),
 		}).Find(&records).Error
@@ -309,6 +317,7 @@ func BuildHandleAPIGetRecords() http.HandlerFunc {
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
+		span.AddEvent("DB done")
 
 		err = json.NewEncoder(w).Encode(records)
 		if err != nil {

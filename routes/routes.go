@@ -3,12 +3,9 @@ package routes
 import (
 	"github.com/craftamap/hobbit-tracker/routes/api"
 	"github.com/gorilla/mux"
-	"github.com/gorilla/sessions"
-	"github.com/sirupsen/logrus"
-	"gorm.io/gorm"
 )
 
-func RegisterRoutes(r *mux.Router, db *gorm.DB, log *logrus.Logger, store sessions.Store) {
+func RegisterRoutes(r *mux.Router) {
 
 	auth := r.PathPrefix("/auth").Subrouter()
 	auth.HandleFunc("/login", BuildHandleLogin()).Methods("POST")

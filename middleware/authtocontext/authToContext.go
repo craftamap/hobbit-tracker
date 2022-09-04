@@ -10,6 +10,8 @@ import (
 	"github.com/craftamap/hobbit-tracker/middleware/requestcontext"
 	"github.com/craftamap/hobbit-tracker/models"
 	"github.com/gorilla/sessions"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -63,11 +65,16 @@ func New() func(http.Handler) http.Handler {
 
 // ServeHTTP implements the core functionality of this middleware
 func (m MiddlewareHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	_, span := otel.Tracer("hobbit").Start(r.Context(), "authToContext/ServeHTTP")
+
 	db := requestcontext.DB(r)
 	log := requestcontext.Log(r)
 	store := requestcontext.Store(r)
 
 	handleBasicAuth := func(username string, password string) (AuthDetails, error) {
+		_, span := otel.Tracer("hobbit").Start(r.Context(), "authToContext/ServeHTTP/handleBasicAuth")
+		span.SetAttributes(attribute.String("username", username))
+		defer span.End()
 		user := &models.User{}
 		if err := db.Where("username = ?", username).First(user).Error; err != nil {
 			log.Warnf("found no user with username %s; %s ", username, err)
@@ -76,6 +83,7 @@ func (m MiddlewareHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 		appPasswords := []models.AppPassword{}
 
+		span.AddEvent("DB")
 		if err := db.Joins("User").Where(models.AppPassword{UserID: user.ID}).Find(&appPasswords).Error; err != nil {
 			log.Warnf("failed to find app passwords for user %s; %s ", username, err)
 			return AuthDetails{}, err
@@ -83,7 +91,9 @@ func (m MiddlewareHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		secretAndPasswordMatched := false
 		var matchedAppPassword models.AppPassword
 		for _, appPassword := range appPasswords {
+			span.AddEvent("Bcrypt")
 			err := bcrypt.CompareHashAndPassword([]byte(appPassword.Secret), []byte(password))
+			span.AddEvent("Bcrypt End")
 			if err == nil {
 				secretAndPasswordMatched = true
 				matchedAppPassword = appPassword
@@ -96,6 +106,7 @@ func (m MiddlewareHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				log.Errorf("Failed to update LastUsedAt for app password %s", matchedAppPassword.ID)
 				return AuthDetails{}, err
 			}
+			span.AddEvent("DB Update")
 			return AuthDetails{
 				Authenticated: true,
 				Username:      user.Username,
@@ -136,6 +147,8 @@ func (m MiddlewareHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	ctx = context.WithValue(ctx, AuthDetailsContextKey, authDetails)
 	r = r.WithContext(ctx)
+
+	span.End()
 
 	m.next.ServeHTTP(w, r)
 }

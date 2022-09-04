@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"embed"
 	"flag"
 	"fmt"
@@ -19,6 +20,12 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
 	"github.com/wader/gormstore/v2"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/exporters/jaeger"
+	"go.opentelemetry.io/otel/sdk/resource"
+	"go.opentelemetry.io/otel/sdk/trace"
+	semconv "go.opentelemetry.io/otel/semconv/v1.4.0"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 	gormLogger "gorm.io/gorm/logger"
@@ -84,8 +91,39 @@ func (c *customRecoveryLogger) Println(msgs ...interface{}) {
 	c.log.Errorln(msgs...)
 }
 
+func newExporter() (trace.SpanExporter, error) {
+	return jaeger.New(jaeger.WithCollectorEndpoint(jaeger.WithEndpoint("http://172.18.0.2:14268/api/traces")))
+}
+func newResource() *resource.Resource {
+	r, _ := resource.Merge(
+		resource.Default(),
+		resource.NewWithAttributes(
+			semconv.SchemaURL,
+			semconv.ServiceNameKey.String("fib"),
+			semconv.ServiceVersionKey.String("v0.1.0"),
+			attribute.String("environment", "demo"),
+		),
+	)
+	return r
+}
+
 func main() {
 	var err error
+
+	exp, err := newExporter()
+	tp := trace.NewTracerProvider(
+		trace.WithBatcher(exp),
+		trace.WithResource(newResource()),
+	)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer func() {
+		if err := tp.Shutdown(context.Background()); err != nil {
+			log.Fatal(err)
+		}
+	}()
+	otel.SetTracerProvider(tp)
 
 	gormConfig := &gorm.Config{}
 	if flagVerbose {
@@ -97,6 +135,7 @@ func main() {
 		fmt.Println(err)
 		return
 	}
+
 	log.Info("Migrating DB")
 	// Manual Migration
 	log.Info("AutoMigrating DB")
@@ -150,13 +189,22 @@ func main() {
 
 	r := mux.NewRouter()
 	r.StrictSlash(true)
+	r.Use(func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			newCtx, span := otel.Tracer("hobbit").Start(r.Context(), "Request")
+			span.SetAttributes(attribute.String("Method", r.Method))
+			span.SetAttributes(attribute.String("Path", r.URL.Path))
+			next.ServeHTTP(w, r.WithContext(newCtx))
+			span.End()
+		})
+	})
 	r.Use(loggingMiddleware)
 
 	r.Use(handlers.RecoveryHandler(handlers.RecoveryLogger(&customRecoveryLogger{log})))
 	r.Use(requestcontext.New(Store, db, log, eventHub))
 	r.Use(authtocontext.New())
 
-	routes.RegisterRoutes(r, db, log, Store)
+	routes.RegisterRoutes(r)
 	websockets.RegisterRoutes(r)
 
 	frontend, err := frontendHandler()

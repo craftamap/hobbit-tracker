@@ -14,6 +14,6 @@ require (
 	github.com/sirupsen/logrus v1.8.1
 	github.com/wader/gormstore/v2 v2.0.0
 	golang.org/x/crypto v0.0.0-20210220033148-5ea612d1eb83
-	gorm.io/driver/sqlite v1.2.6
+	gorm.io/driver/sqlite v1.3.6
 	gorm.io/gorm v1.23.8
 )

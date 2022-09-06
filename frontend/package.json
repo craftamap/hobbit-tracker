@@ -26,7 +26,7 @@
     "@craftamap/esbuild-plugin-html": "^0.4.0",
     "@typescript-eslint/eslint-plugin": "^5.11.0",
     "@typescript-eslint/parser": "^5.11.0",
-    "@volar/server": "^0.31.2",
+    "@volar/server": "^0.32.1",
     "@vue/compiler-sfc": "^3.2.22",
     "@vue/eslint-config-typescript": "^10.0.0",
     "esbuild": "^0.14.23",

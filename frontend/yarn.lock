@@ -5945,10 +5945,10 @@ vfile@^4.0.0, vfile@^4.0.1:
     unist-util-stringify-position "^2.0.0"
     vfile-message "^2.0.0"
 
-vls@^0.7.4:
-  version "0.7.6"
-  resolved "https://registry.yarnpkg.com/vls/-/vls-0.7.6.tgz#22b879ce5d58c1f40cc34f59a73f7e51fad7aab2"
-  integrity sha512-UaE5peKpeT0dsTg4KAbxRVKLotD4i0DW3wb/srcJgNJmpBmTv2HAkE3hMR/naf1bMmUTpQyQPUaZOJE5ihBqlA==
+vls@^0.8.1:
+  version "0.8.1"
+  resolved "https://registry.yarnpkg.com/vls/-/vls-0.8.1.tgz#51f0b9c9838535c400591f92f826f18cd4712982"
+  integrity sha512-Oja3mdxnFxrnSWu3igDyq/vuaeLPd1tU+ZSgVNYvnXcAHwjw2El4iUxhSwJqf6synDl0P8cX41xbiutb0OUoHg==
   dependencies:
     eslint "^7.32.0"
     eslint-plugin-vue "^7.19.1"

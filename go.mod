@@ -13,8 +13,8 @@ require (
 	github.com/mattn/go-sqlite3 v2.0.3+incompatible // indirect
 	github.com/sethvargo/go-password v0.2.0
 	github.com/sirupsen/logrus v1.9.0
-	github.com/wader/gormstore/v2 v2.0.1
+	github.com/wader/gormstore/v2 v2.0.2
 	golang.org/x/crypto v0.0.0-20211108221036-ceb1ce70b4fa
 	gorm.io/driver/sqlite v1.3.6
-	gorm.io/gorm v1.23.8
+	gorm.io/gorm v1.23.10
 )

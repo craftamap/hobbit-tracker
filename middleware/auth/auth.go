@@ -7,6 +7,11 @@ import (
 	"github.com/craftamap/hobbit-tracker/middleware/requestcontext"
 )
 
+0
+0
+0
+0
+
 // MiddlewareHandlerBuilder is a builder for authMiddlewareHandler, allowing easier configuration
 type MiddlewareHandlerBuilder struct {
 	permitSessionAuth     bool

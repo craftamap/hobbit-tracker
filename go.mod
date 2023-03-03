@@ -3,6 +3,7 @@ module github.com/craftamap/hobbit-tracker
 go 1.16
 
 require (
+	github.com/antchfx/xmlquery v1.3.12
 	github.com/charmbracelet/lipgloss v0.6.0
 	github.com/felixge/httpsnoop v1.0.2 // indirect
 	github.com/google/uuid v1.3.0

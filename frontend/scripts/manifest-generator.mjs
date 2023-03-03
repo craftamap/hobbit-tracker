@@ -61,10 +61,9 @@ const defaultManifest = {
       purpose: 'maskable',
     },
   ],
-  // eslint-disable-next-line @typescript-eslint/camelcase
   start_url: '.',
+  id: '/',
   display: 'standalone',
-  // eslint-disable-next-line @typescript-eslint/camelcase
   background_color: '#000000',
 }
 
@@ -77,9 +76,7 @@ export const manifestGeneratorPlugin = (options) => ({
 
       const publicOptions = {
         name: options?.name,
-        // eslint-disable-next-line @typescript-eslint/camelcase
         short_name: options?.name,
-        // eslint-disable-next-line @typescript-eslint/camelcase
         theme_color: options?.themeColor,
       }
 

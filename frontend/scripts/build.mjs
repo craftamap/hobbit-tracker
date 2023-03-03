@@ -35,14 +35,13 @@ const noopPlugin = {
   },
 }
 
-esbuild.build({
+const ctx = await esbuild.context({
   entryPoints: ['src/main.ts'],
   bundle: true,
   metafile: true,
   splitting: true,
   minify: options.mode === 'production',
   sourcemap: options.mode === 'development',
-  watch: options?.watch,
   format: 'esm',
   logLevel: 'info',
   outdir: 'dist/',
@@ -78,3 +77,9 @@ esbuild.build({
       background_color: '#111d1f',
     })],
 })
+
+if (options.watch) {
+  await ctx.watch();
+} else {
+  await ctx.rebuild();
+}

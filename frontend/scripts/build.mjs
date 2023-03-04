@@ -82,4 +82,5 @@ if (options.watch) {
   await ctx.watch();
 } else {
   await ctx.rebuild();
+  await ctx.dispose();
 }

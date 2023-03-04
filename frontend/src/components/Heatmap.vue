@@ -23,7 +23,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, PropType, ref, toRefs } from 'vue'
+import { computed, defineComponent, PropType, reactive, ref, toRefs } from 'vue'
 import { v4 as uuidv4 } from 'uuid'
 
 export default defineComponent({
@@ -78,8 +78,10 @@ export default defineComponent({
       return timestamps;
     })
 
-    const prefersDark = computed(() => {
-      return window.matchMedia('(prefers-color-scheme: dark)').matches
+    let prefersDark = ref(window.matchMedia('(prefers-color-scheme: dark)').matches)
+
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener("change", (pd) => {
+      prefersDark.value = (pd.currentTarget as MediaQueryList).matches
     })
 
     const getColor = (percentage: number) => {
@@ -149,7 +151,7 @@ svg {
 
 @media (prefers-color-scheme: dark) {
   .svg-wrapper {
-    color: black;
+    color: white;
   }
 
 }

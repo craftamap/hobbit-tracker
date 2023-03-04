@@ -520,7 +520,7 @@ func GetMyFeed() http.HandlerFunc {
 			return
 		}
 
-		userIdsOfFollows := []uint{}
+		userIdsOfFollows := []uint{user.ID} // the user also "follows" itself
 		for _, follow := range user.Follows {
 			userIdsOfFollows = append(userIdsOfFollows, follow.ID)
 		}

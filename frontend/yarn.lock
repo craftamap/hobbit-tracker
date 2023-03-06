@@ -1059,10 +1059,10 @@
   resolved "https://registry.yarnpkg.com/@fontsource/lato/-/lato-4.5.9.tgz#7c819b412581591f9abc1c04ea07d67af1e501cd"
   integrity sha512-VkDnHBbPee/KMAUuBwe3rEKRDECo1MsA+I+ucZNU6FYdHrsv+SKpYgNr7nk/OhoaGrn9PrpXcmcd9eoD4J3Y6Q==
 
-"@heroicons/vue@^2.0.10":
-  version "2.0.10"
-  resolved "https://registry.yarnpkg.com/@heroicons/vue/-/vue-2.0.10.tgz#9de6807b13d77db82f10a652d5ec5c0c00393b54"
-  integrity sha512-K32WvSqsuWQrxqAAGCaTELW6VCOgg7OeVP+VBwCMbyeflnguJlCfHNlJ+0z4aPpgJCWB2RESRy3x59t+2byKSg==
+"@heroicons/vue@^2.0.16":
+  version "2.0.16"
+  resolved "https://registry.yarnpkg.com/@heroicons/vue/-/vue-2.0.16.tgz#eb21f6ab32605570fa21a0172da4a6ab02670834"
+  integrity sha512-saVAExLlGu6epqmS543qeWd/UOJUxpTJyK9aXeFGqS3VIW8X7yyJQmUGT40A38gBEAxMOdTdH9jFSh8sjPFM7A==
 
 "@humanwhocodes/config-array@^0.10.4":
   version "0.10.4"

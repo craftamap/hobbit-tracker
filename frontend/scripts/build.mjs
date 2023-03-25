@@ -72,9 +72,24 @@ const ctx = await esbuild.context({
     // eslint-disable-next-line @typescript-eslint/no-empty-function
     options.mode === 'production' ? workboxBuildPlugin() : noopPlugin,
     manifestGeneratorPlugin({
-      name: 'Hobbit Tracker',
-      // eslint-disable-next-line @typescript-eslint/camelcase
-      background_color: '#111d1f',
+      name: options.mode === 'production' ? 'Hobbit Tracker' : 'Hobbit Tracker (Development)',
+      manifestOptions: {
+        background_color: '#111d1f',
+        scope: '/',
+        share_target: {
+          action: 'https://dev.craftam.app/share',
+          method: 'POST',
+          enctype: 'multipart/form-data',
+          params: {
+            files: [
+              {
+                name: 'track',
+                accept: ['application/gpx+xml', '.png', '.gpx'],
+              },
+            ],
+          },
+        },
+      },
     })],
 })
 

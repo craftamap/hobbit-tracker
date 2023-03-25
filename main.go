@@ -121,6 +121,20 @@ func main() {
 		return
 	}
 
+	err = db.AutoMigrate(&models.TemporaryShareFile{})
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	cleanupTimer := time.NewTicker(10 * time.Minute)
+
+	go func() {
+		for range cleanupTimer.C {
+			db.Where("created_at < ?", time.Now().Add(-10 * time.Minute)).Delete(&models.TemporaryShareFile{})
+		}
+	}()
+
 	log.Info("AutoMigrated DB")
 	log.Info("Checking for manual migrations")
 	{

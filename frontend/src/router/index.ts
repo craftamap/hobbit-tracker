@@ -53,6 +53,10 @@ const routes: Array<RouteRecordRaw> = [
     path: '/profile/me/apppassword',
     component: () => import('../views/profile/AppPassword.vue'),
   },
+  {
+    path: '/share/:sharedFileId',
+    component: () => import('../views/CreateFromShared.vue'),
+  },
 ]
 
 const router = createRouter({

@@ -9,7 +9,7 @@
   },
   "dependencies": {
     "@fontsource/lato": "^4.2.2",
-    "@heroicons/vue": "^2.0.10",
+    "@heroicons/vue": "^2.0.17",
     "@types/uuid": "^8.3.0",
     "core-js": "^3.29.0",
     "moment": "^2.29.4",

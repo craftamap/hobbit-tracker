@@ -12,7 +12,7 @@ require (
 	github.com/gorilla/websocket v1.5.0
 	github.com/mattn/go-sqlite3 v2.0.3+incompatible // indirect
 	github.com/sethvargo/go-password v0.2.0
-	github.com/sirupsen/logrus v1.9.0
+	github.com/sirupsen/logrus v1.9.2
 	github.com/wader/gormstore/v2 v2.0.3
 	golang.org/x/crypto v0.7.0
 	gorm.io/driver/sqlite v1.4.4

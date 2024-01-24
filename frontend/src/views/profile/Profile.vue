@@ -22,7 +22,7 @@
 <script lang="ts">
 import { computed, defineComponent, watch } from 'vue'
 
-import { CogIcon, UserAddIcon, UserRemoveIcon } from '@heroicons/vue/outline'
+import { CogIcon, UserPlusIcon as UserAddIcon, UserMinusIcon as UserRemoveIcon } from '@heroicons/vue/24/outline'
 
 import SimpleHobbit from '../../components/SimpleHobbit.vue'
 import { useAuthStore } from '../../store/auth'

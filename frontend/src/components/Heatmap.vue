@@ -24,7 +24,6 @@
 
 <script lang="ts">
 import { computed, defineComponent, PropType, reactive, ref, toRefs } from 'vue'
-import { v4 as uuidv4 } from 'uuid'
 
 export default defineComponent({
   name: 'CalendarHeatmap',
@@ -33,7 +32,7 @@ export default defineComponent({
   },
   setup(props) {
     const { data } = toRefs(props)
-    const uid = ref(uuidv4())
+    const uid = ref(crypto.randomUUID())
 
     const tmp = computed(() => {
       console.error('foo')

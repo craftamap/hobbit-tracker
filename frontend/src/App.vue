@@ -23,7 +23,7 @@
 <script lang="ts">
 import '@fontsource/lato/index.css' /* weight 400 */
 import { defineComponent } from 'vue'
-import DialogWrapper from '@/components/DialogWrapper.vue'
+import DialogWrapper from './components/DialogWrapper.vue'
 import { storeToRefs } from 'pinia'
 import { useSocketStore } from './store/socket'
 import { useAuthStore } from './store/auth'
@@ -48,7 +48,7 @@ export default defineComponent({
 })
 </script>
 
-<style lang="scss">
+<style>
 :root {
   --sky-blue-crayola: #66d2e3ff;
   --cadet-blue: #49a0abff;
@@ -82,6 +82,7 @@ body {
 .fade-leave-active {
   transition: opacity 0.2s;
 }
+
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;
@@ -115,6 +116,7 @@ body {
 
 a {
   text-decoration: none;
+
   &:link,
   &:hover,
   &:active,

@@ -66,7 +66,7 @@ export default defineComponent({
 })
 </script>
 
-<style lang="scss" scoped>
+<style scoped>
 .app-password {
   display: grid;
   grid-template-columns: 3fr 1fr;

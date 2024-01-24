@@ -1,4 +1,4 @@
-import { Hobbit, NumericRecord } from '@/models'
+import { Hobbit, NumericRecord } from '../models'
 import { defineStore } from 'pinia'
 
 export const useHobbitsStore = defineStore('hobbits', {
@@ -101,7 +101,7 @@ export const useHobbitsStore = defineStore('hobbits', {
       if (!res.ok) {
         throw new Error(res.statusText)
       }
-    // TODO: Put in store
+      // TODO: Put in store
     },
     async putRecord({ hobbitId, recordId, timestamp, value, comment }:
       { hobbitId: number; recordId: number; timestamp: Date; value: number; comment: string }) {
@@ -129,7 +129,7 @@ export const useHobbitsStore = defineStore('hobbits', {
       }
       this.deleteRecordForHobbit({ hobbitId, recordId })
     },
-    async postHobbit({ name, description, image }: {name: string; description: string; image: string}) {
+    async postHobbit({ name, description, image }: { name: string; description: string; image: string }) {
       const res = await fetch('/api/hobbits/', {
         method: 'POST',
         headers: {
@@ -147,7 +147,7 @@ export const useHobbitsStore = defineStore('hobbits', {
       const resJson = await res.json()
       this.setHobbit(resJson)
     },
-    async putHobbit({ id, name, description, image }: {id: number; name: string; description: string; image: string}) {
+    async putHobbit({ id, name, description, image }: { id: number; name: string; description: string; image: string }) {
       const res = await fetch(`/api/hobbits/${id}`, {
         method: 'PUT',
         headers: {

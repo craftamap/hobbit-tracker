@@ -54,7 +54,7 @@ export default defineComponent({
 })
 </script>
 
-<style lang="scss" scoped>
+<style scoped>
 .welcome {
   font-size: 16pt;
   text-align: center;

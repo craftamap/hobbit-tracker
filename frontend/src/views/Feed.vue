@@ -26,14 +26,14 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, toRefs, watch } from 'vue'
-import FeedEvent from '@/components/FeedEvent.vue'
-import SimpleHobbit from '@/components/SimpleHobbit.vue'
+import { computed, defineComponent } from 'vue'
+import FeedEvent from '../components/FeedEvent.vue'
+import SimpleHobbit from '../components/SimpleHobbit.vue'
 import { PlusIcon } from '@heroicons/vue/outline'
-import { useAuthStore } from '@/store/auth'
-import { mapActions, storeToRefs } from 'pinia'
-import { useFeedStore } from '@/store/feed'
-import { useHobbitsStore } from '@/store/hobbits'
+import { useAuthStore } from '../store/auth'
+import { storeToRefs } from 'pinia'
+import { useFeedStore } from '../store/feed'
+import { useHobbitsStore } from '../store/hobbits'
 import { useRouter } from 'vue-router'
 
 export default defineComponent({
@@ -79,7 +79,7 @@ export default defineComponent({
 })
 </script>
 
-<style lang="scss" scoped>
+<style scoped>
 .welcome {
   font-size: 16pt;
   text-align: center;
@@ -100,6 +100,7 @@ export default defineComponent({
     "events events sidebar";
   justify-items: stretch;
   align-items: stretch;
+
   @media (max-width: 1000px) {
     grid-template-columns: 1fr;
     grid-template-areas:
@@ -116,12 +117,15 @@ export default defineComponent({
 .greeting {
   grid-area: greeting;
 }
+
 .sidebar {
   grid-area: sidebar;
 }
+
 .events {
   grid-area: events;
 }
+
 .icon-entry {
   display: inline-flex;
   align-items: center;

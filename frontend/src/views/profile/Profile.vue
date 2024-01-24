@@ -14,12 +14,7 @@
         <UserRemoveIcon v-if="follows" class="h-24 cursor-pointer" @click="unfollow" />
       </div>
       <div>Hobbits:</div>
-      <SimpleHobbit
-        v-for="hobbit in hobbitsOfUser"
-        :key="`hobbit-${hobbit.id}`"
-        :hobbit="hobbit"
-        :withHeatmap="true"
-      />
+      <SimpleHobbit v-for="hobbit in hobbitsOfUser" :key="`hobbit-${hobbit.id}`" :hobbit="hobbit" :withHeatmap="true" />
     </div>
   </div>
 </template>
@@ -29,11 +24,11 @@ import { computed, defineComponent, watch } from 'vue'
 
 import { CogIcon, UserAddIcon, UserRemoveIcon } from '@heroicons/vue/outline'
 
-import SimpleHobbit from '@/components/SimpleHobbit.vue'
-import { useAuthStore } from '@/store/auth'
-import { useProfileStore } from '@/store/profile'
-import { useHobbitsStore } from '@/store/hobbits'
-import { useUsersStore } from '@/store/users'
+import SimpleHobbit from '../../components/SimpleHobbit.vue'
+import { useAuthStore } from '../../store/auth'
+import { useProfileStore } from '../../store/profile'
+import { useHobbitsStore } from '../../store/hobbits'
+import { useUsersStore } from '../../store/users'
 import { useRoute, useRouter } from 'vue-router'
 
 export default defineComponent({
@@ -141,7 +136,7 @@ export default defineComponent({
 
 </script>
 
-<style lang="scss" scoped>
+<style scoped>
 .welcome {
   font-size: 16pt;
   text-align: center;

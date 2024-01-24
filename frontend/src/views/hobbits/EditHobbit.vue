@@ -3,31 +3,31 @@
     <div class="header">
       <h1>Edit Hobbit</h1>
     </div>
-      <template v-if="!hobbit">
-        <Loading />
-      </template>
-      <template v-if="hobbit">
-        <FormWrapper>
-          <form>
-            <div>
-              <label for="name">Hobbit name:</label>
-              <input id="name" name="name" type="text" v-model="form.name" />
-            </div>
-            <div>
-              <label for="description">Description:</label>
-              <textarea name="description" id="description" rows="5" v-model="form.description"></textarea>
-            </div>
-            <div>
-              <label for="image">Image:</label>
-              <input id="image" name="image" type="file" @change="changeImage" />
-            </div>
-            <div>
-              <Button value="Edit Hobbit" @click="putHobbit()" type="primary" :loading="submitting"/>
-              <Button value="Go back" @click="goBack()"/>
-            </div>
-          </form>
-        </FormWrapper>
-      </template>
+    <template v-if="!hobbit">
+      <Loading />
+    </template>
+    <template v-if="hobbit">
+      <FormWrapper>
+        <form>
+          <div>
+            <label for="name">Hobbit name:</label>
+            <input id="name" name="name" type="text" v-model="form.name" />
+          </div>
+          <div>
+            <label for="description">Description:</label>
+            <textarea name="description" id="description" rows="5" v-model="form.description"></textarea>
+          </div>
+          <div>
+            <label for="image">Image:</label>
+            <input id="image" name="image" type="file" @change="changeImage" />
+          </div>
+          <div>
+            <Button value="Edit Hobbit" @click="putHobbit()" type="primary" :loading="submitting" />
+            <Button value="Go back" @click="goBack()" />
+          </div>
+        </form>
+      </FormWrapper>
+    </template>
   </div>
 </template>
 
@@ -35,9 +35,9 @@
 import { defineComponent, ref, watch } from 'vue'
 import Button from '../../components/form/Button.vue'
 import Loading from '../../components/Icons/LoadingIcon.vue'
-import FormWrapper from '@/components/form/FormWrapper.vue'
-import { useHobbitsStore } from '@/store/hobbits'
-import { useHobbitFromRoute } from '@/composables/hobbitFromRoute'
+import FormWrapper from '../../components/form/FormWrapper.vue'
+import { useHobbitsStore } from '../../store/hobbits'
+import { useHobbitFromRoute } from '../../composables/hobbitFromRoute'
 import { useRouter } from 'vue-router'
 
 export default defineComponent({
@@ -81,7 +81,7 @@ export default defineComponent({
         temporaryFileReader.readAsDataURL(inputFile)
       })
     }
-    const changeImage = async(event: Event) => {
+    const changeImage = async (event: Event) => {
       // TODO: Add validation
       const fileList = (event?.target as HTMLInputElement).files!
       const firstFile = fileList[0]
@@ -93,7 +93,7 @@ export default defineComponent({
       router.push(`/hobbits/${id.value}`)
     }
 
-    const putHobbit = async() => {
+    const putHobbit = async () => {
       submitting.value = true
       await hobbits.putHobbit({
         id: id.value,

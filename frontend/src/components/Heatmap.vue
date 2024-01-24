@@ -23,7 +23,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, PropType, reactive, ref, toRefs } from 'vue'
+import { computed, defineComponent, PropType, ref, toRefs } from 'vue'
 
 export default defineComponent({
   name: 'CalendarHeatmap',
@@ -130,7 +130,7 @@ export default defineComponent({
 })
 </script>
 
-<style lang="scss" scoped>
+<style scoped>
 [data-uid] {
   /* aspect-ratio: 5; */
 

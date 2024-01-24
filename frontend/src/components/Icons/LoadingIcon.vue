@@ -59,7 +59,7 @@ export default defineComponent({
 })
 </script>
 
-<style lang="scss" scoped>
+<style scoped>
 div {
     padding: 1rem;
 

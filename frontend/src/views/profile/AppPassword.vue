@@ -8,12 +8,7 @@
             <p>Do you really want to delete this app password?</p>
             <p>Description: {{ deleteDialog.appPassword?.description }}</p>
             <div>
-              <Button
-                type="primary"
-                value="delete"
-                @click="deleteAppPassword"
-                :loading="deleteDialog.loading"
-              />
+              <Button type="primary" value="delete" @click="deleteAppPassword" :loading="deleteDialog.loading" />
               <Button value="cancel" @click="closeDeleteDialog" />
             </div>
           </form>
@@ -32,13 +27,8 @@
               <input type="text" readonly :value="addDialog.password" />
             </template>
             <div>
-              <Button
-                type="primary"
-                value="add"
-                @click="addAppPassword"
-                :loading="addDialog.loading"
-                v-if="!addDialog.password"
-              />
+              <Button type="primary" value="add" @click="addAppPassword" :loading="addDialog.loading"
+                v-if="!addDialog.password" />
               <Button value="cancel" @click="closeAddDialog" />
             </div>
           </form>
@@ -51,25 +41,21 @@
         <Add class="h-24" />Add App Password...
       </div>
     </div>
-    <AppPasswordItem
-      v-for="appPassword in appPasswords"
-      :key="`appPassword-${appPassword.id}`"
-      :appPassword="appPassword"
-      @delete="openDeleteDialog($event)"
-    />
+    <AppPasswordItem v-for="appPassword in appPasswords" :key="`appPassword-${appPassword.id}`" :appPassword="appPassword"
+      @delete="openDeleteDialog($event)" />
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent, ref } from 'vue'
-import AppPasswordItem from '@/components/profile/AppPasswordItem.vue'
-import Dialog from '@/components/Dialog.vue'
-import Button from '@/components/form/Button.vue'
-import FormWrapper from '@/components/form/FormWrapper.vue'
-import { AppPassword } from '@/models'
+import AppPasswordItem from '../../components/profile/AppPasswordItem.vue'
+import Dialog from '../../components/Dialog.vue'
+import Button from '../../components/form/Button.vue'
+import FormWrapper from '../../components/form/FormWrapper.vue'
+import { AppPassword } from '../../models'
 import { PlusIcon as Add } from '@heroicons/vue/outline'
-import { mapActions, mapState, storeToRefs } from 'pinia'
-import { useAppPasswordStore } from '@/store/profile'
+import { useAppPasswordStore } from '../../store/profile'
+import { storeToRefs } from 'pinia'
 
 export default defineComponent({
   components: {
@@ -109,7 +95,7 @@ export default defineComponent({
       deleteDialog.value.appPassword = undefined
     }
 
-    const deleteAppPassword = async() => {
+    const deleteAppPassword = async () => {
       deleteDialog.value.loading = true
       if (deleteDialog.value.appPassword?.id) {
         await appPasswordStore.deleteAppPassword({ id: deleteDialog.value.appPassword?.id })
@@ -118,7 +104,7 @@ export default defineComponent({
       closeDeleteDialog()
     }
 
-    const addAppPassword = async() => {
+    const addAppPassword = async () => {
       addDialog.value.loading = true
       const newPassword = await appPasswordStore.postAppPassword({
         description: addDialog.value.description,
@@ -155,7 +141,7 @@ export default defineComponent({
 })
 </script>
 
-<style lang="scss" scoped>
+<style scoped>
 .add-app-password {
   display: flex;
   align-items: center;

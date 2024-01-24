@@ -28,7 +28,7 @@ import { Hobbit } from '../models/index'
 import { computed, defineComponent, PropType, ref, toRefs } from 'vue'
 import Loading from './Icons/LoadingIcon.vue'
 import Heatmap from './Heatmap.vue'
-import { useHobbitsStore } from '@/store/hobbits'
+import { useHobbitsStore } from '../store/hobbits'
 
 export default defineComponent({
   props: {
@@ -78,7 +78,7 @@ export default defineComponent({
 })
 </script>
 
-<style lang="scss" scoped>
+<style scoped>
 .card {
   border-radius: 0.5rem;
   box-shadow: 0px 0px 5px -2px #000000;
@@ -103,6 +103,7 @@ export default defineComponent({
       height: 2rem;
     }
   }
+
   .heatmap {
     max-width: 600px;
     margin: 1rem auto;

@@ -24,7 +24,7 @@ export default defineComponent({
 })
 </script>
 
-<style lang="scss" scoped>
+<style scoped>
 .dialog {
   background: var(--background);
   padding: 1.5em;

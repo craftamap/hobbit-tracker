@@ -5,12 +5,12 @@
     </template>
     <template v-if="hobbit">
       <div>
-      <div class="header">
+        <div class="header">
           <div>
-            <h1>{{hobbit.name}} - Add record</h1>
-            <div class="by">by {{hobbit.user.username}}</div>
+            <h1>{{ hobbit.name }} - Add record</h1>
+            <div class="by">by {{ hobbit.user.username }}</div>
             <div>
-            {{hobbit.description}}
+              {{ hobbit.description }}
             </div>
           </div>
           <div>
@@ -32,8 +32,8 @@
               <textarea name="comment" id="comment" rows="5" v-model="recordData.comment"></textarea>
             </div>
             <div>
-              <Button value="Add record" @click="postRecord()" type="primary" :loading="submitting"/>
-              <Button value="Go back" @click="goBack()"/>
+              <Button value="Add record" @click="postRecord()" type="primary" :loading="submitting" />
+              <Button value="Go back" @click="goBack()" />
             </div>
           </form>
         </FormWrapper>
@@ -43,14 +43,14 @@
 </template>
 
 <script lang="ts">
-import FormWrapper from '@/components/form/FormWrapper.vue'
-import { computed, defineComponent, ref } from 'vue'
-import Loading from '@/components/Icons/LoadingIcon.vue'
+import FormWrapper from '../../../components/form/FormWrapper.vue'
+import { defineComponent, ref } from 'vue'
+import Loading from '../../../components/Icons/LoadingIcon.vue'
 import moment from 'moment'
-import Button from '@/components/form/Button.vue'
-import { useHobbitsStore } from '@/store/hobbits'
-import { useHobbitFromRoute } from '@/composables/hobbitFromRoute'
-import { useRoute, useRouter } from 'vue-router'
+import Button from '../../../components/form/Button.vue'
+import { useHobbitsStore } from '../../../store/hobbits'
+import { useHobbitFromRoute } from '../../../composables/hobbitFromRoute'
+import { useRouter } from 'vue-router'
 
 export default defineComponent({
   components: {
@@ -104,35 +104,36 @@ export default defineComponent({
 
 </script>
 
-<style lang="scss" scoped>
-  label {
-    width: 8rem;
-    display: inline-block;
-  }
+<style scoped>
+label {
+  width: 8rem;
+  display: inline-block;
+}
 
-  table {
-    width: 100%;
-    thead {
-      font-weight: bold;
-    }
-  }
+table {
+  width: 100%;
 
-  h1 {
-    margin: 0;
-    font-size: 16pt;
+  thead {
+    font-weight: bold;
   }
+}
 
-  .by {
-    color: gray;
+h1 {
+  margin: 0;
+  font-size: 16pt;
+}
+
+.by {
+  color: gray;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+
+  img {
+    width: 2rem;
+    height: 2rem;
   }
-
-  .header {
-    display: flex;
-    justify-content: space-between;
-
-    img {
-      width: 2rem;
-      height: 2rem;
-    }
-  }
+}
 </style>

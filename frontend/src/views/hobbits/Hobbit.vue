@@ -48,24 +48,13 @@
               </tr>
             </thead>
             <tbody>
-              <tr
-                v-for="record in (hobbit.records || []).slice().reverse()"
-                :key="`record-${record.id}`"
-              >
+              <tr v-for="record in (hobbit.records || []).slice().reverse()" :key="`record-${record.id}`">
                 <td>{{ record.value }}</td>
                 <td>{{ record.comment }}</td>
                 <td>{{ formatDate(record.timestamp) }}</td>
                 <td class="table-actions">
-                  <Pencil
-                    class="h-20 cursor-pointer"
-                    v-on:click="goToEditRecord($event, record)"
-                    tabindex="0"
-                  />
-                  <Trash
-                    class="h-20 cursor-pointer"
-                    v-on:click="openDeleteRecordDialog($event, record)"
-                    tabindex="0"
-                  />
+                  <Pencil class="h-20 cursor-pointer" v-on:click="goToEditRecord($event, record)" tabindex="0" />
+                  <Trash class="h-20 cursor-pointer" v-on:click="openDeleteRecordDialog($event, record)" tabindex="0" />
                 </td>
               </tr>
             </tbody>
@@ -78,17 +67,17 @@
 
 <script lang="ts">
 import { defineComponent, ref } from 'vue'
-import { Hobbit, NumericRecord } from '@/models'
-import Loading from '@/components/Icons/LoadingIcon.vue'
-import VButton from '@/components/form/Button.vue'
-import DDialog from '@/components/Dialog.vue'
-import FormWrapper from '@/components/form/FormWrapper.vue'
+import { NumericRecord } from '../../models'
+import Loading from '../../components/Icons/LoadingIcon.vue'
+import VButton from '../../components/form/Button.vue'
+import DDialog from '../../components/Dialog.vue'
+import FormWrapper from '../../components/form/FormWrapper.vue'
 import moment from 'moment'
 import { TrashIcon as Trash, PencilIcon as Pencil } from '@heroicons/vue/outline'
-import { useAuthStore } from '@/store/auth'
-import { mapActions, mapState, storeToRefs } from 'pinia'
-import { useHobbitsStore } from '@/store/hobbits'
-import { useHobbitFromRoute } from '@/composables/hobbitFromRoute'
+import { useAuthStore } from '../../store/auth'
+import { storeToRefs } from 'pinia'
+import { useHobbitsStore } from '../../store/hobbits'
+import { useHobbitFromRoute } from '../../composables/hobbitFromRoute'
 import { useRouter } from 'vue-router'
 
 export default defineComponent({
@@ -158,13 +147,14 @@ export default defineComponent({
 })
 </script>
 
-<style lang="scss" scoped>
+<style scoped>
 .buttons {
   display: flex;
 }
 
 table {
   width: 100%;
+
   thead {
     font-weight: bold;
   }
@@ -191,10 +181,12 @@ h1 {
 
 table {
   border-collapse: collapse;
+
   th,
   td {
     padding: 16px 0px;
   }
+
   tr {
     border-bottom: solid 1px lightgray;
   }

@@ -29,7 +29,7 @@
 import { computed, defineComponent } from 'vue'
 import FeedEvent from '../components/FeedEvent.vue'
 import SimpleHobbit from '../components/SimpleHobbit.vue'
-import { PlusIcon } from '@heroicons/vue/outline'
+import { PlusIcon } from '@heroicons/vue/24/outline'
 import { useAuthStore } from '../store/auth'
 import { storeToRefs } from 'pinia'
 import { useFeedStore } from '../store/feed'

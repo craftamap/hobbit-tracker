@@ -20,7 +20,7 @@
 import moment from 'moment'
 import { defineComponent, PropType, toRefs } from 'vue'
 import { AppPassword } from '../../models'
-import { TrashIcon as Trash } from '@heroicons/vue/outline'
+import { TrashIcon as Trash } from '@heroicons/vue/24/outline'
 
 export default defineComponent({
   name: 'AppPasswordItem',

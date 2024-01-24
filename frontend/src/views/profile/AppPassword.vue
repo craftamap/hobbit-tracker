@@ -53,7 +53,7 @@ import Dialog from '../../components/Dialog.vue'
 import Button from '../../components/form/Button.vue'
 import FormWrapper from '../../components/form/FormWrapper.vue'
 import { AppPassword } from '../../models'
-import { PlusIcon as Add } from '@heroicons/vue/outline'
+import { PlusIcon as Add } from '@heroicons/vue/24/outline'
 import { useAppPasswordStore } from '../../store/profile'
 import { storeToRefs } from 'pinia'
 

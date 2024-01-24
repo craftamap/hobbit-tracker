@@ -1,18 +1,22 @@
 <template>
   <div class="grid">
     <div>
-      <span class="icon-entry" @click="navigateAddHobbit"><Add/><span>Add Hobbit... </span></span>
+      <span class="icon-entry" @click="navigateAddHobbit">
+        <Add /><span>Add Hobbit... </span>
+      </span>
     </div>
     <div>
     </div>
     <div>
-      <span class="icon-entry" @click="reload"><Reload/></span>
+      <span class="icon-entry" @click="reload">
+        <Reload />
+      </span>
     </div>
   </div>
 </template>
 
 <script lang="ts">
-import Add from '@/components/Icons/AddIcon.vue'
+import Add from '../components/Icons/AddIcon.vue'
 import { defineComponent } from 'vue'
 import { useRouter } from 'vue-router'
 import Reload from './Icons/ReloadIcon.vue'
@@ -40,7 +44,7 @@ export default defineComponent({
 })
 </script>
 
-<style lang="scss" scoped>
+<style scoped>
 .grid {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
@@ -48,6 +52,7 @@ export default defineComponent({
   :nth-child(2) {
     justify-self: center;
   }
+
   :nth-child(3) {
     justify-self: right;
   }
@@ -57,5 +62,4 @@ export default defineComponent({
   display: inline-flex;
   align-items: center;
   cursor: pointer;
-}
-</style>
+}</style>

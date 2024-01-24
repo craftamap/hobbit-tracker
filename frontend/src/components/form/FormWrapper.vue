@@ -12,7 +12,7 @@ export default defineComponent({
 })
 </script>
 
-<style lang="scss">
+<style>
 .form-wrapper {
   display: flex;
   justify-content: center;

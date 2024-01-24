@@ -2,13 +2,15 @@
   <div class="card">
     <template v-if="isHobbitCreated">
       <div class="header">
-        <router-link :to="`/profile/${hobbit?.user.id}`">{{ hobbit?.user.username }}</router-link> has created a new Hobbit.
+        <router-link :to="`/profile/${hobbit?.user.id}`">{{ hobbit?.user.username }}</router-link> has created a new
+        Hobbit.
       </div>
       <SimpleHobbit :hobbit="hobbit" />
     </template>
     <template v-if="isRecordCreated">
       <div class="header">
-        <router-link :to="`/profile/${hobbit?.user.id}`">{{ hobbit?.user?.username }}</router-link> has created a new entry in
+        <router-link :to="`/profile/${hobbit?.user.id}`">{{ hobbit?.user?.username }}</router-link> has created a new
+        entry in
         <router-link :to="`/hobbits/${hobbit?.user.id}`">"{{ hobbit?.name }}".</router-link>
       </div>
       <h1>
@@ -21,8 +23,8 @@
 
 <script lang="ts">
 import { computed, defineComponent, PropType, toRefs } from 'vue'
-import { FeedEvent, FeedEventTypus, Hobbit, NumericRecord } from '@/models'
-import SimpleHobbit from '@/components/SimpleHobbit.vue'
+import { FeedEvent, FeedEventTypus, Hobbit, NumericRecord } from '../models'
+import SimpleHobbit from '../components/SimpleHobbit.vue'
 
 export default defineComponent({
   name: 'FeedEvent',
@@ -68,7 +70,7 @@ export default defineComponent({
 })
 </script>
 
-<style lang="scss" scoped>
+<style scoped>
 .card {
   border-radius: 0.5rem;
   box-shadow: 0px 0px 5px -2px #000000;

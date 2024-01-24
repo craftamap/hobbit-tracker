@@ -1,4 +1,4 @@
-import { useHobbitsStore } from '@/store/hobbits'
+import { useHobbitsStore } from '../store/hobbits'
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 

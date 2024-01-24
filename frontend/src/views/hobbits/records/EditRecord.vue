@@ -19,12 +19,7 @@
           <form>
             <div>
               <label for="timestamp">When:</label>
-              <input
-                id="timestamp"
-                name="timestamp"
-                type="datetime-local"
-                v-model="recordData.timestamp"
-              />
+              <input id="timestamp" name="timestamp" type="datetime-local" v-model="recordData.timestamp" />
             </div>
             <div>
               <label for="value">Value:</label>
@@ -35,12 +30,7 @@
               <textarea name="comment" id="comment" rows="5" v-model="recordData.comment"></textarea>
             </div>
             <div>
-              <Button
-                value="Edit record"
-                @click="putRecord()"
-                type="primary"
-                :loading="submitting"
-              />
+              <Button value="Edit record" @click="putRecord()" type="primary" :loading="submitting" />
               <Button value="Go back" @click="goBack()" />
             </div>
           </form>
@@ -51,13 +41,13 @@
 </template>
 
 <script lang="ts">
-import FormWrapper from '@/components/form/FormWrapper.vue'
+import FormWrapper from '../../../components/form/FormWrapper.vue'
 import { computed, defineComponent, ref } from 'vue'
-import Loading from '@/components/Icons/LoadingIcon.vue'
+import Loading from '../../../components/Icons/LoadingIcon.vue'
 import moment from 'moment'
-import Button from '@/components/form/Button.vue'
-import { useHobbitsStore } from '@/store/hobbits'
-import { useHobbitFromRoute } from '@/composables/hobbitFromRoute'
+import Button from '../../../components/form/Button.vue'
+import { useHobbitsStore } from '../../../store/hobbits'
+import { useHobbitFromRoute } from '../../../composables/hobbitFromRoute'
 import { useRoute, useRouter } from 'vue-router'
 
 export default defineComponent({
@@ -139,7 +129,7 @@ export default defineComponent({
 })
 </script>
 
-<style lang="scss" scoped>
+<style scoped>
 label {
   width: 8rem;
   display: inline-block;
@@ -147,6 +137,7 @@ label {
 
 table {
   width: 100%;
+
   thead {
     font-weight: bold;
   }

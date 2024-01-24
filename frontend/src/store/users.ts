@@ -1,4 +1,4 @@
-import { User } from '@/models'
+import { User } from '../models'
 import { defineStore } from 'pinia'
 
 export const useUsersStore = defineStore('users', {

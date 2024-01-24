@@ -1,7 +1,7 @@
 <template>
   <button :class="[type, loading ? 'loading' : '']" type="button">
     <span>
-      {{value}}
+      {{ value }}
     </span>
     <Loading height=16 width=16 class="loading-icon" stroke="#fff" />
   </button>
@@ -9,7 +9,7 @@
 
 <script lang="ts">
 import { defineComponent, PropType } from 'vue'
-import Loading from '@/components/Icons/LoadingIcon.vue'
+import Loading from '../../components/Icons/LoadingIcon.vue'
 
 export default defineComponent({
   name: 'VButton',
@@ -24,7 +24,7 @@ export default defineComponent({
 })
 </script>
 
-<style lang="scss" scoped>
+<style scoped>
 button {
   margin-bottom: 0.25rem;
   margin-top: 0.25rem;
@@ -58,10 +58,12 @@ button {
     span {
       visibility: hidden;
     }
+
     .loading-icon {
       visibility: inherit;
     }
   }
+
   .loading-icon {
     padding: 0;
 

@@ -2,9 +2,10 @@
   "name": "hobbit-tracker-frontend",
   "version": "0.2.1",
   "private": true,
+  "type": "module",
   "scripts": {
-    "build": "node scripts/build.mjs",
-    "watch": "node scripts/build.mjs --watch --mode=development",
+    "watch": "vite build --watch --mode=develop",
+    "build": "vue-tsc && vite build",
     "lint": "eslint src --ext .js --ext .vue --ext .ts --fix"
   },
   "dependencies": {
@@ -12,28 +13,22 @@
     "@heroicons/vue": "^2.0.10",
     "moment": "^2.29.4",
     "pinia": "^2.0.32",
-    "register-service-worker": "^1.7.1",
-    "vue": "^3.2.31",
+    "typescript": "^5.3.3",
+    "vite": "^5.0.12",
+    "vue": "^3.4.15",
     "vue-router": "^4.0.0-0"
   },
   "devDependencies": {
-    "@craftamap/esbuild-plugin-html": "^0.5.0",
     "@typescript-eslint/eslint-plugin": "^5.11.0",
     "@typescript-eslint/parser": "^5.54.0",
-    "@vue/compiler-sfc": "^3.2.47",
+    "@vitejs/plugin-vue": "^5.0.3",
     "@vue/eslint-config-typescript": "^10.0.0",
-    "esbuild": "^0.17.10",
-    "esbuild-plugin-vue3": "^0.3.0",
+    "@vue/language-server": "^1.8.27",
     "eslint": "^8.8.0",
-    "eslint-config-standard": "^16.0.3",
-    "eslint-plugin-import": "^2.25.4",
-    "eslint-plugin-node": "^11.1.0",
-    "eslint-plugin-promise": "^4.2.1",
     "eslint-plugin-vue": "^8.4.1",
-    "sass": "^1.45.0",
-    "typescript": "^4.9.5",
-    "workbox-build": "^6.5.3",
-    "yargs": "^17.3.1"
+    "register-service-worker": "^1.7.1",
+    "vue-tsc": "^1.8.27",
+    "workbox-build": "^6.5.3"
   },
   "eslintConfig": {
     "root": true,
@@ -42,7 +37,6 @@
     },
     "extends": [
       "plugin:vue/vue3-essential",
-      "standard",
       "@vue/typescript/recommended"
     ],
     "parserOptions": {

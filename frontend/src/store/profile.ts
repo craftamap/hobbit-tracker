@@ -1,4 +1,4 @@
-import { AppPassword, User } from '@/models'
+import { AppPassword, User } from '../models'
 import { defineStore } from 'pinia'
 
 export const useProfileStore = defineStore('profile', {
@@ -79,13 +79,13 @@ export const useAppPasswordStore = defineStore('apppassword', {
     appPasswords: [] as AppPassword[],
   }),
   actions: {
-    removeAppPassword({ appPassword }: {appPassword: AppPassword}) {
+    removeAppPassword({ appPassword }: { appPassword: AppPassword }) {
       const idx = this.appPasswords.findIndex((ap) => {
         return ap.id === appPassword.id
       })
       this.appPasswords.splice(idx, 1)
     },
-    addAppPassword({ appPassword }: {appPassword: AppPassword}) {
+    addAppPassword({ appPassword }: { appPassword: AppPassword }) {
       this.appPasswords.push(appPassword)
     },
     async fetchAppPasswords() {

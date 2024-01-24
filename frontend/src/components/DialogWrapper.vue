@@ -12,7 +12,7 @@ export default defineComponent({
 })
 </script>
 
-<style lang="scss" scoped>
+<style scoped>
 .dialog-wrapper {
   position: fixed;
   left: 0;

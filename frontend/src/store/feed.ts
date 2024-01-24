@@ -1,4 +1,4 @@
-import { FeedEvent } from '@/models'
+import { FeedEvent } from '../models'
 import { defineStore } from 'pinia'
 
 export const useFeedStore = defineStore('feed', {

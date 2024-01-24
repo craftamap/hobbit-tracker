@@ -27,8 +27,8 @@
 </template>
 
 <script lang="ts">
-import FormWrapper from '@/components/form/FormWrapper.vue'
-import { useHobbitsStore } from '@/store/hobbits'
+import FormWrapper from '../../components/form/FormWrapper.vue'
+import { useHobbitsStore } from '../../store/hobbits'
 import { defineComponent, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import Button from '../../components/form/Button.vue'

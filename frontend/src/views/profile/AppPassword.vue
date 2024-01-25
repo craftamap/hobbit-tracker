@@ -95,7 +95,7 @@ export default defineComponent({
       deleteDialog.value.appPassword = undefined
     }
 
-    const deleteAppPassword = async () => {
+    const deleteAppPassword = async() => {
       deleteDialog.value.loading = true
       if (deleteDialog.value.appPassword?.id) {
         await appPasswordStore.deleteAppPassword({ id: deleteDialog.value.appPassword?.id })
@@ -104,7 +104,7 @@ export default defineComponent({
       closeDeleteDialog()
     }
 
-    const addAppPassword = async () => {
+    const addAppPassword = async() => {
       addDialog.value.loading = true
       const newPassword = await appPasswordStore.postAppPassword({
         description: addDialog.value.description,

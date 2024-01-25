@@ -26,7 +26,7 @@ export const useSocketStore = defineStore('socket', {
 
       this.socket = socket
     },
-    handleWebSocketMessage({ typus, optional_data: optionalData }: { typus: string; optional_data: Record<any, any> }) {
+    handleWebSocketMessage({ typus, optional_data: optionalData }: { typus: string; optional_data: Record<string, unknown> }) {
       console.debug('recieved WebSocketMessage of typus', typus, 'and optional data', optionalData)
       switch (typus) {
         case 'RecordDeleted':

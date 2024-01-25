@@ -1542,12 +1542,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@heroicons/vue@npm:^2.0.10":
-  version: 2.0.10
-  resolution: "@heroicons/vue@npm:2.0.10"
+"@heroicons/vue@npm:^2.1.1":
+  version: 2.1.1
+  resolution: "@heroicons/vue@npm:2.1.1"
   peerDependencies:
     vue: ">= 3"
-  checksum: 48e76f73954a47a82e0043e21f692e67748b1d5ad224b7ae18ea40bc2537fde477b1f772fc2874cdd922842307d15a6d999f01d1fa10e13e73884baed4d18471
+  checksum: b80c14291a6406c794697b9a59c1c8a6f847c8ddd87044a7bdd7333250657de4fb2b5bbe00ce658580bfec2d55e033cc212986d8a0052f9da894f979436a550c
   languageName: node
   linkType: hard
 
@@ -3902,7 +3902,7 @@ __metadata:
   resolution: "hobbit-tracker-frontend@workspace:."
   dependencies:
     "@fontsource/lato": "npm:^4.2.2"
-    "@heroicons/vue": "npm:^2.0.10"
+    "@heroicons/vue": "npm:^2.1.1"
     "@typescript-eslint/eslint-plugin": "npm:^6.19.1"
     "@typescript-eslint/parser": "npm:^6.19.1"
     "@vitejs/plugin-vue": "npm:^5.0.3"

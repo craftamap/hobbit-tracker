@@ -8,7 +8,7 @@
     </div>
     <div class="events">
       <h1>Your personal feed:</h1>
-      <template v-for="(feedEvent, idx) in feedEvents" v-bind:key="`feedEvent-${idx}`">
+      <template v-for="(feedEvent, _idx) in feedEvents" :key="`feedEvent-${_idx}`">
         <FeedEvent :feedEvent="feedEvent" />
       </template>
     </div>

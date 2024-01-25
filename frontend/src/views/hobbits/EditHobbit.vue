@@ -81,7 +81,7 @@ export default defineComponent({
         temporaryFileReader.readAsDataURL(inputFile)
       })
     }
-    const changeImage = async (event: Event) => {
+    const changeImage = async(event: Event) => {
       // TODO: Add validation
       const fileList = (event?.target as HTMLInputElement).files!
       const firstFile = fileList[0]
@@ -93,7 +93,7 @@ export default defineComponent({
       router.push(`/hobbits/${id.value}`)
     }
 
-    const putHobbit = async () => {
+    const putHobbit = async() => {
       submitting.value = true
       await hobbits.putHobbit({
         id: id.value,

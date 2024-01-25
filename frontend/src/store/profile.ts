@@ -107,7 +107,7 @@ export const useAppPasswordStore = defineStore('apppassword', {
       const newAppPassword: AppPassword = await fetch('/api/profile/me/apppassword/', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({ description: description }),
       }).then((res) => {

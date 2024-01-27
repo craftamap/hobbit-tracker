@@ -8,10 +8,9 @@ RUN yarn --cwd /builddir/frontend build
 
 
 
-FROM golang:alpine AS gobuild
+FROM golang AS gobuild
 
 # RUN mkdir /builddir
-RUN apk add --update gcc musl-dev
 COPY . /builddir
 COPY --from=jsbuild /builddir/frontend/dist /builddir/frontend/dist
 WORKDIR /builddir
@@ -19,6 +18,6 @@ RUN go build
 
 
 
-FROM alpine
+FROM debian
 COPY --from=gobuild /builddir/hobbit-tracker /bin/hobbit-tracker
 ENTRYPOINT ["/bin/hobbit-tracker"]

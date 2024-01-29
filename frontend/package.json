@@ -9,7 +9,7 @@
     "lint": "eslint src --ext .js --ext .vue --ext .ts --fix"
   },
   "dependencies": {
-    "@fontsource/lato": "^4.2.2",
+    "@fontsource/lato": "^5.0.18",
     "@heroicons/vue": "^2.0.10",
     "moment": "^2.29.4",
     "pinia": "^2.0.32",

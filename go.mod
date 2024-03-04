@@ -16,8 +16,7 @@ require (
 	github.com/sethvargo/go-password v0.2.0
 	github.com/sirupsen/logrus v1.9.3
 	github.com/wader/gormstore/v2 v2.0.3
-	golang.org/x/crypto v0.18.0
-	golang.org/x/net v0.20.0 // indirect
+	golang.org/x/crypto v0.20.0
 	gorm.io/driver/sqlite v1.5.4
 	gorm.io/gorm v1.25.6
 )

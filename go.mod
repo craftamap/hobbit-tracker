@@ -3,7 +3,7 @@ module github.com/craftamap/hobbit-tracker
 go 1.16
 
 require (
-	github.com/charmbracelet/lipgloss v0.9.1
+	github.com/charmbracelet/lipgloss v0.10.0
 	github.com/felixge/httpsnoop v1.0.4 // indirect
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/handlers v1.5.2
@@ -12,7 +12,6 @@ require (
 	github.com/gorilla/websocket v1.5.1
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/mattn/go-sqlite3 v1.14.20 // indirect
-	github.com/rivo/uniseg v0.4.5 // indirect
 	github.com/sethvargo/go-password v0.2.0
 	github.com/sirupsen/logrus v1.9.3
 	github.com/wader/gormstore/v2 v2.0.3

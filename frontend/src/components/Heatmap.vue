@@ -2,7 +2,8 @@
   <div :data-uid="uid">
   </div>
   <div class="svg-wrapper">
-    <svg viewBox="-30 -20 1090 140" width="1090" height="160">
+    <!-- note that svg is min-x min-y width height and NOT max-x max-y */ -->
+    <svg viewBox="-30 -20 1106 160">
       <text x="-30" fill="currentColor" y="35">Mo</text>
       <text x="-30" fill="currentColor" y="75">We</text>
       <text x="-30" fill="currentColor" y="115">Fr</text>

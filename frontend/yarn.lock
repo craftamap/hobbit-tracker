@@ -1535,10 +1535,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@fontsource/lato@npm:^4.2.2":
-  version: 4.5.9
-  resolution: "@fontsource/lato@npm:4.5.9"
-  checksum: 19fd83792e9f861f7c4db33eac87f1a9edb80377bc75dcadbc030c77934c1ee1aa13812e6c258273ed6f9e23782c0373365e81e37c60f379cf16b7a5bfcb0e02
+"@fontsource/lato@npm:^5.0.20":
+  version: 5.0.20
+  resolution: "@fontsource/lato@npm:5.0.20"
+  checksum: 954fde484356c2897aafd681b79e064e27facadde25d25126df83cb3985e3c668671508cf70a4cf95fd3ba06ea4e8051c4f8dbc5d2c496e16fdbe1f5adf35cb5
   languageName: node
   linkType: hard
 
@@ -3901,7 +3901,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "hobbit-tracker-frontend@workspace:."
   dependencies:
-    "@fontsource/lato": "npm:^4.2.2"
+    "@fontsource/lato": "npm:^5.0.20"
     "@heroicons/vue": "npm:^2.0.10"
     "@typescript-eslint/eslint-plugin": "npm:^6.19.1"
     "@typescript-eslint/parser": "npm:^6.19.1"

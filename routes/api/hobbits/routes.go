@@ -17,6 +17,9 @@ func RegisterRoutes(hobbits *mux.Router) {
 	hobbits.Handle("/{id:[0-9]+}", authMiddlewareBuilder.Build(
 		http.HandlerFunc(BuildHandleAPIPutHobbit()),
 	)).Methods("PUT")
+	hobbits.Handle("/{id:[0-9]+}", authMiddlewareBuilder.Build(
+		http.HandlerFunc(BuildHandleAPIDeleteHobbit()),
+	)).Methods("DELETE")
 	hobbits.Handle("/{id:[0-9]+}", BuildHandleAPIGetHobbit()).Methods("GET")
 	hobbits.Handle("/", BuildHandleAPIGetHobbits()).Methods("GET")
 

@@ -6,16 +6,22 @@
       <span class="username">{{ user?.username }}</span>!
     </div>
     <div>
-      <div v-if="isMe" class="text-align-right">
-        <CogIcon class="h-24 cursor-pointer" @click="goToAppPassword" />
-      </div>
-      <div v-if="!isMe" class="text-align-right">
-        <UserAddIcon v-if="!follows" class="h-24 cursor-pointer" @click="follow" />
-        <UserRemoveIcon v-if="follows" class="h-24 cursor-pointer" @click="unfollow" />
-      </div>
-      <div>Hobbits:</div>
-      <SimpleHobbit v-for="hobbit in hobbitsOfUser" :key="`hobbit-${hobbit.id}`" :hobbit="hobbit" :withHeatmap="true" />
+      <IconBar>
+        <template v-slot:right>
+          <span v-if="isMe">
+            <CogIcon class="h-24 cursor-pointer" @click="goToAppPassword" />
+          </span>
+          <span v-if="!isMe">
+            <UserAddIcon v-if="!follows" class="h-24 cursor-pointer" @click="follow" />
+          </span>
+          <span v-if="!isMe">
+            <UserRemoveIcon v-if="follows" class="h-24 cursor-pointer" @click="unfollow" />
+          </span>
+        </template>
+      </IconBar>
     </div>
+    <div>Hobbits:</div>
+    <SimpleHobbit v-for="hobbit in hobbitsOfUser" :key="`hobbit-${hobbit.id}`" :hobbit="hobbit" :withHeatmap="true" />
   </div>
 </template>
 
@@ -25,6 +31,7 @@ import { computed, defineComponent, watch } from 'vue'
 import { CogIcon, UserPlusIcon as UserAddIcon, UserMinusIcon as UserRemoveIcon } from '@heroicons/vue/24/outline'
 
 import SimpleHobbit from '../../components/SimpleHobbit.vue'
+import IconBar from '../../components/IconBar.vue'
 import { useAuthStore } from '../../store/auth'
 import { useProfileStore } from '../../store/profile'
 import { useHobbitsStore } from '../../store/hobbits'
@@ -38,6 +45,7 @@ export default defineComponent({
     CogIcon,
     UserAddIcon,
     UserRemoveIcon,
+    IconBar,
   },
   setup() {
     const route = useRoute()

@@ -52,4 +52,16 @@ const workboxPlugin = (): Plugin => ({
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [vue(), manifestGeneratorPlugin(), workboxPlugin()],
+  server: {
+    proxy: {
+      '/api': {
+        target: 'http://localhost:8080',
+        secure: false,
+      },
+      '/auth': {
+        target: 'http://localhost:8080',
+        secure: false,
+      },
+    },
+  },
 })

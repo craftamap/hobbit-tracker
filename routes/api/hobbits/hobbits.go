@@ -182,7 +182,7 @@ func BuildHandleAPIPutHobbit() http.HandlerFunc {
 			Description: strings.TrimSpace(recievedHobbit.Description),
 		}
 		db.Model(&currentHobbit).Updates(&sanitizedHobbit)
-                log.Infof("Updated hobbit %+v with values %+v", currentHobbit, sanitizedHobbit)
+		log.Infof("Updated hobbit %+v with values %+v", currentHobbit, sanitizedHobbit)
 
 		err = json.NewEncoder(w).Encode(currentHobbit)
 		if err != nil {
@@ -192,6 +192,66 @@ func BuildHandleAPIPutHobbit() http.HandlerFunc {
 
 		eventHub.Broadcast(hub.ServerSideEvent{
 			Typus:        hub.HobbitModified,
+			OptionalData: currentHobbit,
+		})
+	}
+}
+
+func BuildHandleAPIDeleteHobbit() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		db := requestcontext.DB(r)
+		log := requestcontext.Log(r)
+		eventHub := requestcontext.Hub(r)
+
+		user := models.User{}
+
+		// TODO: Add error handling here
+		err := db.Where("ID = ?", r.Context().Value(authtocontext.AuthDetailsContextKey).(authtocontext.AuthDetails).UserID).First(&user).Error
+		if err != nil {
+			log.Error(err)
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+
+		// TODO: add error handling
+		vars := mux.Vars(r)
+		id, ok := vars["id"]
+		if !ok {
+			log.Error("Can't get id from mux")
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+		numericID, err := strconv.ParseUint(id, 10, 32)
+		if err != nil {
+			log.Error(err)
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+
+		currentHobbit := models.Hobbit{}
+		err = db.Where(models.Hobbit{ID: uint(numericID)}).Joins("User").First(&currentHobbit).Error
+		if err != nil {
+			log.Error(err)
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+		// Auth check: only the creator can update its hobbit
+		if user.ID != currentHobbit.User.ID {
+			log.Error("User does not match -> unauthorized")
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+
+		err = db.Model(&currentHobbit).Delete(&currentHobbit).Error
+		if err != nil {
+			log.Error(err)
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+		log.Infof("Deleted hobbit %+v ", currentHobbit)
+
+		eventHub.Broadcast(hub.ServerSideEvent{
+			Typus:        hub.HobbitDeleted,
 			OptionalData: currentHobbit,
 		})
 	}

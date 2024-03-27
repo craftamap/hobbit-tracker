@@ -1,43 +1,30 @@
 <template>
   <div class="grid">
     <div>
-      <span class="icon-entry" @click="navigateAddHobbit">
-        <Add /><span>Add Hobbit... </span>
-      </span>
+      <slot name="left">
+      </slot>
     </div>
     <div>
+      <slot name="center">
+      </slot>
     </div>
     <div>
-      <span class="icon-entry" @click="reload">
-        <Reload />
-      </span>
+      <slot name="right">
+      </slot>
     </div>
   </div>
 </template>
 
 <script lang="ts">
-import Add from '../components/Icons/AddIcon.vue'
 import { defineComponent } from 'vue'
-import { useRouter } from 'vue-router'
-import Reload from './Icons/ReloadIcon.vue'
 
 export default defineComponent({
   name: 'IconBar',
-  components: {
-    Add: Add,
-    Reload: Reload,
-  },
   setup(_, { emit }) {
-    const router = useRouter()
-
-    const navigateAddHobbit = () => {
-      router.push('/hobbits/add')
-    }
     const reload = () => {
       emit('reload')
     }
     return {
-      navigateAddHobbit,
       reload,
     }
   },
@@ -58,8 +45,10 @@ export default defineComponent({
   }
 }
 
-.icon-entry {
+.grid :deep(> div > span) {
   display: inline-flex;
   align-items: center;
   cursor: pointer;
-}</style>
+}
+
+</style>

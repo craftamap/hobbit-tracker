@@ -34,6 +34,10 @@ const routes: Array<RouteRecordRaw> = [
     component: () => import('../views/hobbits/EditHobbit.vue'),
   },
   {
+    path: '/hobbits/:hobbitId/delete',
+    component: () => import('../views/hobbits/DeleteHobbit.vue'),
+  },
+  {
     path: '/hobbits/:hobbitId/records/add',
     component: () => import('../views/hobbits/records/AddRecord.vue'),
   },

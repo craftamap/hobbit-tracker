@@ -165,5 +165,17 @@ export const useHobbitsStore = defineStore('hobbits', {
       const resJson = await res.json()
       this.setHobbit(resJson)
     },
+    async deleteHobbit({ id }: { id: number }) {
+      const res = await fetch(`/api/hobbits/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+      if (!res.ok) {
+        throw new Error(res.statusText)
+      }
+      delete this.hobbits[id]
+    },
   },
 })

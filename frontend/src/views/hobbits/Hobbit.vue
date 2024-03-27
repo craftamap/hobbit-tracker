@@ -30,14 +30,30 @@
           </div>
         </div>
         <div>
-          <div class="buttons" v-if="isAuthenticated && userId === hobbit.user.id">
-            <router-link :to="`/hobbits/${id}/records/add`" custom v-slot="{ navigate }">
-              <VButton value="Add Record" type="primary" @click="navigate" />
-            </router-link>
-            <router-link :to="`/hobbits/${id}/edit`" custom v-slot="{ navigate }">
-              <VButton value="Edit" @click="navigate" />
-            </router-link>
-          </div>
+          <IconBar>
+            <template v-slot:left>
+              <router-link v-if="isAuthenticated && userId === hobbit.user.id" :to="`/hobbits/${id}/records/add`" custom
+                v-slot="{ navigate }">
+                <span @click="navigate">
+                  <Add /><span>Add Record... </span>
+                </span>
+              </router-link>
+            </template>
+            <template v-slot:right>
+              <router-link v-if="isAuthenticated && userId === hobbit.user.id" :to="`/hobbits/${id}/edit`" custom
+                v-slot="{ navigate }">
+                <span @click="navigate">
+                  <Pencil class="h-20 cursor-pointer" />
+                </span>
+              </router-link>
+              <router-link v-if="isAuthenticated && userId === hobbit.user.id" :to="`/hobbits/${id}/delete`" custom
+                v-slot="{ navigate }">
+                <span @click="navigate">
+                  <Trash class="h-20 cursor-pointer" />
+                </span>
+              </router-link>
+            </template>
+          </IconBar>
           <table>
             <thead>
               <tr>
@@ -79,6 +95,8 @@ import { storeToRefs } from 'pinia'
 import { useHobbitsStore } from '../../store/hobbits'
 import { useHobbitFromRoute } from '../../composables/hobbitFromRoute'
 import { useRouter } from 'vue-router'
+import IconBar from '../../components/IconBar.vue'
+import Add from '../../components/Icons/AddIcon.vue'
 
 export default defineComponent({
   name: 'HobbitView',
@@ -89,6 +107,8 @@ export default defineComponent({
     Pencil,
     DDialog,
     FormWrapper,
+    IconBar,
+    Add,
   },
   setup() {
     const auth = useAuthStore()
@@ -148,10 +168,6 @@ export default defineComponent({
 </script>
 
 <style scoped>
-.buttons {
-  display: flex;
-}
-
 table {
   width: 100%;
 

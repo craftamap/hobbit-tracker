@@ -50,20 +50,17 @@ export default defineComponent({
 
 <style>
 :root {
-  --sky-blue-crayola: #66d2e3ff;
-  --cadet-blue: #49a0abff;
-  --ming: #076470ff;
-  --primary: #076470ff;
-  --midnight-green-eagle-green: #1a4b52ff;
-  --primary-dark: #1a4b52ff;
+  --primary: #076470; /* ming */
+  --primary-dark: #1a4b52ff;/* midnight-green-eagle-green */
 
   --primary-text: #111d1f;
   --secondary-text: #444444;
   --background: #ffffff;
 
   @media (prefers-color-scheme: dark) {
+    --primary: #37A2B0;
     --primary-text: #ffffff;
-    --secondary-text: #cccccc;
+    --secondary-text: #eeeeee;
     --background: #111d1f;
   }
 }

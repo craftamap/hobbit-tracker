@@ -59,7 +59,7 @@ export default defineComponent({
   font-size: 16pt;
   text-align: center;
   margin-bottom: 2rem;
-  color: darkgray;
+  color: var(--secondary-text);
 
 }
 </style>

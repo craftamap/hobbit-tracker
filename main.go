@@ -28,6 +28,7 @@ var (
 	flagDiskMode bool
 	flagPort     int
 	flagVerbose  bool
+	flagDatabase string
 )
 
 var (
@@ -49,6 +50,7 @@ func init() {
 	flag.BoolVar(&flagDiskMode, "disk-mode", false, "disk mode")
 	flag.IntVar(&flagPort, "port", 8080, "port")
 	flag.BoolVar(&flagVerbose, "v", false, "verbose, enables debug logs")
+	flag.StringVar(&flagDatabase, "db", "hobbits.sqlite", "path to the database")
 	flag.Parse()
 
 	if flagVerbose {
@@ -92,7 +94,7 @@ func main() {
 		gormConfig.Logger = gormLogger.Default.LogMode(gormLogger.Info)
 	}
 
-	db, err = gorm.Open(sqlite.Open("hobbits.sqlite"), gormConfig)
+	db, err = gorm.Open(sqlite.Open(flagDatabase), gormConfig)
 	if err != nil {
 		fmt.Println(err)
 		return

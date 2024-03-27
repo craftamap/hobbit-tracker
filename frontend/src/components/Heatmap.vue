@@ -78,7 +78,7 @@ export default defineComponent({
       return timestamps;
     })
 
-    let prefersDark = ref(window.matchMedia('(prefers-color-scheme: dark)').matches)
+    const prefersDark = ref(window.matchMedia('(prefers-color-scheme: dark)').matches)
 
     window.matchMedia('(prefers-color-scheme: dark)').addEventListener("change", (pd) => {
       prefersDark.value = (pd.currentTarget as MediaQueryList).matches

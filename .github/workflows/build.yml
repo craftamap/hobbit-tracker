@@ -20,6 +20,7 @@ jobs:
       
       - name: Build Frontend
         run: |
+          corepack enable
           yarn --cwd frontend install
           yarn --cwd frontend build
       - name: Build Backend

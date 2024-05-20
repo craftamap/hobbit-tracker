@@ -1,8 +1,9 @@
-FROM node:18 AS jsbuild
+FROM node:20 AS jsbuild
 
 # RUN mkdir /builddir
 COPY . /builddir
-
+RUN corepack enable
+RUN corepack prepare yarn@stable --activate
 RUN yarn --cwd /builddir/frontend install
 RUN yarn --cwd /builddir/frontend build
 

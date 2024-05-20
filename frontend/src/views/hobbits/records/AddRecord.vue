@@ -46,11 +46,11 @@
 import FormWrapper from '../../../components/form/FormWrapper.vue'
 import { defineComponent, ref } from 'vue'
 import Loading from '../../../components/Icons/LoadingIcon.vue'
-import moment from 'moment'
 import Button from '../../../components/form/Button.vue'
 import { useHobbitsStore } from '../../../store/hobbits'
 import { useHobbitFromRoute } from '../../../composables/hobbitFromRoute'
 import { useRouter } from 'vue-router'
+import { Temporal } from '@js-temporal/polyfill'
 
 export default defineComponent({
   components: {
@@ -64,18 +64,23 @@ export default defineComponent({
 
     const submitting = ref(false)
     const recordData = ref({
-      timestamp: moment().format('YYYY-MM-DDTHH:mm'),
+      timestamp: Temporal.Now.plainDateTimeISO().toString({fractionalSecondDigits: 0}),
       value: 10,
       comment: '',
     })
 
     const { id, hobbit } = useHobbitFromRoute()
 
+    console.log(Temporal.Now.timeZoneId())
     const postRecord = () => {
       submitting.value = true
       hobbits.postRecord({
         id: id.value,
-        timestamp: moment(recordData.value.timestamp).toDate(),
+        timestamp: Temporal.PlainDateTime
+          .from(recordData.value.timestamp)
+          .toZonedDateTime(Temporal.Now.timeZoneId())
+          .toInstant()
+          .toString(),
         value: Number(recordData.value.value),
         comment: recordData.value.comment,
       }).then(() => {

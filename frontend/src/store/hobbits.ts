@@ -86,7 +86,7 @@ export const useHobbitsStore = defineStore('hobbits', {
         this.hobbits[hobbitId].records = resJson
       }
     },
-    async postRecord({ id, timestamp, value, comment }: { id: number; timestamp: Date; value: number; comment: string }) {
+    async postRecord({ id, timestamp, value, comment }: { id: number; timestamp: string; value: number; comment: string }) {
       const res = await fetch(`/api/hobbits/${id}/records/`, {
         method: 'POST',
         headers: {

@@ -54,6 +54,7 @@
               </router-link>
             </template>
           </IconBar>
+          <Line :options="{ scales: {x: { type: 'time' }, y: {min: 0} } }" :data="chartData" />
           <table>
             <thead>
               <tr>
@@ -82,7 +83,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from 'vue'
+import { defineComponent, ref, computed } from 'vue'
 import { NumericRecord } from '../../models'
 import Loading from '../../components/Icons/LoadingIcon.vue'
 import VButton from '../../components/form/Button.vue'
@@ -97,6 +98,11 @@ import { useHobbitFromRoute } from '../../composables/hobbitFromRoute'
 import { useRouter } from 'vue-router'
 import IconBar from '../../components/IconBar.vue'
 import Add from '../../components/Icons/AddIcon.vue'
+import { Line } from 'vue-chartjs'
+import { Chart as ChartJS, Title, Tooltip, Legend, LineElement, CategoryScale, LinearScale, PointElement, TimeScale } from 'chart.js'
+import 'chartjs-adapter-moment'
+ChartJS.register(Title, Tooltip, Legend, LineElement, CategoryScale, LinearScale, PointElement, TimeScale)
+
 
 export default defineComponent({
   name: 'HobbitView',
@@ -109,6 +115,7 @@ export default defineComponent({
     FormWrapper,
     IconBar,
     Add,
+    Line,
   },
   setup() {
     const auth = useAuthStore()
@@ -125,6 +132,21 @@ export default defineComponent({
     const { authenticated: isAuthenticated, userId } = storeToRefs(auth)
 
     hobbits.fetchRecords(id.value)
+
+    const chartData = computed(() => {
+      // cut off 1 year
+      const yearAgo = new Date(new Date().setFullYear(new Date().getFullYear() - 1));
+      return {
+        datasets: [{
+          label: hobbit.value.name,
+          borderColor: getComputedStyle(document.body).getPropertyValue('--primary-dark'),
+          backgroundColor: getComputedStyle(document.body).getPropertyValue('--primary'),
+          data: hobbit.value?.records?.filter((record => new Date(record.timestamp) > yearAgo)).map((record) => {
+            return { x: record.timestamp as unknown as number, y: record.value }
+          }),
+        }],
+      }
+    })
 
     const openDeleteRecordDialog = (_: Event, record: NumericRecord) => {
       deleteDialog.value.record = record
@@ -157,6 +179,7 @@ export default defineComponent({
       id,
       isAuthenticated,
       userId,
+      chartData,
       goToEditRecord,
       deleteRecord,
       openDeleteRecordDialog,

@@ -3844,7 +3844,7 @@ __metadata:
     vite: "npm:^5.2.6"
     vue: "npm:^3.4.21"
     vue-chartjs: "npm:^5.3.1"
-    vue-router: "npm:^4.3.0"
+    vue-router: "npm:^4.3.3"
     vue-tsc: "npm:^2.0.7"
     workbox-build: "npm:^7.0.0"
   languageName: unknown
@@ -6082,14 +6082,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"vue-router@npm:^4.3.0":
-  version: 4.3.0
-  resolution: "vue-router@npm:4.3.0"
+"vue-router@npm:^4.3.3":
+  version: 4.3.3
+  resolution: "vue-router@npm:4.3.3"
   dependencies:
     "@vue/devtools-api": "npm:^6.5.1"
   peerDependencies:
     vue: ^3.2.0
-  checksum: 10c0/72865ad2e5e17035f1d38311caaec77759f9813f3a627553994c05c43d04ceeaf1f9325260be4c060411c49ed176035579bf4815a4c084b908688c0cc6b3cf72
+  checksum: 10c0/bd58907346b899acb896f58764c6eb0f6ff7a68bd6e5781a774c746ac3dad5d7cc05a7a9d2b3c46288a3de2bfe94b14613fe1c50a06dbaf749f92f2fd8126138
   languageName: node
   linkType: hard
 

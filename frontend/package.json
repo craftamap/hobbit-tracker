@@ -7,7 +7,7 @@
     "start": "vite",
     "watch": "vite build --watch --mode=develop",
     "build": "vue-tsc && vite build",
-    "lint": "eslint src --ext .js --ext .vue --ext .ts"
+    "lint": "eslint src"
   },
   "dependencies": {
     "@fontsource/lato": "^5.2.7",
@@ -15,54 +15,26 @@
     "chart.js": "^4.5.1",
     "chartjs-adapter-moment": "^1.0.1",
     "moment": "^2.30.1",
-    "pinia": "^2.1.7",
-    "typescript": "^5.4.3",
-    "vite": "^5.2.6",
+    "pinia": "^3.0.0",
+    "typescript": "^6.0.0",
+    "vite": "^8.0.0",
     "vue": "^3.5.31",
     "vue-chartjs": "^5.3.1",
-    "vue-router": "^4.3.0"
+    "vue-router": "^4.5.0"
   },
   "devDependencies": {
     "@types/node": "^25.5.0",
-    "@typescript-eslint/eslint-plugin": "^7.4.0",
-    "@typescript-eslint/parser": "^7.4.0",
-    "@vitejs/plugin-vue": "^5.0.4",
-    "@vue/eslint-config-typescript": "^13.0.0",
-    "@vue/language-server": "^2.0.19",
-    "@vue/typescript-plugin": "^2.0.19",
-    "eslint": "^8.57.0",
-    "eslint-plugin-vue": "^9.24.0",
+    "@typescript-eslint/eslint-plugin": "^8.0.0",
+    "@typescript-eslint/parser": "^8.0.0",
+    "@vitejs/plugin-vue": "^6.0.5",
+    "@vue/eslint-config-typescript": "^14.0.0",
+    "@vue/language-server": "^3.2.6",
+    "@vue/typescript-plugin": "^3.2.6",
+    "eslint": "^10.0.3",
+    "eslint-plugin-vue": "^10.0.0",
     "register-service-worker": "^1.7.2",
-    "vue-tsc": "^2.0.7",
+    "vue-tsc": "^3.2.6",
     "workbox-build": "^7.4.0"
-  },
-  "eslintConfig": {
-    "root": true,
-    "env": {
-      "node": true
-    },
-    "extends": [
-      "plugin:vue/vue3-essential",
-      "@vue/typescript/recommended"
-    ],
-    "parser": "vue-eslint-parser",
-    "parserOptions": {
-      "parser": "@typescript-eslint/parser",
-      "ecmaVersion": 2020
-    },
-    "rules": {
-      "comma-dangle": [
-        "error",
-        "always-multiline"
-      ],
-      "space-before-function-paren": [
-        "error",
-        "never"
-      ],
-      "vue/no-reserved-component-names": [
-        "off"
-      ]
-    }
   },
   "browserslist": [
     "> 1%",

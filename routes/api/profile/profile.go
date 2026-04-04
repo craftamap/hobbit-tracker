@@ -115,7 +115,7 @@ func GetFollowForUser() http.HandlerFunc {
 
 		follows := count > 0
 
-		json.NewEncoder(w).Encode(map[string]interface{}{
+		json.NewEncoder(w).Encode(map[string]any{
 			"follows": follows,
 			"user":    otherUser,
 		})
@@ -342,7 +342,7 @@ func BuildHandlePostAppPassword() http.HandlerFunc {
 			return
 		}
 
-		var dat map[string]interface{}
+		var dat map[string]any
 		err = json.NewDecoder(r.Body).Decode(&dat)
 		if err != nil {
 			log.Error(err)
@@ -502,7 +502,7 @@ const (
 type FeedEvent struct {
 	FeedEventTypus FeedEventTypus
 	CreatedAt      time.Time
-	Payload        interface{}
+	Payload        any
 }
 
 func GetMyFeed() http.HandlerFunc {
@@ -562,10 +562,7 @@ func GetMyFeed() http.HandlerFunc {
 			return relevantEvents[i].CreatedAt.After(relevantEvents[j].CreatedAt)
 		})
 
-		upperMax := len(relevantEvents) - 1
-		if upperMax >= 25 {
-			upperMax = 25
-		}
+		upperMax := min(len(relevantEvents)-1, 25)
 
 		relevantEvents = relevantEvents[0:upperMax]
 

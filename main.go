@@ -82,7 +82,7 @@ type customRecoveryLogger struct {
 	log *logrus.Logger
 }
 
-func (c *customRecoveryLogger) Println(msgs ...interface{}) {
+func (c *customRecoveryLogger) Println(msgs ...any) {
 	c.log.Errorln(msgs...)
 }
 

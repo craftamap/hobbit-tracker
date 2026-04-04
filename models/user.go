@@ -21,10 +21,10 @@ type AppPassword struct {
 	Secret      string         `json:"secret,omitempty"`
 	UserID      uint           `gorm:"index" json:"user_id,omitempty"`
 	User        *User          `gorm:"foreignKey:UserID" json:"user,omitempty"`
-	LastUsedAt  time.Time      `json:"last_used_at,omitempty"`
-	CreatedAt   time.Time      `json:"created_at,omitempty"`
-	UpdatedAt   time.Time      `json:"updated_at,omitempty"`
-	DeletedAt   gorm.DeletedAt `gorm:"index" json:"deleted_at,omitempty"`
+	LastUsedAt  time.Time      `json:"last_used_at"`
+	CreatedAt   time.Time      `json:"created_at"`
+	UpdatedAt   time.Time      `json:"updated_at"`
+	DeletedAt   gorm.DeletedAt `gorm:"index" json:"deleted_at"`
 }
 
 func (ap *AppPassword) BeforeCreate(scope *gorm.DB) error {

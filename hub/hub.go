@@ -8,7 +8,7 @@ import (
 // ServerSideEventTypus is an alias for string used for ServerSideEvents
 type ServerSideEventTypus string
 
-//  constants of EventTypus
+// constants of EventTypus
 const (
 	HobbitCreated  ServerSideEventTypus = "HobbitCreated"
 	HobbitDeleted  ServerSideEventTypus = "HobbitDeleted"
@@ -21,7 +21,7 @@ const (
 // ServerSideEvent simulates a event happening on the Server
 type ServerSideEvent struct {
 	Typus        ServerSideEventTypus `json:"typus"`
-	OptionalData interface{}          `json:"optional_data,omitempty"`
+	OptionalData any                  `json:"optional_data,omitempty"`
 }
 
 // Hub is the actual event Hub

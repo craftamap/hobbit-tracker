@@ -8,8 +8,16 @@
             <p>Do you really want to delete this app password?</p>
             <p>Description: {{ deleteDialog.appPassword?.description }}</p>
             <div>
-              <Button type="primary" value="delete" @click="deleteAppPassword" :loading="deleteDialog.loading" />
-              <Button value="cancel" @click="closeDeleteDialog" />
+              <Button
+                type="primary"
+                value="delete"
+                :loading="deleteDialog.loading"
+                @click="deleteAppPassword"
+              />
+              <Button
+                value="cancel"
+                @click="closeDeleteDialog"
+              />
             </div>
           </form>
         </FormWrapper>
@@ -20,16 +28,32 @@
             <p>Create a new app password</p>
             <div>
               <label for="description">Description:</label>
-              <input id="description" type="text" v-model="addDialog.description" />
+              <input
+                id="description"
+                v-model="addDialog.description"
+                type="text"
+              >
             </div>
             <template v-if="addDialog.password">
               <p>Your new password is:</p>
-              <input type="text" readonly :value="addDialog.password" />
+              <input
+                type="text"
+                readonly
+                :value="addDialog.password"
+              >
             </template>
             <div>
-              <Button type="primary" value="add" @click="addAppPassword" :loading="addDialog.loading"
-                v-if="!addDialog.password" />
-              <Button value="cancel" @click="closeAddDialog" />
+              <Button
+                v-if="!addDialog.password"
+                type="primary"
+                value="add"
+                :loading="addDialog.loading"
+                @click="addAppPassword"
+              />
+              <Button
+                value="cancel"
+                @click="closeAddDialog"
+              />
             </div>
           </form>
         </FormWrapper>
@@ -37,12 +61,20 @@
     </Teleport>
     <h1>App Passwords</h1>
     <div>
-      <div class="add-app-password cursor-pointer" @click="openAddDialog" tabindex="0">
+      <div
+        class="add-app-password cursor-pointer"
+        tabindex="0"
+        @click="openAddDialog"
+      >
         <Add class="h-24" />Add App Password...
       </div>
     </div>
-    <AppPasswordItem v-for="appPassword in appPasswords" :key="`appPassword-${appPassword.id}`" :appPassword="appPassword"
-      @delete="openDeleteDialog($event)" />
+    <AppPasswordItem
+      v-for="appPassword in appPasswords"
+      :key="`appPassword-${appPassword.id}`"
+      :app-password="appPassword"
+      @delete="openDeleteDialog($event)"
+    />
   </div>
 </template>
 

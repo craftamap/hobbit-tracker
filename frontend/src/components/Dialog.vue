@@ -1,7 +1,7 @@
 <template>
   <DialogWrapper v-if="shown">
     <div class="dialog">
-      <slot></slot>
+      <slot />
     </div>
   </DialogWrapper>
 </template>

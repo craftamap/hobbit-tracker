@@ -1,26 +1,39 @@
 <template>
   <div class="feed">
     <div class="greeting">
-      <div class="welcome" v-if="authenticated">
+      <div
+        v-if="authenticated"
+        class="welcome"
+      >
         Here there,
         <span class="username">{{ username }}</span>!
       </div>
     </div>
     <div class="events">
       <h1>Your personal feed:</h1>
-      <template v-for="(feedEvent, _idx) in feedEvents" :key="`feedEvent-${_idx}`">
-        <FeedEvent :feedEvent="feedEvent" />
+      <template
+        v-for="(feedEvent, _idx) in feedEvents"
+        :key="`feedEvent-${_idx}`"
+      >
+        <FeedEvent :feed-event="feedEvent" />
       </template>
     </div>
     <div class="sidebar">
       <h1>Your hobbits:</h1>
       <div>
-        <span class="icon-entry" @click="goToAddHobbit">
+        <span
+          class="icon-entry"
+          @click="goToAddHobbit"
+        >
           <PlusIcon class="w-24 h-24" />
           <span>Add Hobbit...</span>
         </span>
       </div>
-      <SimpleHobbit v-for="hobbit in hobbitsOfUser" :key="`hobbit-${hobbit.id}`" :hobbit="hobbit" />
+      <SimpleHobbit
+        v-for="hobbit in hobbitsOfUser"
+        :key="`hobbit-${hobbit.id}`"
+        :hobbit="hobbit"
+      />
     </div>
   </div>
 </template>

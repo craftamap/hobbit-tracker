@@ -1,33 +1,39 @@
 <template>
-    <FormWrapper>
-        <form
-            ref="form"
-            method="POST"
-            action="/auth/login"
-            v-on:keyup.enter="submit"
+  <FormWrapper>
+    <form
+      ref="form"
+      method="POST"
+      action="/auth/login"
+      @keyup.enter="submit"
+    >
+      <div class="welcome">
+        Welcome back!
+      </div>
+      <div>
+        <input
+          id="username"
+          type="text"
+          name="username"
+          placeholder="username"
         >
-            <div class="welcome">Welcome back!</div>
-            <div>
-                <input
-                    type="text"
-                    id="username"
-                    name="username"
-                    placeholder="username"
-                />
-            </div>
-            <div>
-                <input
-                    type="password"
-                    id="password"
-                    name="password"
-                    placeholder="password"
-                />
-            </div>
-            <div>
-                <Button @click="submit" value="Login" type="primary" />
-            </div>
-        </form>
-    </FormWrapper>
+      </div>
+      <div>
+        <input
+          id="password"
+          type="password"
+          name="password"
+          placeholder="password"
+        >
+      </div>
+      <div>
+        <Button
+          value="Login"
+          type="primary"
+          @click="submit"
+        />
+      </div>
+    </form>
+  </FormWrapper>
 </template>
 
 <script lang="ts">

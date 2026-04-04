@@ -10,11 +10,19 @@
       <FormWrapper>
         <form>
           <div>
-            <p>Id: {{hobbit.id}}</p>
-            <p>Name: {{hobbit.name}}</p>
-            <p>Description: {{hobbit.description}}</p>
-            <Button value="Delete Hobbit" @click="deleteHobbit()" type="primary" :loading="submitting" />
-            <Button value="Go back" @click="goBack()" />
+            <p>Id: {{ hobbit.id }}</p>
+            <p>Name: {{ hobbit.name }}</p>
+            <p>Description: {{ hobbit.description }}</p>
+            <Button
+              value="Delete Hobbit"
+              type="primary"
+              :loading="submitting"
+              @click="deleteHobbit()"
+            />
+            <Button
+              value="Go back"
+              @click="goBack()"
+            />
           </div>
         </form>
       </FormWrapper>

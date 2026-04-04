@@ -10,17 +10,21 @@
     </div>
     <div class="icons-wrapper">
       <span tabindex="0">
-        <Trash class="h-16 cursor-pointer" @click="emitDelete()" />
+        <Trash
+          class="h-16 cursor-pointer"
+          @click="emitDelete()"
+        />
       </span>
     </div>
   </div>
 </template>
 
 <script lang="ts">
-import moment from 'moment'
 import { defineComponent, PropType, toRefs } from 'vue'
 import { AppPassword } from '../../models'
 import { TrashIcon as Trash } from '@heroicons/vue/24/outline'
+import { formatDate, formatDateAgo } from '../../utils/date-utils'
+
 
 export default defineComponent({
   name: 'AppPasswordItem',
@@ -35,21 +39,6 @@ export default defineComponent({
   setup(props, { emit }) {
     const { appPassword } = toRefs(props)
 
-    const formatDate = (date: string | undefined): string => {
-      const d = moment(date)
-      if (d.year() === 1) {
-        return 'never'
-      }
-      return d.format('YYYY-MM-DD HH:mm')
-    }
-
-    const formatDateAgo = (date: string | undefined): string => {
-      const d = moment(date)
-      if (d.year() === 1) {
-        return 'never'
-      }
-      return moment.duration(d.diff(moment())).humanize() + ' ago'
-    }
 
     const emitDelete = () => {
       emit('delete', {

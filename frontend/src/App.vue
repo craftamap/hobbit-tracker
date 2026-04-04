@@ -1,21 +1,35 @@
 <template>
   <div>
     <div id="nav">
-      <router-link to="/">Home</router-link> |
-      <router-link to="/overview">Overview</router-link> |
+      <router-link to="/">
+        Home
+      </router-link> |
+      <router-link to="/overview">
+        Overview
+      </router-link> |
       <template v-if="isAuthenticated">
-        <router-link to="/profile/me">Profile</router-link> |
+        <router-link to="/profile/me">
+          Profile
+        </router-link> |
         <a href="/auth/logout">Logout</a>
       </template>
-      <router-link v-if="!isAuthenticated" to="/login">Login</router-link>
+      <router-link
+        v-if="!isAuthenticated"
+        to="/login"
+      >
+        Login
+      </router-link>
     </div>
     <router-view v-slot="{ Component }">
-      <transition name="fade" mode="out-in">
+      <transition
+        name="fade"
+        mode="out-in"
+      >
         <component :is="Component" />
       </transition>
     </router-view>
     <div>
-      <div id="dialog-target"></div>
+      <div id="dialog-target" />
     </div>
   </div>
 </template>
@@ -50,8 +64,10 @@ export default defineComponent({
 
 <style>
 :root {
-  --primary: #076470; /* ming */
-  --primary-dark: #1a4b52ff;/* midnight-green-eagle-green */
+  --primary: #076470;
+  /* ming */
+  --primary-dark: #1a4b52ff;
+  /* midnight-green-eagle-green */
 
   --primary-text: #111d1f;
   --secondary-text: #444444;

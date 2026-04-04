@@ -1,21 +1,46 @@
 <template>
-  <div :data-uid="uid">
-  </div>
+  <div :data-uid="uid" />
   <div class="svg-wrapper">
     <!-- note that svg is min-x min-y width height and NOT max-x max-y */ -->
     <svg viewBox="-30 -20 1106 160">
-      <text x="-30" fill="currentColor" y="35">Mo</text>
-      <text x="-30" fill="currentColor" y="75">We</text>
-      <text x="-30" fill="currentColor" y="115">Fr</text>
-      <template v-for="(timestamp, idx) in timestamps" :key="timestamp">
-        <text v-if="timestamp.getDate() === 1" :x="Math.floor((idx / 7)) * 20" y="-10" fill="currentColor">{{
+      <text
+        x="-30"
+        fill="currentColor"
+        y="35"
+      >Mo</text>
+      <text
+        x="-30"
+        fill="currentColor"
+        y="75"
+      >We</text>
+      <text
+        x="-30"
+        fill="currentColor"
+        y="115"
+      >Fr</text>
+      <template
+        v-for="(timestamp, idx) in timestamps"
+        :key="timestamp"
+      >
+        <text
+          v-if="timestamp.getDate() === 1"
+          :x="Math.floor((idx / 7)) * 20"
+          y="-10"
+          fill="currentColor"
+        >{{
           timestamp.toLocaleString(undefined, {
             month:
               'short'
           }) }}</text>
-        <rect width="16" height="16" :y="(idx % 7) * 20" :x="Math.floor((idx / 7)) * 20"
-          :data-timestamp="timestamp.getTime()" ry='3'
-          :style="`fill: ${getColor((mappedData?.get(timestamp.getTime()) || 0) / (max === 0 ? 1 : max))}`">
+        <rect
+          width="16"
+          height="16"
+          :y="(idx % 7) * 20"
+          :x="Math.floor((idx / 7)) * 20"
+          :data-timestamp="timestamp.getTime()"
+          ry="3"
+          :style="`fill: ${getColor((mappedData?.get(timestamp.getTime()) || 0) / (max === 0 ? 1 : max))}`"
+        >
           <title>{{ timestamp }} - Count: {{ mappedData?.get(timestamp.getTime()) || 0 }}</title>
         </rect>
       </template>

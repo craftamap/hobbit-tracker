@@ -1,21 +1,29 @@
 <template>
   <div>
-    <div class="welcome" v-if="isAuthenticated">
+    <div
+      v-if="isAuthenticated"
+      class="welcome"
+    >
       Here there, <span class="username">{{ username }}</span>!
     </div>
     <IconBar @reload="reload">
-      <template v-slot:left>
+      <template #left>
         <span @click="navigateAddHobbit">
           <Add /><span>Add Hobbit... </span>
         </span>
       </template>
-      <template v-slot:right>
+      <template #right>
         <span @click="reload">
           <Reload />
         </span>
       </template>
     </IconBar>
-    <SimpleHobbit v-for="hobbit in hobbits" :key='`hobbit-${hobbit?.id}`' :hobbit="hobbit" :withHeatmap=true />
+    <SimpleHobbit
+      v-for="hobbit in hobbits"
+      :key="`hobbit-${hobbit?.id}`"
+      :hobbit="hobbit"
+      :with-heatmap="true"
+    />
   </div>
 </template>
 

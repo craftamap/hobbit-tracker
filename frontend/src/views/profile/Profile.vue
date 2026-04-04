@@ -1,27 +1,47 @@
 <template>
   <div>
     <div class="welcome">
-      <template v-if="isMe">Here there, </template>
-      <template v-if="!isMe">This is </template>
+      <template v-if="isMe">
+        Here there,
+      </template>
+      <template v-if="!isMe">
+        This is
+      </template>
       <span class="username">{{ user?.username }}</span>!
     </div>
     <div>
       <IconBar>
-        <template v-slot:right>
+        <template #right>
           <span v-if="isMe">
-            <CogIcon class="h-24 cursor-pointer" @click="goToAppPassword" />
+            <CogIcon
+              class="h-24 cursor-pointer"
+              @click="goToAppPassword"
+            />
           </span>
           <span v-if="!isMe">
-            <UserAddIcon v-if="!follows" class="h-24 cursor-pointer" @click="follow" />
+            <UserAddIcon
+              v-if="!follows"
+              class="h-24 cursor-pointer"
+              @click="follow"
+            />
           </span>
           <span v-if="!isMe">
-            <UserRemoveIcon v-if="follows" class="h-24 cursor-pointer" @click="unfollow" />
+            <UserRemoveIcon
+              v-if="follows"
+              class="h-24 cursor-pointer"
+              @click="unfollow"
+            />
           </span>
         </template>
       </IconBar>
     </div>
     <div>Hobbits:</div>
-    <SimpleHobbit v-for="hobbit in hobbitsOfUser" :key="`hobbit-${hobbit.id}`" :hobbit="hobbit" :withHeatmap="true" />
+    <SimpleHobbit
+      v-for="hobbit in hobbitsOfUser"
+      :key="`hobbit-${hobbit.id}`"
+      :hobbit="hobbit"
+      :with-heatmap="true"
+    />
   </div>
 </template>
 

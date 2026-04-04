@@ -8,31 +8,33 @@
         <div class="header">
           <div>
             <h1>{{ hobbit.name }} - Add record</h1>
-            <div class="by">by {{ hobbit.user.username }}</div>
+            <div class="by">
+              by {{ hobbit.user.username }}
+            </div>
             <div>
               {{ hobbit.description }}
             </div>
           </div>
           <div>
-            <img :src="hobbit.image" />
+            <img :src="hobbit.image">
           </div>
         </div>
         <FormWrapper>
           <form>
             <div>
               <label for="timestamp">When:</label>
-              <input id="timestamp" name="timestamp" type="datetime-local" v-model="recordData.timestamp" />
+              <input id="timestamp" v-model="recordData.timestamp" name="timestamp" type="datetime-local">
             </div>
             <div>
               <label for="value">Value:</label>
-              <input type="number" name="number" id="number" v-model="recordData.value" />
+              <input id="number" v-model="recordData.value" type="number" name="number">
             </div>
             <div>
               <label for="comment">Comment:</label>
-              <textarea name="comment" id="comment" rows="5" v-model="recordData.comment"></textarea>
+              <textarea id="comment" v-model="recordData.comment" name="comment" rows="5" />
             </div>
             <div>
-              <Button value="Add record" @click="postRecord()" type="primary" :loading="submitting" />
+              <Button value="Add record" type="primary" :loading="submitting" @click="postRecord()" />
               <Button value="Go back" @click="goBack()" />
             </div>
           </form>
@@ -46,11 +48,11 @@
 import FormWrapper from '../../../components/form/FormWrapper.vue'
 import { defineComponent, ref } from 'vue'
 import Loading from '../../../components/Icons/LoadingIcon.vue'
-import moment from 'moment'
 import Button from '../../../components/form/Button.vue'
 import { useHobbitsStore } from '../../../store/hobbits'
 import { useHobbitFromRoute } from '../../../composables/hobbitFromRoute'
 import { useRouter } from 'vue-router'
+import { fromDateTimeLocal, toDateTimeLocal } from '../../../utils/date-utils'
 
 export default defineComponent({
   components: {
@@ -64,7 +66,7 @@ export default defineComponent({
 
     const submitting = ref(false)
     const recordData = ref({
-      timestamp: moment().format('YYYY-MM-DDTHH:mm'),
+      timestamp: toDateTimeLocal(Temporal.Now.instant()),
       value: 10,
       comment: '',
     })
@@ -75,7 +77,7 @@ export default defineComponent({
       submitting.value = true
       hobbits.postRecord({
         id: id.value,
-        timestamp: moment(recordData.value.timestamp).toDate(),
+        timestamp: fromDateTimeLocal(recordData.value.timestamp),
         value: Number(recordData.value.value),
         comment: recordData.value.comment,
       }).then(() => {

@@ -23,23 +23,23 @@ const manifestGeneratorPlugin = (): Plugin => ({
           ...images.regular.map((size) => ({
             src: `./img/icons/icon-${size}x${size}.png`,
             sizes: `${size}x${size}`,
-            type: 'image/png'
+            type: 'image/png',
           })),
           ...images.regular.map((size) => ({
             src: `./img/icons/icon-maskable-${size}x${size}.png`,
             sizes: `${size}x${size}`,
             type: 'image/png',
             purpose: 'maskable',
-          }))
-        ]
-      })
+          })),
+        ],
+      }),
     })
-  }
+  },
 })
 
 const workboxPlugin = (): Plugin => ({
   name: 'workbox',
-  writeBundle: async () => {
+  writeBundle: async() => {
     const result = await workboxBuild.generateSW({
       globDirectory: 'dist',
       globPatterns: ['**/*.{html,js,css,woff,woff2}'],

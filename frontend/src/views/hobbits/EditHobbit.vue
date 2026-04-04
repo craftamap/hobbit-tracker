@@ -11,19 +11,42 @@
         <form>
           <div>
             <label for="name">Hobbit name:</label>
-            <input id="name" name="name" type="text" v-model="form.name" />
+            <input
+              id="name"
+              v-model="form.name"
+              name="name"
+              type="text"
+            >
           </div>
           <div>
             <label for="description">Description:</label>
-            <textarea name="description" id="description" rows="5" v-model="form.description"></textarea>
+            <textarea
+              id="description"
+              v-model="form.description"
+              name="description"
+              rows="5"
+            />
           </div>
           <div>
             <label for="image">Image:</label>
-            <input id="image" name="image" type="file" @change="changeImage" />
+            <input
+              id="image"
+              name="image"
+              type="file"
+              @change="changeImage"
+            >
           </div>
           <div>
-            <Button value="Edit Hobbit" @click="putHobbit()" type="primary" :loading="submitting" />
-            <Button value="Go back" @click="goBack()" />
+            <Button
+              value="Edit Hobbit"
+              type="primary"
+              :loading="submitting"
+              @click="putHobbit()"
+            />
+            <Button
+              value="Go back"
+              @click="goBack()"
+            />
           </div>
         </form>
       </FormWrapper>

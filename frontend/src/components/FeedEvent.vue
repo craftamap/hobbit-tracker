@@ -2,21 +2,34 @@
   <div class="card">
     <template v-if="isHobbitCreated">
       <div class="header">
-        <router-link :to="`/profile/${hobbit?.user.id}`">{{ hobbit?.user.username }}</router-link> has created a new
+        <router-link :to="`/profile/${hobbit?.user.id}`">
+          {{ hobbit?.user.username }}
+        </router-link> has created a new
         Hobbit.
       </div>
       <SimpleHobbit :hobbit="hobbit" />
     </template>
     <template v-if="isRecordCreated">
       <div class="header">
-        <router-link :to="`/profile/${hobbit?.user.id}`">{{ hobbit?.user?.username }}</router-link> has created a new
+        <router-link :to="`/profile/${hobbit?.user.id}`">
+          {{ hobbit?.user?.username }}
+        </router-link> has created a new
         entry in
-        <router-link :to="`/hobbits/${hobbit?.user.id}`">"{{ hobbit?.name }}".</router-link>
+        <router-link :to="`/hobbits/${hobbit?.user.id}`">
+          "{{ hobbit?.name }}".
+        </router-link>
       </div>
       <h1>
-        <router-link :to="`/hobbits/${hobbit?.id}`">{{ record?.value }}</router-link>
+        <router-link :to="`/hobbits/${hobbit?.id}`">
+          {{ record?.value }}
+        </router-link>
       </h1>
-      <blockquote class="comment" v-if="!!record?.comment">{{ record?.comment }}</blockquote>
+      <blockquote
+        v-if="!!record?.comment"
+        class="comment"
+      >
+        {{ record?.comment }}
+      </blockquote>
     </template>
   </div>
 </template>

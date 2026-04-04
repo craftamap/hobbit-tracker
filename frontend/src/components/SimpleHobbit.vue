@@ -1,24 +1,38 @@
 <template>
-  <div class="card" :data-id="hobbit?.id">
+  <div
+    class="card"
+    :data-id="hobbit?.id"
+  >
     <div class="header">
       <div>
         <h1>
-          <router-link :to="`/hobbits/${hobbit?.id}`">{{
-            hobbit?.name
-          }}</router-link>
+          <router-link :to="`/hobbits/${hobbit?.id}`">
+            {{
+              hobbit?.name
+            }}
+          </router-link>
         </h1>
-        <div class="by">by {{ hobbit?.user.username }}</div>
+        <div class="by">
+          by {{ hobbit?.user.username }}
+        </div>
         <div>
           {{ hobbit?.description }}
         </div>
       </div>
       <div>
-        <img :src="hobbit?.image" v-if="hobbit?.image" />
+        <img
+          v-if="hobbit?.image"
+          :src="hobbit?.image"
+        >
       </div>
     </div>
     <div v-if="withHeatmap">
       <Loading v-if="loadingHeatmapData" />
-      <Heatmap v-if="!loadingHeatmapData" :data="heatmapData" class="heatmap" />
+      <Heatmap
+        v-if="!loadingHeatmapData"
+        :data="heatmapData"
+        class="heatmap"
+      />
     </div>
   </div>
 </template>
@@ -31,16 +45,16 @@ import Heatmap from './Heatmap.vue'
 import { useHobbitsStore } from '../store/hobbits'
 
 export default defineComponent({
+  components: {
+    Loading,
+    Heatmap,
+  },
   props: {
     hobbit: Object as PropType<Hobbit>,
     withHeatmap: {
       type: Boolean as PropType<boolean>,
       default: false,
     },
-  },
-  components: {
-    Loading,
-    Heatmap,
   },
   setup(props) {
     const hobbitsStore = useHobbitsStore()

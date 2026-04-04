@@ -86,7 +86,7 @@ export const useHobbitsStore = defineStore('hobbits', {
         this.hobbits[hobbitId].records = resJson
       }
     },
-    async postRecord({ id, timestamp, value, comment }: { id: number; timestamp: Date; value: number; comment: string }) {
+    async postRecord({ id, timestamp, value, comment }: { id: number; timestamp: Temporal.Instant; value: number; comment: string }) {
       const res = await fetch(`/api/hobbits/${id}/records/`, {
         method: 'POST',
         headers: {
@@ -104,7 +104,7 @@ export const useHobbitsStore = defineStore('hobbits', {
       // TODO: Put in store
     },
     async putRecord({ hobbitId, recordId, timestamp, value, comment }:
-      { hobbitId: number; recordId: number; timestamp: Date; value: number; comment: string }) {
+      { hobbitId: number; recordId: number; timestamp: Temporal.Instant; value: number; comment: string }) {
       const res = await fetch(`/api/hobbits/${hobbitId}/records/${recordId}`, {
         method: 'PUT',
         headers: {

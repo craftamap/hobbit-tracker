@@ -8,7 +8,6 @@ export interface NumericRecord {
   timestamp: string;
   value: number;
   comment: string;
-  // eslint-disable-next-line no-use-before-define
   hobbit?: Hobbit;
 }
 

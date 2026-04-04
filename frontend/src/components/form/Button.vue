@@ -1,9 +1,17 @@
 <template>
-  <button :class="[type, loading ? 'loading' : '']" type="button">
+  <button
+    :class="[type, loading ? 'loading' : '']"
+    type="button"
+  >
     <span>
       {{ value }}
     </span>
-    <Loading height=16 width=16 class="loading-icon" stroke="#fff" />
+    <Loading
+      height="16"
+      width="16"
+      class="loading-icon"
+      stroke="#fff"
+    />
   </button>
 </template>
 

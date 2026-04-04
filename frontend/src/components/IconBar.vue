@@ -1,16 +1,13 @@
 <template>
   <div class="grid">
     <div>
-      <slot name="left">
-      </slot>
+      <slot name="left" />
     </div>
     <div>
-      <slot name="center">
-      </slot>
+      <slot name="center" />
     </div>
     <div>
-      <slot name="right">
-      </slot>
+      <slot name="right" />
     </div>
   </div>
 </template>

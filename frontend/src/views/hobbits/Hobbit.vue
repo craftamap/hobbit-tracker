@@ -11,8 +11,15 @@
             <form>
               <p>Do you really want to delete this record?</p>
               <div>
-                <VButton type="primary" value="delete" @click="deleteRecord" />
-                <VButton value="cancel" @click="closeDeleteRecordDialog" />
+                <VButton
+                  type="primary"
+                  value="delete"
+                  @click="deleteRecord"
+                />
+                <VButton
+                  value="cancel"
+                  @click="closeDeleteRecordDialog"
+                />
               </div>
             </form>
           </FormWrapper>
@@ -22,56 +29,84 @@
         <div class="header">
           <div>
             <h1>{{ hobbit.name }}</h1>
-            <div class="by">by {{ hobbit.user.username }}</div>
+            <div class="by">
+              by {{ hobbit.user.username }}
+            </div>
             <div>{{ hobbit.description }}</div>
           </div>
           <div>
-            <img :src="hobbit.image" />
+            <img :src="hobbit.image">
           </div>
         </div>
         <div>
           <IconBar>
-            <template v-slot:left>
-              <router-link v-if="isAuthenticated && userId === hobbit.user.id" :to="`/hobbits/${id}/records/add`" custom
-                v-slot="{ navigate }">
+            <template #left>
+              <router-link
+                v-if="isAuthenticated && userId === hobbit.user.id"
+                v-slot="{ navigate }"
+                :to="`/hobbits/${id}/records/add`"
+                custom
+              >
                 <span @click="navigate">
                   <Add /><span>Add Record... </span>
                 </span>
               </router-link>
             </template>
-            <template v-slot:right>
-              <router-link v-if="isAuthenticated && userId === hobbit.user.id" :to="`/hobbits/${id}/edit`" custom
-                v-slot="{ navigate }">
+            <template #right>
+              <router-link
+                v-if="isAuthenticated && userId === hobbit.user.id"
+                v-slot="{ navigate }"
+                :to="`/hobbits/${id}/edit`"
+                custom
+              >
                 <span @click="navigate">
                   <Pencil class="h-20 cursor-pointer" />
                 </span>
               </router-link>
-              <router-link v-if="isAuthenticated && userId === hobbit.user.id" :to="`/hobbits/${id}/delete`" custom
-                v-slot="{ navigate }">
+              <router-link
+                v-if="isAuthenticated && userId === hobbit.user.id"
+                v-slot="{ navigate }"
+                :to="`/hobbits/${id}/delete`"
+                custom
+              >
                 <span @click="navigate">
                   <Trash class="h-20 cursor-pointer" />
                 </span>
               </router-link>
             </template>
           </IconBar>
-          <Line :options="{ scales: {x: { type: 'time' }, y: {min: 0} } }" :data="chartData" />
+          <Line
+            :options="{ scales: {x: { type: 'time' }, y: {min: 0} } }"
+            :data="chartData"
+          />
           <table>
             <thead>
               <tr>
                 <td>value</td>
                 <td>comment</td>
                 <td>date</td>
-                <td name="actions"></td>
+                <td name="actions" />
               </tr>
             </thead>
             <tbody>
-              <tr v-for="record in (hobbit.records || []).slice().reverse()" :key="`record-${record.id}`">
+              <tr
+                v-for="record in (hobbit.records || []).slice().reverse()"
+                :key="`record-${record.id}`"
+              >
                 <td>{{ record.value }}</td>
                 <td>{{ record.comment }}</td>
                 <td>{{ formatDate(record.timestamp) }}</td>
                 <td class="table-actions">
-                  <Pencil class="h-20 cursor-pointer" v-on:click="goToEditRecord($event, record)" tabindex="0" />
-                  <Trash class="h-20 cursor-pointer" v-on:click="openDeleteRecordDialog($event, record)" tabindex="0" />
+                  <Pencil
+                    class="h-20 cursor-pointer"
+                    tabindex="0"
+                    @click="goToEditRecord($event, record)"
+                  />
+                  <Trash
+                    class="h-20 cursor-pointer"
+                    tabindex="0"
+                    @click="openDeleteRecordDialog($event, record)"
+                  />
                 </td>
               </tr>
             </tbody>
@@ -83,13 +118,12 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, computed } from 'vue'
+import { defineComponent, ref, computed, watch } from 'vue'
 import { NumericRecord } from '../../models'
 import Loading from '../../components/Icons/LoadingIcon.vue'
 import VButton from '../../components/form/Button.vue'
 import DDialog from '../../components/Dialog.vue'
 import FormWrapper from '../../components/form/FormWrapper.vue'
-import moment from 'moment'
 import { TrashIcon as Trash, PencilIcon as Pencil } from '@heroicons/vue/24/outline'
 import { useAuthStore } from '../../store/auth'
 import { storeToRefs } from 'pinia'
@@ -100,7 +134,8 @@ import IconBar from '../../components/IconBar.vue'
 import Add from '../../components/Icons/AddIcon.vue'
 import { Line } from 'vue-chartjs'
 import { Chart as ChartJS, Title, Tooltip, Legend, LineElement, CategoryScale, LinearScale, PointElement, TimeScale } from 'chart.js'
-import 'chartjs-adapter-moment'
+import 'chartjs-adapter-temporal/register'
+import { formatDate } from '../../utils/date-utils'
 ChartJS.register(Title, Tooltip, Legend, LineElement, CategoryScale, LinearScale, PointElement, TimeScale)
 
 
@@ -131,19 +166,24 @@ export default defineComponent({
 
     const { authenticated: isAuthenticated, userId } = storeToRefs(auth)
 
-    hobbits.fetchRecords(id.value)
+    watch(hobbit, () => {
+      hobbits.fetchRecords(id.value);
+    });
 
     const chartData = computed(() => {
       // cut off 1 year
-      const yearAgo = new Date(new Date().setFullYear(new Date().getFullYear() - 1));
+      const yearAgo = Temporal.Now.zonedDateTimeISO().subtract({ years: 1 }).toInstant();
       return {
         datasets: [{
           label: hobbit.value.name,
           borderColor: getComputedStyle(document.body).getPropertyValue('--primary-dark'),
           backgroundColor: getComputedStyle(document.body).getPropertyValue('--primary'),
-          data: hobbit.value?.records?.filter((record => new Date(record.timestamp) > yearAgo)).map((record) => {
+          data: hobbit.value?.records
+          ?.filter(record => Temporal.Instant.from(record.timestamp).until(yearAgo).sign === -1)
+          .toSorted((recordA, recordB) => Temporal.Instant.compare(Temporal.Instant.from(recordA.timestamp), Temporal.Instant.from(recordB.timestamp)))
+          .map((record) => {
             return { x: record.timestamp as unknown as number, y: record.value }
-          }),
+          }) 
         }],
       }
     })
@@ -167,10 +207,6 @@ export default defineComponent({
         hobbitId: Number(id.value),
         recordId: Number(deleteDialog.value.record?.id),
       })
-    }
-
-    const formatDate = (date: string) => {
-      return moment(date).format('YYYY-MM-DD HH:mm')
     }
 
     return {

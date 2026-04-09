@@ -8,7 +8,10 @@
         has created a new
         Hobbit.
       </div>
-      <SimpleHobbit :hobbit="hobbit" />
+      <SimpleHobbit
+        v-if="hobbit"
+        :hobbit="hobbit"
+      />
     </template>
     <template v-if="isRecordCreated">
       <div class="header">

@@ -76,7 +76,7 @@
             </template>
           </IconBar>
           <Line
-            :options="{ scales: {x: { type: 'time' }, y: {min: 0} } }"
+            :options="{ scales: { x: { type: 'time' }, y: { min: 0 } } }"
             :data="chartData"
           />
           <table>
@@ -90,7 +90,7 @@
             </thead>
             <tbody>
               <tr
-                v-for="record in (hobbit.records || []).slice().reverse()"
+                v-for="record in (records || []).toReversed()"
                 :key="`record-${record.id}`"
               >
                 <td>{{ record.value }}</td>
@@ -118,13 +118,13 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, computed, watch } from 'vue'
+import { computed, defineComponent, ref, watch } from 'vue'
 import { NumericRecord } from '../../models'
 import Loading from '../../components/Icons/LoadingIcon.vue'
 import VButton from '../../components/form/Button.vue'
 import DDialog from '../../components/Dialog.vue'
 import FormWrapper from '../../components/form/FormWrapper.vue'
-import { TrashIcon as Trash, PencilIcon as Pencil } from '@heroicons/vue/24/outline'
+import { PencilIcon as Pencil, TrashIcon as Trash } from '@heroicons/vue/24/outline'
 import { useAuthStore } from '../../store/auth'
 import { storeToRefs } from 'pinia'
 import { useHobbitsStore } from '../../store/hobbits'
@@ -133,9 +133,20 @@ import { useRouter } from 'vue-router'
 import IconBar from '../../components/IconBar.vue'
 import Add from '../../components/Icons/AddIcon.vue'
 import { Line } from 'vue-chartjs'
-import { Chart as ChartJS, Title, Tooltip, Legend, LineElement, CategoryScale, LinearScale, PointElement, TimeScale } from 'chart.js'
+import {
+  CategoryScale,
+  Chart as ChartJS,
+  Legend,
+  LinearScale,
+  LineElement,
+  PointElement,
+  TimeScale,
+  Title,
+  Tooltip,
+} from 'chart.js'
 import 'chartjs-adapter-temporal/register'
 import { formatDate } from '../../utils/date-utils'
+
 ChartJS.register(Title, Tooltip, Legend, LineElement, CategoryScale, LinearScale, PointElement, TimeScale)
 
 
@@ -163,6 +174,9 @@ export default defineComponent({
     })
 
     const { hobbit, id } = useHobbitFromRoute()
+    const records = computed(() => {
+      return hobbits.getRecordsByHobbitId(id.value);
+    });
 
     const { authenticated: isAuthenticated, userId } = storeToRefs(auth)
 
@@ -178,12 +192,12 @@ export default defineComponent({
           label: hobbit.value.name,
           borderColor: getComputedStyle(document.body).getPropertyValue('--primary-dark'),
           backgroundColor: getComputedStyle(document.body).getPropertyValue('--primary'),
-          data: hobbit.value?.records
-          ?.filter(record => Temporal.Instant.from(record.timestamp).until(yearAgo).sign === -1)
-          .toSorted((recordA, recordB) => Temporal.Instant.compare(Temporal.Instant.from(recordA.timestamp), Temporal.Instant.from(recordB.timestamp)))
-          .map((record) => {
-            return { x: record.timestamp as unknown as number, y: record.value }
-          }) 
+          data: records.value
+            ?.filter(record => Temporal.Instant.from(record.timestamp).until(yearAgo).sign === -1)
+            .toSorted((recordA, recordB) => Temporal.Instant.compare(Temporal.Instant.from(recordA.timestamp), Temporal.Instant.from(recordB.timestamp)))
+            .map((record) => {
+              return { x: record.timestamp as unknown as number, y: record.value }
+            }),
         }],
       }
     })
@@ -212,6 +226,7 @@ export default defineComponent({
     return {
       deleteDialog,
       hobbit,
+      records,
       id,
       isAuthenticated,
       userId,

@@ -21,19 +21,42 @@
           <form>
             <div>
               <label for="timestamp">When:</label>
-              <input id="timestamp" v-model="recordData.timestamp" name="timestamp" type="datetime-local">
+              <input
+                id="timestamp"
+                v-model="recordData.timestamp"
+                name="timestamp"
+                type="datetime-local"
+              >
             </div>
             <div>
               <label for="value">Value:</label>
-              <input id="number" v-model="recordData.value" type="number" name="number">
+              <input
+                id="number"
+                v-model="recordData.value"
+                type="number"
+                name="number"
+              >
             </div>
             <div>
               <label for="comment">Comment:</label>
-              <textarea id="comment" v-model="recordData.comment" name="comment" rows="5" />
+              <textarea
+                id="comment"
+                v-model="recordData.comment"
+                name="comment"
+                rows="5"
+              />
             </div>
             <div>
-              <Button value="Edit record" type="primary" :loading="submitting" @click="putRecord()" />
-              <Button value="Go back" @click="goBack()" />
+              <Button
+                value="Edit record"
+                type="primary"
+                :loading="submitting"
+                @click="putRecord()"
+              />
+              <Button
+                value="Go back"
+                @click="goBack()"
+              />
             </div>
           </form>
         </FormWrapper>
@@ -93,7 +116,6 @@ export default defineComponent({
       }).then(() => {
         return Promise.all([
           hobbits.fetchRecords(id.value),
-          hobbits.fetchHeatmapData(id.value),
         ])
       }).then(() => {
         submitting.value = false

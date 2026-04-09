@@ -4,6 +4,7 @@ import { defineStore } from 'pinia'
 export const useHobbitsStore = defineStore('hobbits', {
   state: () => ({
     hobbits: {} as { [key: number]: Hobbit },
+    records: {} as { [key: number]: NumericRecord[] },
     initialLoaded: false,
   }),
   getters: {
@@ -20,10 +21,25 @@ export const useHobbitsStore = defineStore('hobbits', {
         return value.user.id === userId
       })
     },
+    getRecordsByHobbitId: (state) => (hobbitId: number): NumericRecord[] => {
+      return state.records[hobbitId]
+    },
     getRecordById: (state) => (hobbitId: number, recordId: number): NumericRecord | undefined => {
-      return state.hobbits[hobbitId]?.records?.find((value: NumericRecord) => {
+      return state.records[hobbitId]?.find((value: NumericRecord) => {
         return value.id === recordId
       })
+    },
+    getHeatmapByHobbitId: (state) => (hobbitId: number): { date: Temporal.PlainDate, count: number }[] => {
+      const records = state.records[hobbitId] || [];
+      const heatmap = new Map<Temporal.PlainDate, number>();
+      const tz = Temporal.Now.timeZoneId();
+      for (const record of records) {
+        const date = Temporal.Instant.from(record.timestamp).toZonedDateTimeISO(tz).toPlainDate();
+        heatmap.set(date, (heatmap.get(date) || 0) + record.value);
+      }
+      return Array.from(heatmap.entries()).map(([date, count]) => ({
+        date, count,
+      }));
     },
   },
   actions: {
@@ -35,10 +51,12 @@ export const useHobbitsStore = defineStore('hobbits', {
       this.hobbits = Object.assign({}, this.hobbits, ...hobbits.map((x: Hobbit) => ({ [x.id]: Object.assign({}, this.hobbits[x.id], x) })))
     },
     deleteRecordForHobbit({ hobbitId, recordId }: { hobbitId: number; recordId: number }) {
-      const selectedHobbit = this.hobbits[hobbitId]
-      selectedHobbit.records = selectedHobbit.records.filter((record) => {
-        return record.id !== recordId
-      })
+      if (!this.records[hobbitId]) {
+        return;
+      }
+      this.records[hobbitId] = this.records[hobbitId].filter((value: NumericRecord) => {
+        return value.id !== recordId
+      });
     },
     async fetchHobbitsByUser(userId: number | string = 'me') {
       const res = await fetch(`/api/profile/${userId}/hobbits`)
@@ -66,27 +84,20 @@ export const useHobbitsStore = defineStore('hobbits', {
       const resJson = await res.json()
       this.setHobbit(resJson)
     },
-    async fetchHeatmapData(hobbitId: number) {
-      const res = await fetch(`/api/hobbits/${hobbitId}/records/heatmap`)
-      if (!res.ok) {
-        throw new Error(res.statusText)
-      }
-      const resJson = await res.json()
-      if (this.hobbits[hobbitId]) {
-        this.hobbits[hobbitId].heatmap = resJson
-      }
-    },
     async fetchRecords(hobbitId: number) {
       const res = await fetch(`/api/hobbits/${hobbitId}/records/`)
       if (!res.ok) {
         throw new Error(res.statusText)
       }
       const resJson = await res.json()
-      if (this.hobbits[hobbitId]) {
-        this.hobbits[hobbitId].records = resJson
-      }
+      this.records[hobbitId] = resJson
     },
-    async postRecord({ id, timestamp, value, comment }: { id: number; timestamp: Temporal.Instant; value: number; comment: string }) {
+    async postRecord({ id, timestamp, value, comment }: {
+      id: number;
+      timestamp: Temporal.Instant;
+      value: number;
+      comment: string
+    }) {
       const res = await fetch(`/api/hobbits/${id}/records/`, {
         method: 'POST',
         headers: {
@@ -103,8 +114,13 @@ export const useHobbitsStore = defineStore('hobbits', {
       }
       // TODO: Put in store
     },
-    async putRecord({ hobbitId, recordId, timestamp, value, comment }:
-      { hobbitId: number; recordId: number; timestamp: Temporal.Instant; value: number; comment: string }) {
+    async putRecord({ hobbitId, recordId, timestamp, value, comment }: {
+      hobbitId: number;
+      recordId: number;
+      timestamp: Temporal.Instant;
+      value: number;
+      comment: string
+    }) {
       const res = await fetch(`/api/hobbits/${hobbitId}/records/${recordId}`, {
         method: 'PUT',
         headers: {
@@ -147,7 +163,12 @@ export const useHobbitsStore = defineStore('hobbits', {
       const resJson = await res.json()
       this.setHobbit(resJson)
     },
-    async putHobbit({ id, name, description, image }: { id: number; name: string; description: string; image: string }) {
+    async putHobbit({ id, name, description, image }: {
+      id: number;
+      name: string;
+      description: string;
+      image: string
+    }) {
       const res = await fetch(`/api/hobbits/${id}`, {
         method: 'PUT',
         headers: {

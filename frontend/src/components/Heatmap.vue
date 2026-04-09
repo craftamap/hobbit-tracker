@@ -7,41 +7,45 @@
         x="-30"
         fill="currentColor"
         y="35"
-      >Mo</text>
+      >Mo
+      </text>
       <text
         x="-30"
         fill="currentColor"
         y="75"
-      >We</text>
+      >We
+      </text>
       <text
         x="-30"
         fill="currentColor"
         y="115"
-      >Fr</text>
+      >Fr
+      </text>
       <template
-        v-for="(timestamp, idx) in timestamps"
-        :key="timestamp"
+        v-for="(date, idx) in dates"
+        :key="date.toString()"
       >
         <text
-          v-if="timestamp.getDate() === 1"
+          v-if="date.day === 1"
           :x="Math.floor((idx / 7)) * 20"
           y="-10"
           fill="currentColor"
         >{{
-          timestamp.toLocaleString(undefined, {
-            month:
-              'short'
-          }) }}</text>
+          date.toLocaleString(undefined, {
+            month: 'short'
+          })
+        }}
+        </text>
         <rect
           width="16"
           height="16"
           :y="(idx % 7) * 20"
           :x="Math.floor((idx / 7)) * 20"
-          :data-timestamp="timestamp.getTime()"
+          :data-date="date.toString()"
           ry="3"
-          :style="`fill: ${getColor((mappedData?.get(timestamp.getTime()) || 0) / (max === 0 ? 1 : max))}`"
+          :style="`fill: ${getColor((mappedData.map.get(date.toString()) || 0) / (mappedData.max === 0 ? 1 : mappedData.max))}`"
         >
-          <title>{{ timestamp }} - Count: {{ mappedData?.get(timestamp.getTime()) || 0 }}</title>
+          <title>{{ date.toString() }} - Count: {{ mappedData.map.get(date.toString()) || 0 }}</title>
         </rect>
       </template>
     </svg>
@@ -54,53 +58,43 @@ import { computed, defineComponent, PropType, ref, toRefs } from 'vue'
 export default defineComponent({
   name: 'CalendarHeatmap',
   props: {
-    data: Array as PropType<{ count: number, date: Date }[]>,
+    data: {
+      type: Array as PropType<{ count: number, date: Temporal.PlainDate }[]>,
+      required: true,
+    },
   },
   setup(props) {
     const { data } = toRefs(props)
     const uid = ref(crypto.randomUUID())
+    const tz = Temporal.Now.timeZoneId()
 
-    const tmp = computed(() => {
-      console.error('foo')
-      const map = new Map();
+    const mappedData = computed(() => {
+      const map = new Map<string, number>();
       let max = 0;
       for (const entry of data.value || []) {
         if (entry.count > max) {
           max = entry.count;
         }
-        map.set(entry.date.setHours(0, 0, 0, 0), entry.count || 0)
+        const dateStr = entry.date.toString();
+        map.set(dateStr, entry.count || 0)
       }
-      console.error('foo done')
-      return [map, max]
+      return { map, max }
     })
-    const mappedData = computed(() => tmp.value[0] as Map<number, number>)
-    const max = computed(() => tmp.value[1] as number);
-    console.log(mappedData.value)
 
-    // monday, 52 weeks ago, midnight
-    const startDate = new Date()
-    startDate.setFullYear(startDate.getFullYear() - 1);
-    startDate.setDate(startDate.getDate() - startDate.getDay());
-    startDate.setHours(0, 0, 0, 0)
-    console.log(startDate)
+    const dates = computed(() => {
+      const today = Temporal.Now.plainDateISO(tz)
+      // End of this week (Sunday)
+      const endDate = today.add({ days: 7 - today.dayOfWeek })
+      // Start of the grid (Monday, 52 weeks ago)
+      const startDate = endDate.subtract({ weeks: 52 }).subtract({ days: 6 })
 
-    // end of this week, midnight
-    const endDate = new Date()
-    endDate.setDate(endDate.getDate() - endDate.getDay());
-    endDate.setDate(endDate.getDate() - endDate.getDay() + 6);
-    startDate.setHours(0, 0, 0, 0)
-    console.log(endDate)
-
-
-    const timestamps = computed(() => {
-      const timestamps = []
-      const ptrDate = new Date(startDate)
-      while (ptrDate <= endDate) {
-        timestamps.push(new Date(ptrDate))
-        ptrDate.setDate(ptrDate.getDate() + 1)
+      const dates = []
+      let curr = startDate
+      while (Temporal.PlainDate.compare(curr, endDate) <= 0) {
+        dates.push(curr)
+        curr = curr.add({ days: 1 })
       }
-      console.log(timestamps);
-      return timestamps;
+      return dates
     })
 
     const prefersDark = ref(window.matchMedia('(prefers-color-scheme: dark)').matches)
@@ -122,34 +116,10 @@ export default defineComponent({
       return `rgb(${r}, ${g}, ${b})`;
     }
 
-    // const renderCalHeatMap = () => {
-    //   return new Promise((resolve) => {
-    //     setTimeout(() => {
-    //       const calHeatMap = new CalendarHeatMap()
-    //         .data(data.value)
-    //         .selector(`[data-uid='${uid.value}']`)
-    //         .colorRange(['#e9f6f7', '#218380'])
-    //         .tooltipEnabled(true)
-    //       if (prefersDark.value) {
-    //         // replace with better color
-    //         calHeatMap.colorRange(['#333333', '#218380'])
-    //       }
-
-    //       resolve(calHeatMap())
-    //     }, 0)
-    //   })
-    // }
-    // watch(data, () => {
-    //   renderCalHeatMap()
-    // })
-
-    // renderCalHeatMap()
-
     return {
       uid,
       mappedData,
-      max,
-      timestamps,
+      dates,
       getColor,
     }
   },
@@ -157,15 +127,6 @@ export default defineComponent({
 </script>
 
 <style scoped>
-[data-uid] {
-  /* aspect-ratio: 5; */
-
-  text {
-    fill: var(--primary-text);
-  }
-}
-
-
 svg {
   width: 100%;
 }
@@ -178,7 +139,9 @@ svg {
   .svg-wrapper {
     color: white;
   }
+}
 
+text {
+  fill: currentColor;
 }
 </style>
-

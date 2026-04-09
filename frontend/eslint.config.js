@@ -1,7 +1,5 @@
 import eslint from '@eslint/js';
-import { defineConfig } from 'eslint/config';
 import eslintPluginVue from 'eslint-plugin-vue';
-import pluginVue from 'eslint-plugin-vue'
 import typescriptEslint from 'typescript-eslint';
 import globals from 'globals';
 

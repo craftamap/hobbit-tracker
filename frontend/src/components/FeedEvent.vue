@@ -4,7 +4,8 @@
       <div class="header">
         <router-link :to="`/profile/${hobbit?.user.id}`">
           {{ hobbit?.user.username }}
-        </router-link> has created a new
+        </router-link>
+        has created a new
         Hobbit.
       </div>
       <SimpleHobbit :hobbit="hobbit" />
@@ -13,7 +14,8 @@
       <div class="header">
         <router-link :to="`/profile/${hobbit?.user.id}`">
           {{ hobbit?.user?.username }}
-        </router-link> has created a new
+        </router-link>
+        has created a new
         entry in
         <router-link :to="`/hobbits/${hobbit?.user.id}`">
           "{{ hobbit?.name }}".
@@ -45,7 +47,10 @@ export default defineComponent({
     SimpleHobbit,
   },
   props: {
-    feedEvent: Object as PropType<FeedEvent>,
+    feedEvent: {
+      type: Object as PropType<FeedEvent>,
+      required: true,
+    },
   },
   setup(props) {
     const { feedEvent } = toRefs(props)

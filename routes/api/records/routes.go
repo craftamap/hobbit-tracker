@@ -20,5 +20,4 @@ func RegisterRoutes(records *mux.Router) {
 	records.Handle("/{record_id:[0-9]+}", authMiddlewareBuilder.Build(
 		http.HandlerFunc(BuildHandleAPIDeleteRecord()),
 	)).Methods("DELETE")
-	records.Handle("/heatmap", BuildHandleAPIGetRecordsForHeatmap()).Methods("GET")
 }

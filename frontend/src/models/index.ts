@@ -24,8 +24,6 @@ export interface Hobbit {
   name: string;
   image: string;
   description: string;
-  records: NumericRecord[];
-  heatmap: NumericRecord[];
 }
 
 export enum FeedEventTypus {

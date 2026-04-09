@@ -25,9 +25,18 @@ export default defineComponent({
     Loading,
   },
   props: {
-    type: String,
-    value: String,
-    loading: Boolean as PropType<boolean>,
+    type: {
+      type: String as PropType<string>,
+      default: '',
+    },
+    value: {
+      type: String as PropType<string>,
+      default: '',
+    },
+    loading: {
+      type: Boolean as PropType<boolean>,
+      default: false,
+    },
   },
 })
 </script>

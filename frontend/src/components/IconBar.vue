@@ -17,6 +17,7 @@ import { defineComponent } from 'vue'
 
 export default defineComponent({
   name: 'IconBar',
+  emits: ['reload'],
   setup(_, { emit }) {
     const reload = () => {
       emit('reload')

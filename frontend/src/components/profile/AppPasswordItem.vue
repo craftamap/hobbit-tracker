@@ -34,8 +34,10 @@ export default defineComponent({
   props: {
     appPassword: {
       type: Object as PropType<AppPassword>,
+      required: true,
     },
   },
+  emits: ['delete'],
   setup(props, { emit }) {
     const { appPassword } = toRefs(props)
 

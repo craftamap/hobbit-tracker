@@ -50,7 +50,10 @@ export default defineComponent({
     Heatmap,
   },
   props: {
-    hobbit: Object as PropType<Hobbit>,
+    hobbit: {
+      type: Object as PropType<Hobbit>,
+      required: true,
+    },
     withHeatmap: {
       type: Boolean as PropType<boolean>,
       default: false,
@@ -62,24 +65,27 @@ export default defineComponent({
     const loadingHeatmapData = ref(true)
     const { hobbit } = toRefs(props)
 
+
     const heatmapData = computed(() => {
-      return (hobbit.value?.heatmap || [{ timestamp: new Date(), value: 0 }]).map((record) => {
-        return {
-          date: new Date(record.timestamp),
-          count: record.value,
-        }
-      })
+      if (!hobbit.value?.id) {
+        return []
+      }
+      return hobbitsStore.getHeatmapByHobbitId(hobbit.value?.id)
     })
 
-    const fetchHeatmapData = () => {
-      if (!hobbit.value?.heatmap && hobbit.value?.id) {
-        hobbitsStore.fetchHeatmapData(hobbit.value?.id)
-          .then(() => {
-            loadingHeatmapData.value = false
-          })
-      } else {
-        loadingHeatmapData.value = false
+    const fetchHeatmapData = async() => {
+      if (!hobbit.value?.id) {
+        return;
       }
+
+      if (!hobbitsStore.getRecordsByHobbitId(hobbit.value?.id)) {
+        try {
+          await hobbitsStore.fetchRecords(hobbit.value?.id);
+        } catch (e) {
+          console.log('failed to fetch records for heatmap', e);
+        }
+      }
+      loadingHeatmapData.value = false;
     }
 
     fetchHeatmapData()

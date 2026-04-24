@@ -21,10 +21,11 @@ jobs:
       
       - name: Build Frontend
         run: |
+          cd frontend
           corepack enable
           corepack prepare
-          yarn --cwd frontend install
-          yarn --cwd frontend build
+          yarn install
+          yarn build
       - name: Build Backend
         run: go build -v
 

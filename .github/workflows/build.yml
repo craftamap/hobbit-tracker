@@ -22,7 +22,6 @@ jobs:
       - name: Build Frontend
         run: |
           corepack enable
-          corepack prepare yarn@stable --activate
           yarn --cwd frontend install
           yarn --cwd frontend build
       - name: Build Backend

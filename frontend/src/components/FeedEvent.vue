@@ -20,7 +20,7 @@
         </router-link>
         has created a new
         entry in
-        <router-link :to="`/hobbits/${hobbit?.user.id}`">
+        <router-link :to="`/hobbits/${hobbit?.id}`">
           "{{ hobbit?.name }}".
         </router-link>
       </div>

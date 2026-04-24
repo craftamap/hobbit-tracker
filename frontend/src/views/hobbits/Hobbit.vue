@@ -134,6 +134,7 @@ import IconBar from '../../components/IconBar.vue'
 import Add from '../../components/Icons/AddIcon.vue'
 import { Line } from 'vue-chartjs'
 import {
+  _adapters,
   CategoryScale,
   Chart as ChartJS,
   Legend,
@@ -143,7 +144,6 @@ import {
   TimeScale,
   Title,
   Tooltip,
-  _adapters,
 } from 'chart.js'
 import temporalAdapter from 'chartjs-adapter-temporal'
 import { formatDate } from '../../utils/date-utils'

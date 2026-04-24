@@ -1,4 +1,4 @@
-FROM node:20 AS jsbuild
+FROM node:24 AS jsbuild
 
 # RUN mkdir /builddir
 COPY . /builddir

@@ -2,12 +2,11 @@ FROM node:24 AS jsbuild
 
 # RUN mkdir /builddir
 COPY . /builddir
+WORKDIR /builddir/frontend
 RUN corepack enable
-RUN corepack prepare yarn@stable --activate
-RUN yarn --cwd /builddir/frontend install
-RUN yarn --cwd /builddir/frontend build
-
-
+RUN corepack prepare
+RUN yarn install
+RUN yarn build
 
 FROM golang AS gobuild
 
@@ -16,8 +15,6 @@ COPY . /builddir
 COPY --from=jsbuild /builddir/frontend/dist /builddir/frontend/dist
 WORKDIR /builddir
 RUN go build
-
-
 
 FROM debian
 COPY --from=gobuild /builddir/hobbit-tracker /bin/hobbit-tracker

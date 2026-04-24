@@ -143,10 +143,12 @@ import {
   TimeScale,
   Title,
   Tooltip,
+  _adapters,
 } from 'chart.js'
-import 'chartjs-adapter-temporal/register'
+import temporalAdapter from 'chartjs-adapter-temporal'
 import { formatDate } from '../../utils/date-utils'
 
+_adapters._date.override(temporalAdapter);
 ChartJS.register(Title, Tooltip, Legend, LineElement, CategoryScale, LinearScale, PointElement, TimeScale)
 
 

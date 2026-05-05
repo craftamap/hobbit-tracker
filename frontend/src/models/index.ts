@@ -12,10 +12,10 @@ export interface NumericRecord {
 }
 
 export interface AppPassword {
-    id: string;
-    description: string;
-    secret: string;
-    last_used_at: string;
+  id: string;
+  description: string;
+  secret: string;
+  last_used_at: string;
 }
 
 export interface Hobbit {
@@ -24,6 +24,7 @@ export interface Hobbit {
   name: string;
   image: string;
   description: string;
+  archivedAt: null | string;
 }
 
 export enum FeedEventTypus {

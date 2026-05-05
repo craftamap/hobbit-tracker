@@ -10,6 +10,7 @@ type Hobbit struct {
 	Image       string          `json:"image,omitempty"`
 	Description string          `json:"description,omitempty"`
 	Records     []NumericRecord `gorm:"foreignKey:HobbitID" json:"records,omitempty"`
+	ArchivedAt  *time.Time      `json:"archivedAt"`
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
 }

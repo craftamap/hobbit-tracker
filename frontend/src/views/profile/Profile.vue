@@ -37,7 +37,14 @@
     </div>
     <div>Hobbits:</div>
     <SimpleHobbit
-      v-for="hobbit in hobbitsOfUser"
+      v-for="hobbit in activeHobbitsOfUser"
+      :key="`hobbit-${hobbit.id}`"
+      :hobbit="hobbit"
+      :with-heatmap="true"
+    />
+    <h2>Archived Hobbits</h2>
+    <SimpleHobbit
+      v-for="hobbit in archivedHobbitsOfUser"
       :key="`hobbit-${hobbit.id}`"
       :hobbit="hobbit"
       :with-heatmap="true"
@@ -48,7 +55,7 @@
 <script lang="ts">
 import { computed, defineComponent, watch } from 'vue'
 
-import { CogIcon, UserPlusIcon as UserAddIcon, UserMinusIcon as UserRemoveIcon } from '@heroicons/vue/24/outline'
+import { CogIcon, UserMinusIcon as UserRemoveIcon, UserPlusIcon as UserAddIcon } from '@heroicons/vue/24/outline'
 
 import SimpleHobbit from '../../components/SimpleHobbit.vue'
 import IconBar from '../../components/IconBar.vue'
@@ -98,9 +105,15 @@ export default defineComponent({
       return !route.params.profileId
     })
 
-    const hobbitsOfUser = computed(() => {
+    const activeHobbitsOfUser = computed(() => {
       if (userId.value) {
-        return hobbits.getHobbitsByUser(userId.value)
+        return hobbits.getHobbitsByUser(userId.value).filter(hobbit => !hobbit.archivedAt)
+      }
+      return null
+    })
+    const archivedHobbitsOfUser = computed(() => {
+      if (userId.value) {
+        return hobbits.getHobbitsByUser(userId.value).filter(hobbit => hobbit.archivedAt)
       }
       return null
     })
@@ -153,7 +166,8 @@ export default defineComponent({
     return {
       user,
       isMe,
-      hobbitsOfUser,
+      activeHobbitsOfUser,
+      archivedHobbitsOfUser,
       follows,
       follow,
       unfollow,

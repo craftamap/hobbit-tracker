@@ -19,7 +19,14 @@
       </template>
     </IconBar>
     <SimpleHobbit
-      v-for="hobbit in hobbits"
+      v-for="hobbit in activeHobbits"
+      :key="`hobbit-${hobbit?.id}`"
+      :hobbit="hobbit"
+      :with-heatmap="true"
+    />
+    <h2>Archived Hobbits</h2>
+    <SimpleHobbit
+      v-for="hobbit in archivedHobbits"
       :key="`hobbit-${hobbit?.id}`"
       :hobbit="hobbit"
       :with-heatmap="true"
@@ -28,7 +35,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
+import { computed, defineComponent } from 'vue'
 import SimpleHobbit from '../components/SimpleHobbit.vue'
 import IconBar from '../components/IconBar.vue'
 import { storeToRefs } from 'pinia'
@@ -60,8 +67,16 @@ export default defineComponent({
       router.push('/hobbits/add')
     }
 
+    const activeHobbits = computed(() => {
+      return getHobbits.value.filter((hobbit) => !hobbit.archivedAt)
+    });
+    const archivedHobbits = computed(() => {
+      return getHobbits.value.filter((hobbit) => hobbit.archivedAt)
+    });
+
     return {
-      hobbits: getHobbits,
+      activeHobbits: activeHobbits,
+      archivedHobbits: archivedHobbits,
       reload,
       username,
       isAuthenticated,

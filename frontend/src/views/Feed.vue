@@ -68,7 +68,7 @@ export default defineComponent({
 
     const hobbitsOfUser = computed(() => {
       if (userId) {
-        return hobbits.getHobbitsByUser(userId.value!)
+        return hobbits.getHobbitsByUser(userId.value!).filter(hobbit => !hobbit.archivedAt);
       }
       return []
     })

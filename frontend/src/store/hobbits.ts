@@ -163,11 +163,12 @@ export const useHobbitsStore = defineStore('hobbits', {
       const resJson = await res.json()
       this.setHobbit(resJson)
     },
-    async putHobbit({ id, name, description, image }: {
+    async putHobbit({ id, name, description, image, archivedAt }: {
       id: number;
       name: string;
       description: string;
-      image: string
+      image: string;
+      archivedAt: string | null;
     }) {
       const res = await fetch(`/api/hobbits/${id}`, {
         method: 'PUT',
@@ -178,6 +179,7 @@ export const useHobbitsStore = defineStore('hobbits', {
           name,
           description,
           image,
+          archivedAt,
         }),
       })
       if (!res.ok) {

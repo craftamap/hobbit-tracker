@@ -37,6 +37,15 @@
             >
           </div>
           <div>
+            <input
+              id="isArchived"
+              v-model="form.isArchived"
+              name="isArchived"
+              type="checkbox"
+            >
+            <label for="isArchived">Is archived</label>
+          </div>
+          <div>
             <Button
               value="Edit Hobbit"
               type="primary"
@@ -75,7 +84,7 @@ export default defineComponent({
     const router = useRouter()
 
     const submitting = ref(false)
-    const form = ref({ name: '', description: '', image: '' })
+    const form = ref({ name: '', description: '', image: '', isArchived: false })
 
     const { hobbit, id } = useHobbitFromRoute()
 
@@ -86,6 +95,7 @@ export default defineComponent({
         form.value.name = newValue.name
         form.value.description = newValue.description
         form.value.image = newValue.image
+        form.value.isArchived = !!newValue.archivedAt
       }
     }, { immediate: true })
 
@@ -123,6 +133,7 @@ export default defineComponent({
         name: form.value.name,
         description: form.value.description,
         image: form.value.image,
+        archivedAt: form.value.isArchived ? (hobbit.value.archivedAt || Temporal.Now.instant().toString()) : null,
       })
       submitting.value = false
     }

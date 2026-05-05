@@ -182,6 +182,8 @@ func BuildHandleAPIPutHobbit() http.HandlerFunc {
 			Description: strings.TrimSpace(recievedHobbit.Description),
 		}
 		db.Model(&currentHobbit).Updates(&sanitizedHobbit)
+		// archivedAt is nullable and therefore isnt updatable with "Updates"
+		db.Model(&currentHobbit).Update("archivedAt", recievedHobbit.ArchivedAt)
 		log.Infof("Updated hobbit %+v with values %+v", currentHobbit, sanitizedHobbit)
 
 		err = json.NewEncoder(w).Encode(currentHobbit)

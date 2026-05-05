@@ -28,12 +28,14 @@ export default defineComponent({
       background: var(--primary-dark);
     }
 
-    input, textarea {
+    input:not([type="checkbox"]), textarea {
       margin-bottom: 0.25rem;
       appearance: none;
+
       &:focus {
         outline: none;
       }
+
       border: none;
       line-height: 2em;
       padding: 5px;

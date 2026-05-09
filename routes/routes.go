@@ -1,18 +1,19 @@
 package routes
 
 import (
-	"github.com/craftamap/hobbit-tracker/routes/api"
-	"github.com/gorilla/mux"
+	"net/http"
+
 	"github.com/gorilla/sessions"
 	"gorm.io/gorm"
 )
 
-func RegisterRoutes(r *mux.Router, db *gorm.DB, store sessions.Store) {
-
-	auth := r.PathPrefix("/auth").Subrouter()
-	auth.HandleFunc("/login", BuildHandleLogin()).Methods("POST")
-	auth.HandleFunc("/logout", BuildHandleLogout())
-
-	routeOfAPI := r.PathPrefix("/api").Subrouter()
-	api.RegisterRoutes(routeOfAPI)
+func GetRoutes(db *gorm.DB, store sessions.Store) http.Handler {
+	//	auth := r.PathPrefix("/auth").Subrouter()
+	//	auth.HandleFunc("/login", BuildHandleLogin()).Methods("POST")
+	//	auth.HandleFunc("/logout", BuildHandleLogout())
+	//
+	//	routeOfAPI := r.PathPrefix("/api").Subrouter()
+	//	api.RegisterRoutes(routeOfAPI)
+	//
+	return nil
 }

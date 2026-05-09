@@ -1,9 +1,9 @@
 package auth
 
-import (
-	"github.com/gorilla/mux"
-)
+import "net/http"
 
-func RegisterRoutes(auth *mux.Router) {
-	auth.HandleFunc("/", BuildHandleAPIGetAuth()).Methods("GET")
+func GetRoutes() http.Handler {
+	authRoutes := http.NewServeMux()
+	authRoutes.HandleFunc("GET /", BuildHandleAPIGetAuth())
+	return authRoutes
 }

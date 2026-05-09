@@ -15,9 +15,8 @@ import (
 	"github.com/craftamap/hobbit-tracker/middleware/requestcontext"
 	"github.com/craftamap/hobbit-tracker/models"
 	"github.com/craftamap/hobbit-tracker/routes"
-	"github.com/craftamap/hobbit-tracker/websockets"
+	"github.com/craftamap/hobbit-tracker/routes/api"
 	"github.com/gorilla/handlers"
-	"github.com/gorilla/mux"
 	"github.com/wader/gormstore/v2"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
@@ -142,25 +141,30 @@ func main() {
 	eventHub := hub.New()
 	eventHub.Run()
 
-	r := mux.NewRouter()
-	r.StrictSlash(true)
-	r.Use(loggingMiddleware)
+	rootRouter := http.NewServeMux()
 
-	r.Use(handlers.RecoveryHandler(handlers.RecoveryLogger(&customRecoveryLogger{})))
-	r.Use(requestcontext.New(Store, db, eventHub))
-	r.Use(authtocontext.New())
+	rootRouter.Handle("POST /auth/login", routes.BuildHandleLogin())
+	rootRouter.Handle("POST /auth/logout", routes.BuildHandleLogout())
+	rootRouter.Handle("/api/", http.StripPrefix("/api", api.GetRoutes()))
 
-	routes.RegisterRoutes(r, db, Store)
-	websockets.RegisterRoutes(r)
+	// routes.GetRoutes(db, log, Store)
+	// websockets.RegisterRoutes(r)
 
 	frontend, err := frontendHandler()
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-	r.PathPrefix("/").Handler(frontend)
+	rootRouter.Handle("/", frontend)
+
+	r := authtocontext.New()(rootRouter)
+	r = requestcontext.New(Store, db, eventHub)(r)
+	r = handlers.RecoveryHandler(handlers.RecoveryLogger(&customRecoveryLogger{}))(r)
+	r = loggingMiddleware(r)
+
+	listeningOn := fmt.Sprintf(":%d", flagPort)
 	slog.Info("Listening on", "port", flagPort)
-	err = http.ListenAndServe(fmt.Sprintf(":%d", flagPort), r)
+	err = http.ListenAndServe(listeningOn, r)
 	if err != nil {
 		fmt.Println(err)
 		return

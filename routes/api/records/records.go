@@ -2,6 +2,7 @@ package records
 
 import (
 	"encoding/json"
+	"log/slog"
 	"net/http"
 	"strconv"
 
@@ -15,7 +16,6 @@ import (
 func BuildHandleAPIPostRecord() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		db := requestcontext.DB(r)
-		log := requestcontext.Log(r)
 		eventHub := requestcontext.Hub(r)
 
 		user := models.User{}
@@ -23,7 +23,7 @@ func BuildHandleAPIPostRecord() http.HandlerFunc {
 		// TODO: Add error handling here
 		err := db.Where("ID = ?", r.Context().Value(authtocontext.AuthDetailsContextKey).(authtocontext.AuthDetails).UserID).First(&user).Error
 		if err != nil {
-			log.Error(err)
+			slog.Error("failed to get user", "err", err)
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
@@ -32,13 +32,13 @@ func BuildHandleAPIPostRecord() http.HandlerFunc {
 		vars := mux.Vars(r)
 		hobbitID, ok := vars["hobbit_id"]
 		if !ok {
-			log.Error("Can't get id from mux")
+			slog.Error("Can't get id from mux")
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
 		numericHobbitID, err := strconv.ParseUint(hobbitID, 10, 32)
 		if err != nil {
-			log.Error(err)
+			slog.Error("Failed to parse hobbit id", "err", err)
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
@@ -46,11 +46,11 @@ func BuildHandleAPIPostRecord() http.HandlerFunc {
 		recievedRecord := models.NumericRecord{}
 		err = json.NewDecoder(r.Body).Decode(&recievedRecord)
 		if err != nil {
-			log.Error(err)
+			slog.Error("Failed to decode recieved record", "err", err)
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
-		log.Info("recievedRecord", recievedRecord)
+		slog.Info("we recieved a record", "recievedRecord", recievedRecord)
 
 		// Are we allowed to create records for this hobbit?
 		// TODO: error handling
@@ -58,7 +58,7 @@ func BuildHandleAPIPostRecord() http.HandlerFunc {
 		db.Where(models.Hobbit{ID: uint(numericHobbitID)}).Joins("User").First(&parentHobbit)
 
 		if user.ID != parentHobbit.User.ID {
-			log.Error("User does not match -> unauthorized")
+			slog.Error("User does not match -> unauthorized")
 			w.WriteHeader(http.StatusUnauthorized)
 			return
 		}
@@ -72,7 +72,7 @@ func BuildHandleAPIPostRecord() http.HandlerFunc {
 
 		err = db.Create(&sanitizedRecord).Error
 		if err != nil {
-			log.Error(err)
+			slog.Error("failed to create hobbit", "err", err)
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
@@ -83,7 +83,7 @@ func BuildHandleAPIPostRecord() http.HandlerFunc {
 
 		err = json.NewEncoder(w).Encode(returnedRecord)
 		if err != nil {
-			log.Error(err)
+			slog.Error("failed to encode record", "err", err)
 			w.WriteHeader(http.StatusInternalServerError)
 		}
 
@@ -97,7 +97,6 @@ func BuildHandleAPIPostRecord() http.HandlerFunc {
 func BuildHandleAPIPutRecord() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		db := requestcontext.DB(r)
-		log := requestcontext.Log(r)
 		eventHub := requestcontext.Hub(r)
 
 		user := models.User{}
@@ -105,7 +104,7 @@ func BuildHandleAPIPutRecord() http.HandlerFunc {
 		// TODO: Add error handling here
 		err := db.Where("ID = ?", r.Context().Value(authtocontext.AuthDetailsContextKey).(authtocontext.AuthDetails).UserID).First(&user).Error
 		if err != nil {
-			log.Error(err)
+			slog.Error("Failed to get user", "err", err)
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
@@ -114,28 +113,28 @@ func BuildHandleAPIPutRecord() http.HandlerFunc {
 		vars := mux.Vars(r)
 		hobbitID, ok := vars["hobbit_id"]
 		if !ok {
-			log.Error("Can't get id from mux")
+			slog.Error("Can't get id from mux")
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
 
 		recordID, ok := vars["record_id"]
 		if !ok {
-			log.Error("Can't get id from mux")
+			slog.Error("Can't get id from mux")
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
 
 		numericHobbitID, err := strconv.ParseUint(hobbitID, 10, 32)
 		if err != nil {
-			log.Error(err)
+			slog.Error("Failed to parse hobbit id", "err", err)
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
 
 		numericRecordID, err := strconv.ParseUint(recordID, 10, 32)
 		if err != nil {
-			log.Error(err)
+			slog.Error("Failed to parse record id", "err", err)
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
@@ -146,7 +145,7 @@ func BuildHandleAPIPutRecord() http.HandlerFunc {
 		db.Where(models.Hobbit{ID: uint(numericHobbitID)}).Joins("User").First(&parentHobbit)
 
 		if user.ID != parentHobbit.User.ID {
-			log.Error("User does not match -> unauthorized")
+			slog.Error("User does not match -> unauthorized")
 			w.WriteHeader(http.StatusUnauthorized)
 			return
 		}
@@ -154,11 +153,11 @@ func BuildHandleAPIPutRecord() http.HandlerFunc {
 		recievedRecord := models.NumericRecord{}
 		err = json.NewDecoder(r.Body).Decode(&recievedRecord)
 		if err != nil {
-			log.Error(err)
+			slog.Error("Failed to decode recieved record", "err", err)
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
-		log.Info("recievedRecord", recievedRecord)
+		slog.Info("we recieved a record", "recievedRecord", recievedRecord)
 
 		sanitizedRecord := models.NumericRecord{
 			ID:        uint(numericRecordID),
@@ -170,7 +169,7 @@ func BuildHandleAPIPutRecord() http.HandlerFunc {
 		// TODO: I think we should actually check first if the record even exists...
 		err = db.Save(&sanitizedRecord).Error
 		if err != nil {
-			log.Error(err)
+			slog.Error("failed to save record", "err", err)
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
@@ -179,7 +178,7 @@ func BuildHandleAPIPutRecord() http.HandlerFunc {
 
 		err = json.NewEncoder(w).Encode(returnedRecord)
 		if err != nil {
-			log.Error(err)
+			slog.Error("failed to encode record", "err", err)
 			w.WriteHeader(http.StatusInternalServerError)
 		}
 
@@ -193,14 +192,13 @@ func BuildHandleAPIPutRecord() http.HandlerFunc {
 func BuildHandleAPIDeleteRecord() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		db := requestcontext.DB(r)
-		log := requestcontext.Log(r)
 		eventHub := requestcontext.Hub(r)
 
 		user := models.User{}
 
 		err := db.Where("ID = ?", r.Context().Value(authtocontext.AuthDetailsContextKey).(authtocontext.AuthDetails).UserID).First(&user).Error
 		if err != nil {
-			log.Error(err)
+			slog.Error("Failed to get user", "err", err)
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
@@ -209,28 +207,28 @@ func BuildHandleAPIDeleteRecord() http.HandlerFunc {
 		vars := mux.Vars(r)
 		hobbitID, ok := vars["hobbit_id"]
 		if !ok {
-			log.Error("Can't get id from mux")
+			slog.Error("Can't get id from mux")
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
 
 		recordID, ok := vars["record_id"]
 		if !ok {
-			log.Error("Can't get id from mux")
+			slog.Error("Can't get id from mux")
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
 
 		numericHobbitID, err := strconv.ParseUint(hobbitID, 10, 32)
 		if err != nil {
-			log.Error(err)
+			slog.Error("Failed to parse hobbit id", "err", err)
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
 
 		numericRecordID, err := strconv.ParseUint(recordID, 10, 32)
 		if err != nil {
-			log.Error(err)
+			slog.Error("Failed to parse record id", "err", err)
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
@@ -241,7 +239,7 @@ func BuildHandleAPIDeleteRecord() http.HandlerFunc {
 		db.Where(models.Hobbit{ID: uint(numericHobbitID)}).Joins("User").First(&parentHobbit)
 
 		if user.ID != parentHobbit.User.ID {
-			log.Error("User does not match -> unauthorized")
+			slog.Error("User does not match -> unauthorized")
 			w.WriteHeader(http.StatusUnauthorized)
 			return
 		}
@@ -253,7 +251,7 @@ func BuildHandleAPIDeleteRecord() http.HandlerFunc {
 
 		err = db.Where(&deletedRecord).First(&deletedRecord).Error
 		if err != nil {
-			log.Error(err)
+			slog.Error("failed getting record to delete", "err", err)
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
@@ -263,14 +261,13 @@ func BuildHandleAPIDeleteRecord() http.HandlerFunc {
 		}
 		err = db.Delete(&recordToDelete).Error
 		if err != nil {
-			log.Error(err)
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
 
 		err = json.NewEncoder(w).Encode(deletedRecord)
 		if err != nil {
-			log.Error(err)
+			slog.Error("error when encoding deleted record", "err", err)
 			w.WriteHeader(http.StatusInternalServerError)
 		}
 
@@ -284,18 +281,17 @@ func BuildHandleAPIDeleteRecord() http.HandlerFunc {
 func BuildHandleAPIGetRecords() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		db := requestcontext.DB(r)
-		log := requestcontext.Log(r)
 
 		vars := mux.Vars(r)
 		hobbitID, ok := vars["hobbit_id"]
 		if !ok {
-			log.Error("Can't get id from mux")
+			slog.Error("Can't get id from mux")
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
 		numericHobbitID, err := strconv.ParseUint(hobbitID, 10, 32)
 		if err != nil {
-			log.Error(err)
+			slog.Error("failed parsing hobbit id", "err", err)
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
@@ -305,14 +301,14 @@ func BuildHandleAPIGetRecords() http.HandlerFunc {
 			HobbitID: uint(numericHobbitID),
 		}).Find(&records).Error
 		if err != nil {
-			log.Error(err)
+			slog.Error("failed to get records", "err", err)
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
 
 		err = json.NewEncoder(w).Encode(records)
 		if err != nil {
-			log.Error(err)
+			slog.Error("failed to encode records", "err", err)
 			w.WriteHeader(http.StatusInternalServerError)
 		}
 	}

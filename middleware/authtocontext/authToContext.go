@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/gob"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"time"
 
@@ -64,20 +65,19 @@ func New() func(http.Handler) http.Handler {
 // ServeHTTP implements the core functionality of this middleware
 func (m MiddlewareHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	db := requestcontext.DB(r)
-	log := requestcontext.Log(r)
 	store := requestcontext.Store(r)
 
 	handleBasicAuth := func(username string, password string) (AuthDetails, error) {
 		user := &models.User{}
 		if err := db.Where("username = ?", username).First(user).Error; err != nil {
-			log.Warnf("found no user with username %s; %s ", username, err)
+			slog.Warn("found no user with username", "username", username, "err", err)
 			return AuthDetails{}, err
 		}
 
 		appPasswords := []models.AppPassword{}
 
 		if err := db.Joins("User").Where(models.AppPassword{UserID: user.ID}).Find(&appPasswords).Error; err != nil {
-			log.Warnf("failed to find app passwords for user %s; %s ", username, err)
+			slog.Warn("failed to find app passwords for user", "username", username, "err", err)
 			return AuthDetails{}, err
 		}
 		secretAndPasswordMatched := false
@@ -91,9 +91,9 @@ func (m MiddlewareHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 		if secretAndPasswordMatched {
-			log.Info("Password matched")
+			slog.Info("Password matched")
 			if err := db.Model(&models.AppPassword{ID: matchedAppPassword.ID}).Updates(models.AppPassword{LastUsedAt: time.Now()}).Error; err != nil {
-				log.Errorf("Failed to update LastUsedAt for app password %s", matchedAppPassword.ID)
+				slog.Error("Failed to update LastUsedAt for app password", "appPasswordID", matchedAppPassword.ID, "err", err)
 				return AuthDetails{}, err
 			}
 			return AuthDetails{
@@ -109,7 +109,7 @@ func (m MiddlewareHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	handleSessionAuth := func(session *sessions.Session) (AuthDetails, error) {
 		authDetails, ok := session.Values[AuthDetailsSessionKey].(AuthDetails)
 		if !ok {
-			log.Debugf("Could not type assert cookie to AuthDetails, %+T", session.Values[AuthDetailsSessionKey])
+			slog.Debug("Could not type assert cookie to AuthDetails", "sessionKey", fmt.Sprintf("%+T", session.Values[AuthDetailsSessionKey]))
 			return AuthDetails{}, fmt.Errorf("Could not type assert cookie to AuthDetails, %+T", session.Values[AuthDetailsSessionKey])
 		}
 		if authDetails.AuthType != AuthTypeSession {
@@ -124,12 +124,12 @@ func (m MiddlewareHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if username, password, ok := r.BasicAuth(); ok {
 		authDetails, err = handleBasicAuth(username, password)
 		if err != nil {
-			log.Debugln("User could not be authenticated by basicAuth")
+			slog.Debug("User could not be authenticated by basicAuth")
 		}
 	} else if session, err := store.Get(r, "session"); err == nil && !session.IsNew && len(session.Values) > 0 {
 		authDetails, err = handleSessionAuth(session)
 		if err != nil {
-			log.Debugln("User could not be authenticated by SessionAuth")
+			slog.Debug("User could not be authenticated by SessionAuth")
 		}
 	}
 

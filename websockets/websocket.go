@@ -1,8 +1,8 @@
 package websockets
 
 import (
-	"fmt"
 	"hash/fnv"
+	"log/slog"
 	"net/http"
 	"strconv"
 	"time"
@@ -15,7 +15,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/websocket"
-	"github.com/sirupsen/logrus"
 )
 
 const (
@@ -46,7 +45,6 @@ var upgrader = websocket.Upgrader{
 
 // WebSocketClient is the server-side client of a websocket connection started by a request
 type WebSocketClient struct {
-	log               *logrus.Logger
 	Conn              *websocket.Conn
 	AuthDetails       authtocontext.AuthDetails
 	User              *models.User
@@ -62,44 +60,32 @@ func (c *WebSocketClient) getLipglossStyle() lipgloss.Style {
 	return lipgloss.NewStyle().Foreground(lipgloss.Color(strconv.Itoa(c.rangedUUIDHash())))
 }
 
-func (c *WebSocketClient) errorln(msg string) {
-	c.log.Errorln(fmt.Sprintf("[%s]", c.getLipglossStyle().Render(c.websocketClientId.String())), msg)
-}
-
-func (c *WebSocketClient) warnln(msg string) {
-	c.log.Warnln(fmt.Sprintf("[%s]", c.getLipglossStyle().Render(c.websocketClientId.String())), msg)
-}
-
-func (c *WebSocketClient) debugln(msg string) {
-	c.log.Debugln(fmt.Sprintf("[%s]", c.getLipglossStyle().Render(c.websocketClientId.String())), msg)
-}
-
 func (c *WebSocketClient) handleWriting() {
 	ticker := time.NewTicker(pingPeriod)
 	defer func() {
 		ticker.Stop()
 		err := c.Conn.Close()
 		if err != nil {
-			c.warnln(fmt.Sprintln("Could not close connection in defer of handleWriting: ", err))
+			slog.Warn("Could not close connection in defer of handleWriting", "err", err, "clientId", c.websocketClientId.String())
 		}
 	}()
 	for {
 		select {
 		case event := <-c.ServerSideEvents:
-			c.debugln(fmt.Sprintln("event sent to client - event:", event))
+			slog.Debug("event sent to client", "event", event, "clientId", c.websocketClientId.String())
 			err := c.Conn.WriteJSON(event)
 			if err != nil {
 				return
 			}
 		case <-ticker.C:
-			c.debugln("ping")
+			slog.Debug("ping", "clientId", c.websocketClientId.String())
 			err := c.Conn.SetWriteDeadline(time.Now().Add(writeWait))
 			if err != nil {
-				c.warnln(fmt.Sprintln("Could not set deadline", err))
+				slog.Warn("Could not set deadline", "err", err, "clientId", c.websocketClientId.String())
 				return
 			}
 			if err := c.Conn.WriteMessage(websocket.PingMessage, nil); err != nil {
-				c.warnln(fmt.Sprintln("error occured while sending ping to client:", err))
+				slog.Warn("error occured while sending ping to client", "err", err, "clientId", c.websocketClientId.String())
 				return
 			}
 		}
@@ -111,18 +97,18 @@ func (c *WebSocketClient) handleReading(hub *hub.Hub) {
 		hub.Unregister(c.ServerSideEvents)
 		err := c.Conn.Close()
 		if err != nil {
-			c.warnln(fmt.Sprintln("Could not close connection in defer of handleReading: ", err))
+			slog.Warn("Could not close connection in defer of handleReading", "err", err, "clientId", c.websocketClientId.String())
 		}
 	}()
 
 	c.Conn.SetReadLimit(maxMessageSize)
 	err := c.Conn.SetReadDeadline(time.Now().Add(pongWait))
 	if err != nil {
-		c.warnln(fmt.Sprintln("Could not set SetReadLine", err))
+		slog.Warn("Could not set SetReadLine", "err", err, "clientId", c.websocketClientId.String())
 		return
 	}
 	c.Conn.SetPongHandler(func(string) error {
-		c.debugln("pong")
+		slog.Debug("pong", "clientId", c.websocketClientId.String())
 		err := c.Conn.SetReadDeadline(time.Now().Add(pongWait))
 		return err
 	})
@@ -131,12 +117,12 @@ func (c *WebSocketClient) handleReading(hub *hub.Hub) {
 		typus, message, err := c.Conn.ReadMessage()
 		if err != nil {
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
-				c.warnln(fmt.Sprintln("Closing event occured whilst reading/waiting for message", err))
+				slog.Warn("Closing event occured whilst reading/waiting for message", "err", err, "clientId", c.websocketClientId.String())
 				return
 			}
 			break
 		}
-		c.log.Printf("Recieved message of typus %d with the content %s", typus, message)
+		slog.Info("Recieved message", "typus", typus, "content", message, "clientId", c.websocketClientId.String())
 	}
 }
 
@@ -144,7 +130,6 @@ func (c *WebSocketClient) handleReading(hub *hub.Hub) {
 func RegisterRoutes(r *mux.Router) {
 	r.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
 		db := requestcontext.DB(r)
-		log := requestcontext.Log(r)
 		h := requestcontext.Hub(r)
 
 		conn, err := upgrader.Upgrade(w, r, w.Header())
@@ -159,7 +144,7 @@ func RegisterRoutes(r *mux.Router) {
 		if authDetails.Authenticated {
 			err = db.Where("ID = ?", r.Context().Value(authtocontext.AuthDetailsContextKey).(authtocontext.AuthDetails).UserID).First(&user).Error
 			if err != nil {
-				log.Error(err)
+				slog.Error("Could not find user in database", "err", err)
 				w.WriteHeader(http.StatusBadRequest)
 				return
 			}
@@ -167,7 +152,6 @@ func RegisterRoutes(r *mux.Router) {
 
 		s := WebSocketClient{
 			Conn:              conn,
-			log:               log,
 			ServerSideEvents:  make(chan hub.ServerSideEvent, 256),
 			AuthDetails:       authDetails,
 			User:              &user,

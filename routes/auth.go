@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"log/slog"
 	"net/http"
 
 	"github.com/craftamap/hobbit-tracker/middleware/authtocontext"
@@ -13,7 +14,6 @@ import (
 // Users are getting logged out by setting their authDetails
 func BuildHandleLogout() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		log := requestcontext.Log(r)
 		store := requestcontext.Store(r)
 
 		session, _ := store.Get(r, "session")
@@ -28,7 +28,7 @@ func BuildHandleLogout() http.HandlerFunc {
 		err := session.Save(r, w)
 
 		if err != nil {
-			log.Error(err)
+			slog.Error("failed to save session", "err", err)
 			w.WriteHeader(http.StatusInternalServerError)
 		}
 
@@ -40,7 +40,7 @@ func BuildHandleLogout() http.HandlerFunc {
 		w.Header().Add("Location", redirectPath)
 		w.WriteHeader(http.StatusFound)
 
-		log.Infof("Logged out user %s", username)
+		slog.Info("Logged out user", "username", username)
 	}
 }
 
@@ -48,44 +48,43 @@ func BuildHandleLogout() http.HandlerFunc {
 func BuildHandleLogin() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		db := requestcontext.DB(r)
-		log := requestcontext.Log(r)
 		store := requestcontext.Store(r)
 
 		err := r.ParseForm()
 		if err != nil {
-			log.Warn("Could not parse form data")
+			slog.Warn("Could not parse form data")
 			w.WriteHeader(http.StatusUnauthorized)
 			return
 		}
 		username := r.PostForm.Get("username")
 		if username == "" {
-			log.Warn("request did not contain username")
+			slog.Warn("request did not contain username")
 			w.WriteHeader(http.StatusUnauthorized)
 			return
 		}
 		password := r.PostForm.Get("password")
 		if password == "" {
-			log.Warn("request did not contain password")
+			slog.Warn("request did not contain password")
 			w.WriteHeader(http.StatusUnauthorized)
 			return
 		}
 
 		user := &models.User{}
 		if err := db.Where("username = ?", username).First(user).Error; err != nil {
-			log.Warnf("found no user with username %s; %s ", username, err)
+			slog.Warn("found no user with username", "username", username, "err", err)
 			w.WriteHeader(http.StatusUnauthorized)
 			return
 		}
 
 		if user.Secret == "" {
-			log.Warnf("found user with username %s, but no secret was found ", username)
+			slog.Warn("found user with username, but no secret was found", "username", username)
 			w.WriteHeader(http.StatusUnauthorized)
 			return
 		}
 
 		err = bcrypt.CompareHashAndPassword([]byte(user.Secret), []byte(password))
 		if err != nil {
-			log.Warnf("invalid password %s", username)
+			slog.Warn("invalid password for user", "username", username)
 			w.WriteHeader(http.StatusUnauthorized)
 			return
 		}
@@ -98,7 +97,9 @@ func BuildHandleLogin() http.HandlerFunc {
 			UserID:        user.ID,
 		}
 		err = session.Save(r, w)
-		log.Warnf("%s", err)
+		if err != nil {
+			slog.Warn("failed to save session", "err", err)
+		}
 
 		redirectPath := r.PostForm.Get("redirect")
 		if redirectPath == "" {
@@ -108,6 +109,6 @@ func BuildHandleLogin() http.HandlerFunc {
 		w.Header().Add("Location", redirectPath)
 		w.WriteHeader(http.StatusFound)
 
-		log.Infof("Logged in user %s", username)
+		slog.Info("Logged in user", "username", username)
 	}
 }

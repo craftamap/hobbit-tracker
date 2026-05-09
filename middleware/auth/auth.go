@@ -1,10 +1,10 @@
 package auth
 
 import (
+	"log/slog"
 	"net/http"
 
 	"github.com/craftamap/hobbit-tracker/middleware/authtocontext"
-	"github.com/craftamap/hobbit-tracker/middleware/requestcontext"
 )
 
 // MiddlewareHandlerBuilder is a builder for authMiddlewareHandler, allowing easier configuration
@@ -54,8 +54,6 @@ type authMiddlewareHandler struct {
 
 // ServeHTTP implements the authentication
 func (m authMiddlewareHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	log := requestcontext.Log(r)
-
 	contextAuthDetails := r.Context().Value(authtocontext.AuthDetailsContextKey)
 	authDetails := contextAuthDetails.(authtocontext.AuthDetails)
 
@@ -68,7 +66,7 @@ func (m authMiddlewareHandler) ServeHTTP(w http.ResponseWriter, r *http.Request)
 		w.WriteHeader(http.StatusUnauthorized)
 		_, err := w.Write([]byte("AuthType AppPassword not allowed for this endpoint"))
 		if err != nil {
-			log.Error(err)
+			slog.Error("failed to write response", "err", err)
 		}
 		return
 	}
@@ -77,7 +75,7 @@ func (m authMiddlewareHandler) ServeHTTP(w http.ResponseWriter, r *http.Request)
 		w.WriteHeader(http.StatusUnauthorized)
 		_, err := w.Write([]byte("AuthType Session not allowed for this endpoint"))
 		if err != nil {
-			log.Error(err)
+			slog.Error("failed to write response", "err", err)
 		}
 		return
 	}

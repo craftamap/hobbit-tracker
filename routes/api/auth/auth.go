@@ -2,16 +2,14 @@ package auth
 
 import (
 	"encoding/json"
+	"log/slog"
 	"net/http"
 
 	"github.com/craftamap/hobbit-tracker/middleware/authtocontext"
-	"github.com/craftamap/hobbit-tracker/middleware/requestcontext"
 )
 
 func BuildHandleAPIGetAuth() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		log := requestcontext.Log(r)
-
 		c := r.Context()
 		contextAuthDetails := c.Value(authtocontext.AuthDetailsContextKey)
 		authDetails, ok := contextAuthDetails.(authtocontext.AuthDetails)
@@ -20,14 +18,14 @@ func BuildHandleAPIGetAuth() http.HandlerFunc {
 				Authenticated: false,
 			})
 			if err != nil {
-				log.Error(err)
+				slog.Error("failed to encode auth details", "err", err)
 				w.WriteHeader(http.StatusInternalServerError)
 			}
 			return
 		}
 		err := json.NewEncoder(w).Encode(authDetails)
 		if err != nil {
-			log.Error(err)
+			slog.Error("failed to encode auth details", "err", err)
 			w.WriteHeader(http.StatusInternalServerError)
 		}
 	}

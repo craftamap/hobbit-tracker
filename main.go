@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"io/fs"
+	"log/slog"
 	"net/http"
 	"os"
 	"time"
@@ -17,11 +18,9 @@ import (
 	"github.com/craftamap/hobbit-tracker/websockets"
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
-	"github.com/sirupsen/logrus"
 	"github.com/wader/gormstore/v2"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
-	gormLogger "gorm.io/gorm/logger"
 )
 
 var (
@@ -40,13 +39,7 @@ var (
 var content embed.FS
 var db *gorm.DB
 
-var log = logrus.New()
-
 func init() {
-	log.SetFormatter(&logrus.TextFormatter{
-		FullTimestamp: true,
-	})
-
 	flag.BoolVar(&flagDiskMode, "disk-mode", false, "disk mode")
 	flag.IntVar(&flagPort, "port", 8080, "port")
 	flag.BoolVar(&flagVerbose, "v", false, "verbose, enables debug logs")
@@ -54,13 +47,13 @@ func init() {
 	flag.Parse()
 
 	if flagVerbose {
-		log.SetLevel(logrus.DebugLevel)
+		slog.SetLogLoggerLevel(slog.LevelDebug)
 	}
 }
 
 func loggingMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		log.Info(fmt.Sprintf("%s %s %s", r.RemoteAddr, r.Method, r.URL))
+		slog.Info("request", "addr", r.RemoteAddr, "method", r.Method, "url", r.URL)
 		next.ServeHTTP(w, r)
 	})
 }
@@ -72,18 +65,17 @@ func frontendHandler() (http.Handler, error) {
 		return nil, err
 	}
 	if flagDiskMode {
-		log.Warn("Disk Mode")
+		slog.Warn("Disk Mode")
 		contentStatic = os.DirFS("frontend/dist")
 	}
 	return http.FileServer(http.FS(contentStatic)), nil
 }
 
 type customRecoveryLogger struct {
-	log *logrus.Logger
 }
 
 func (c *customRecoveryLogger) Println(msgs ...any) {
-	c.log.Errorln(msgs...)
+	slog.Error("recovering", "msgs", msgs)
 }
 
 func main() {
@@ -91,7 +83,7 @@ func main() {
 
 	gormConfig := &gorm.Config{}
 	if flagVerbose {
-		gormConfig.Logger = gormLogger.Default.LogMode(gormLogger.Info)
+		slog.SetLogLoggerLevel(slog.LevelDebug)
 	}
 
 	db, err = gorm.Open(sqlite.Open(flagDatabase), gormConfig)
@@ -99,9 +91,9 @@ func main() {
 		fmt.Println(err)
 		return
 	}
-	log.Info("Migrating DB")
+	slog.Info("Migrating DB")
 	// Manual Migration
-	log.Info("AutoMigrating DB")
+	slog.Info("AutoMigrating DB")
 	err = db.AutoMigrate(&models.Hobbit{})
 	if err != nil {
 		fmt.Println(err)
@@ -123,21 +115,21 @@ func main() {
 		return
 	}
 
-	log.Info("AutoMigrated DB")
-	log.Info("Checking for manual migrations")
+	slog.Info("AutoMigrated DB")
+	slog.Info("Checking for manual migrations")
 	{
 		// Migration from v0.2.1 to above
 		records := []models.NumericRecord{}
 		db.Where("created_at IS NULL").Find(&records)
 		if len(records) > 0 {
-			log.Info("Found migration from v0.2.1, performing migration")
+			slog.Info("Found migration from v0.2.1, performing migration")
 			db.Model(&models.NumericRecord{}).Where("created_at IS NULL").Updates(&models.NumericRecord{CreatedAt: time.Now()})
 
 			db.Model(&models.Hobbit{}).Where("created_at IS NULL").Updates(&models.Hobbit{CreatedAt: time.Now()})
-			log.Info("Found migration from v0.2.1, done")
+			slog.Info("Found migration from v0.2.1, done")
 		}
 	}
-	log.Info("Migrated DB")
+	slog.Info("Migrated DB")
 
 	// key must be 16, 24 or 32 bytes long (AES-128, AES-192 or AES-256)
 	key := []byte("jMcBBEBKAzw89XNb")
@@ -147,18 +139,18 @@ func main() {
 	quit := make(chan struct{})
 	go Store.PeriodicCleanup(1*time.Hour, quit)
 	defer close(quit)
-	eventHub := hub.New(log)
+	eventHub := hub.New()
 	eventHub.Run()
 
 	r := mux.NewRouter()
 	r.StrictSlash(true)
 	r.Use(loggingMiddleware)
 
-	r.Use(handlers.RecoveryHandler(handlers.RecoveryLogger(&customRecoveryLogger{log})))
-	r.Use(requestcontext.New(Store, db, log, eventHub))
+	r.Use(handlers.RecoveryHandler(handlers.RecoveryLogger(&customRecoveryLogger{})))
+	r.Use(requestcontext.New(Store, db, eventHub))
 	r.Use(authtocontext.New())
 
-	routes.RegisterRoutes(r, db, log, Store)
+	routes.RegisterRoutes(r, db, Store)
 	websockets.RegisterRoutes(r)
 
 	frontend, err := frontendHandler()
@@ -167,9 +159,8 @@ func main() {
 		return
 	}
 	r.PathPrefix("/").Handler(frontend)
-	listeningOn := fmt.Sprintf(":%d", flagPort)
-	log.Infof("Listening on %s", listeningOn)
-	err = http.ListenAndServe(listeningOn, r)
+	slog.Info("Listening on", "port", flagPort)
+	err = http.ListenAndServe(fmt.Sprintf(":%d", flagPort), r)
 	if err != nil {
 		fmt.Println(err)
 		return

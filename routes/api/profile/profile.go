@@ -5,14 +5,13 @@ import (
 	"log/slog"
 	"net/http"
 	"sort"
-	"strconv"
 	"time"
 
+	"github.com/craftamap/hobbit-tracker/httputil"
 	"github.com/craftamap/hobbit-tracker/middleware/authtocontext"
 	"github.com/craftamap/hobbit-tracker/middleware/requestcontext"
 	"github.com/craftamap/hobbit-tracker/models"
 	"github.com/google/uuid"
-	"github.com/gorilla/mux"
 	"github.com/sethvargo/go-password/password"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -21,17 +20,9 @@ func GetOthersUserInfo() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		db := requestcontext.DB(r)
 
-		urlVariables := mux.Vars(r)
-		otherUserStrId, ok := urlVariables["id"]
+		otherUserID, ok := httputil.GetUint64PathValue(r, "id")
 		if !ok {
-			slog.Error("No user id found!")
-			w.WriteHeader(http.StatusBadRequest)
-			return
-		}
-
-		otherUserID, err := strconv.ParseUint(otherUserStrId, 10, 64)
-		if err != nil {
-			slog.Error("user id is not numeric", "err", err)
+			slog.Error("Can't get id from path")
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
@@ -44,7 +35,7 @@ func GetOthersUserInfo() http.HandlerFunc {
 		//	}
 
 		otherUser := models.User{}
-		if err = db.Where(models.User{ID: uint(otherUserID)}).First(&otherUser).Error; err != nil {
+		if err := db.Where(models.User{ID: uint(otherUserID)}).First(&otherUser).Error; err != nil {
 			slog.Error("user could not be found", "err", err)
 			w.WriteHeader(http.StatusBadRequest)
 			return
@@ -59,7 +50,7 @@ func GetOthersUserInfo() http.HandlerFunc {
 		}
 
 		w.Header().Add("Content-Type", "application/json")
-		err = json.NewEncoder(w).Encode(sanitisedOtherUser)
+		err := json.NewEncoder(w).Encode(sanitisedOtherUser)
 		if err != nil {
 			slog.Error("failed to encode response", "err", err)
 			w.WriteHeader(http.StatusInternalServerError)
@@ -71,17 +62,9 @@ func GetFollowForUser() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		db := requestcontext.DB(r)
 
-		urlVariables := mux.Vars(r)
-		otherUserStrId, ok := urlVariables["id"]
+		otherUserID, ok := httputil.GetUint64PathValue(r, "id")
 		if !ok {
-			slog.Error("No user id found!")
-			w.WriteHeader(http.StatusBadRequest)
-			return
-		}
-
-		otherUserID, err := strconv.ParseUint(otherUserStrId, 10, 64)
-		if err != nil {
-			slog.Error("user id is not numeric", "err", err)
+			slog.Error("Can't get id from path")
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
@@ -125,17 +108,9 @@ func DeleteFollowForUser() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		db := requestcontext.DB(r)
 
-		urlVariables := mux.Vars(r)
-		otherUserStrId, ok := urlVariables["id"]
+		otherUserID, ok := httputil.GetUint64PathValue(r, "id")
 		if !ok {
-			slog.Error("No user id found!")
-			w.WriteHeader(http.StatusBadRequest)
-			return
-		}
-
-		otherUserID, err := strconv.ParseUint(otherUserStrId, 10, 64)
-		if err != nil {
-			slog.Error("user id is not numeric", "err", err)
+			slog.Error("Can't get id from path")
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
@@ -177,17 +152,9 @@ func PutFollowForUser() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		db := requestcontext.DB(r)
 
-		urlVariables := mux.Vars(r)
-		otherUserStrId, ok := urlVariables["id"]
+		otherUserID, ok := httputil.GetUint64PathValue(r, "id")
 		if !ok {
-			slog.Error("No user id found!")
-			w.WriteHeader(http.StatusBadRequest)
-			return
-		}
-
-		otherUserID, err := strconv.ParseUint(otherUserStrId, 10, 64)
-		if err != nil {
-			slog.Error("user id is not numeric", "err", err)
+			slog.Error("Can't get id from path")
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
@@ -239,17 +206,9 @@ func GetOthersHobbits() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		db := requestcontext.DB(r)
 
-		urlVariables := mux.Vars(r)
-		otherUserStrId, ok := urlVariables["id"]
+		otherUserID, ok := httputil.GetUint64PathValue(r, "id")
 		if !ok {
-			slog.Error("No user id found!")
-			w.WriteHeader(http.StatusBadRequest)
-			return
-		}
-
-		otherUserID, err := strconv.ParseUint(otherUserStrId, 10, 64)
-		if err != nil {
-			slog.Error("user id is not numeric", "err", err)
+			slog.Error("Can't get id from path")
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
@@ -263,7 +222,7 @@ func GetOthersHobbits() http.HandlerFunc {
 
 		hobbits := []models.Hobbit{}
 
-		err = db.Joins("User").Where(&models.Hobbit{UserID: uint(otherUserID)}).Find(&hobbits).Error
+		err := db.Joins("User").Where(&models.Hobbit{UserID: uint(otherUserID)}).Find(&hobbits).Error
 		if err != nil {
 			slog.Error("failed to find hobbits for other user", "err", err, "otherUserID", otherUserID)
 			w.WriteHeader(http.StatusInternalServerError)
@@ -412,8 +371,7 @@ func BuildHandleDeleteAppPassword() http.HandlerFunc {
 			return
 		}
 
-		vars := mux.Vars(r)
-		id, ok := vars["id"]
+		id, ok := httputil.GetAlphanumericPathValue(r, "id")
 		if !ok {
 			slog.Error("No app password id found!")
 			w.WriteHeader(http.StatusBadRequest)

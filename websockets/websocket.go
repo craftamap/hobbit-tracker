@@ -13,7 +13,6 @@ import (
 	"github.com/craftamap/hobbit-tracker/middleware/requestcontext"
 	"github.com/craftamap/hobbit-tracker/models"
 	"github.com/google/uuid"
-	"github.com/gorilla/mux"
 	"github.com/gorilla/websocket"
 )
 
@@ -126,9 +125,10 @@ func (c *WebSocketClient) handleReading(hub *hub.Hub) {
 	}
 }
 
-// RegisterRoutes registers the websocket route to the passed router
-func RegisterRoutes(r *mux.Router) {
-	r.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
+// GetRoutes registers the websocket route to the passed router
+func GetRoutes() http.Handler {
+	router := http.NewServeMux()
+	router.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
 		db := requestcontext.DB(r)
 		h := requestcontext.Hub(r)
 
@@ -163,4 +163,5 @@ func RegisterRoutes(r *mux.Router) {
 		go s.handleWriting()
 		go s.handleReading(h)
 	})
+	return router
 }

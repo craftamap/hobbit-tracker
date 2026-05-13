@@ -17,7 +17,7 @@ func GetRoutes() http.Handler {
 	profileMe.HandleFunc("GET /api/profile/me/feed", GetMyFeed())
 
 	profileMe.HandleFunc("GET /api/profile/me/apppassword", BuildHandleGetAppPasswords())
-	profileMe.HandleFunc("POST /api/profile/me/apppassword", BuildHandlePostAppPassword())
+	profileMe.HandleFunc("POST /api/profile/me/apppassword/{$}", BuildHandlePostAppPassword())
 	// todo: new id mapping
 	profileMe.HandleFunc("DELETE /api/profile/me/apppassword/{id}", BuildHandleDeleteAppPassword())
 

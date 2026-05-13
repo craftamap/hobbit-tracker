@@ -371,7 +371,7 @@ func BuildHandleDeleteAppPassword() http.HandlerFunc {
 			return
 		}
 
-		id, ok := httputil.GetAlphanumericPathValue(r, "id")
+		id, ok := httputil.GetAlphanumericMinusPathValue(r, "id")
 		if !ok {
 			slog.Error("No app password id found!")
 			w.WriteHeader(http.StatusBadRequest)

@@ -16,12 +16,12 @@ func GetUint64PathValue(req *http.Request, name string) (uint64, bool) {
 }
 
 
-func GetAlphanumericPathValue(req *http.Request, name string) (string, bool) {
+func GetAlphanumericMinusPathValue(req *http.Request, name string) (string, bool) {
 	value := req.PathValue(name)
 	if value == "" {
 		return "", false
 	}
-	pattern := regexp.MustCompile("^[a-zA-Z0-9]+$")
+	pattern := regexp.MustCompile(`^[a-zA-Z0-9\-]+$`)
 	matches := pattern.MatchString(value)
 	if !matches {
 		return "", false

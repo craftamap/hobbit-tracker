@@ -4,6 +4,6 @@ import "net/http"
 
 func GetRoutes() http.Handler {
 	authRoutes := http.NewServeMux()
-	authRoutes.HandleFunc("GET /", BuildHandleAPIGetAuth())
+	authRoutes.HandleFunc("GET /api/auth/", BuildHandleAPIGetAuth())
 	return authRoutes
 }

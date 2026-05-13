@@ -5,28 +5,32 @@ import (
 
 	"github.com/craftamap/hobbit-tracker/middleware/auth"
 	apiAuth "github.com/craftamap/hobbit-tracker/routes/api/auth"
-	"github.com/gorilla/mux"
 )
 
-func RegisterRoutes(profile *mux.Router) {
+func GetRoutes() http.Handler {
+	profile := http.NewServeMux()
 	authMiddlewareBuilder := auth.Builder()
 
-	profileMe := profile.PathPrefix("/me").Subrouter()
-	profileMe.Use(authMiddlewareBuilder.Build)
-	profileMe.Handle("/", apiAuth.BuildHandleAPIGetAuth())
-	profileMe.HandleFunc("/hobbits", BuildHandleProfileGetHobbits()).Methods("GET")
-	profileMe.HandleFunc("/feed", GetMyFeed()).Methods(http.MethodGet)
+	profileMe := http.NewServeMux()
+	profileMe.Handle("GET /api/profile/me", apiAuth.BuildHandleAPIGetAuth())
+	profileMe.HandleFunc("GET /api/profile/me/hobbits", BuildHandleProfileGetHobbits())
+	profileMe.HandleFunc("GET /api/profile/me/feed", GetMyFeed())
 
-	profileMeAppPassword := profileMe.PathPrefix("/apppassword").Subrouter()
-	profileMeAppPassword.Use(authMiddlewareBuilder.Build) //.WithPermitAppPasswordAuth(false).Build)
-	profileMeAppPassword.HandleFunc("/", BuildHandleGetAppPasswords()).Methods("GET")
-	profileMeAppPassword.HandleFunc("/", BuildHandlePostAppPassword()).Methods("POST")
-	profileMeAppPassword.HandleFunc("/{id:[0-9a-zA-Z\\-]+}", BuildHandleDeleteAppPassword()).Methods("DELETE")
+	profileMe.HandleFunc("GET /api/profile/me/apppassword", BuildHandleGetAppPasswords())
+	profileMe.HandleFunc("POST /api/profile/me/apppassword", BuildHandlePostAppPassword())
+	// todo: new id mapping
+	profileMe.HandleFunc("DELETE /api/profile/me/apppassword/{id}", BuildHandleDeleteAppPassword())
 
-	profileOthers := profile.PathPrefix("/{id:[0-9]+}").Subrouter()
-	profileOthers.HandleFunc("/", GetOthersUserInfo()).Methods(http.MethodGet)
-	profileOthers.HandleFunc("/follow", GetFollowForUser()).Methods(http.MethodGet)
-	profileOthers.HandleFunc("/follow", PutFollowForUser()).Methods(http.MethodPut)
-	profileOthers.HandleFunc("/follow", DeleteFollowForUser()).Methods(http.MethodDelete)
-	profileOthers.HandleFunc("/hobbits", GetOthersHobbits()).Methods(http.MethodGet)
+	profile.Handle("/api/profile/me/", authMiddlewareBuilder.Build(profileMe))
+
+	profileOthers := http.NewServeMux()
+	// todo: new id mappings
+	profileOthers.HandleFunc("GET /api/profile/{id}/", GetOthersUserInfo())
+	profileOthers.HandleFunc("GET /api/profile/{id}/follow", GetFollowForUser())
+	profileOthers.HandleFunc("PUT /api/profile/{id}/follow", PutFollowForUser())
+	profileOthers.HandleFunc("DELETE /api/profile/{id}/follow", DeleteFollowForUser())
+	profileOthers.HandleFunc("GET /api/profile/{id}/hobbits", GetOthersHobbits())
+	profile.Handle("/api/profile/{id}/", authMiddlewareBuilder.Build(profileOthers))
+
+	return profile
 }

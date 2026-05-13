@@ -4,13 +4,12 @@ import (
 	"encoding/json"
 	"log/slog"
 	"net/http"
-	"strconv"
 
+	"github.com/craftamap/hobbit-tracker/httputil"
 	"github.com/craftamap/hobbit-tracker/hub"
 	"github.com/craftamap/hobbit-tracker/middleware/authtocontext"
 	"github.com/craftamap/hobbit-tracker/middleware/requestcontext"
 	"github.com/craftamap/hobbit-tracker/models"
-	"github.com/gorilla/mux"
 )
 
 func BuildHandleAPIPostRecord() http.HandlerFunc {
@@ -28,17 +27,9 @@ func BuildHandleAPIPostRecord() http.HandlerFunc {
 			return
 		}
 
-		// TODO: add error handling
-		vars := mux.Vars(r)
-		hobbitID, ok := vars["hobbit_id"]
+		numericHobbitID, ok := httputil.GetUint64PathValue(r, "hobbit_id")
 		if !ok {
-			slog.Error("Can't get id from mux")
-			w.WriteHeader(http.StatusBadRequest)
-			return
-		}
-		numericHobbitID, err := strconv.ParseUint(hobbitID, 10, 32)
-		if err != nil {
-			slog.Error("Failed to parse hobbit id", "err", err)
+			slog.Error("Can't get id from path")
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
@@ -109,32 +100,15 @@ func BuildHandleAPIPutRecord() http.HandlerFunc {
 			return
 		}
 
-		// TODO: add error handling
-		vars := mux.Vars(r)
-		hobbitID, ok := vars["hobbit_id"]
+		numericHobbitID, ok := httputil.GetUint64PathValue(r, "hobbit_id")
 		if !ok {
-			slog.Error("Can't get id from mux")
+			slog.Error("Can't get id from path")
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
-
-		recordID, ok := vars["record_id"]
+		numericRecordID, ok := httputil.GetUint64PathValue(r, "record_id")
 		if !ok {
-			slog.Error("Can't get id from mux")
-			w.WriteHeader(http.StatusBadRequest)
-			return
-		}
-
-		numericHobbitID, err := strconv.ParseUint(hobbitID, 10, 32)
-		if err != nil {
-			slog.Error("Failed to parse hobbit id", "err", err)
-			w.WriteHeader(http.StatusBadRequest)
-			return
-		}
-
-		numericRecordID, err := strconv.ParseUint(recordID, 10, 32)
-		if err != nil {
-			slog.Error("Failed to parse record id", "err", err)
+			slog.Error("Can't get id from path")
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
@@ -203,32 +177,15 @@ func BuildHandleAPIDeleteRecord() http.HandlerFunc {
 			return
 		}
 
-		// TODO: add error handling
-		vars := mux.Vars(r)
-		hobbitID, ok := vars["hobbit_id"]
+		numericHobbitID, ok := httputil.GetUint64PathValue(r, "hobbit_id")
 		if !ok {
-			slog.Error("Can't get id from mux")
+			slog.Error("Can't get id from path")
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
-
-		recordID, ok := vars["record_id"]
+		numericRecordID, ok := httputil.GetUint64PathValue(r, "record_id")
 		if !ok {
-			slog.Error("Can't get id from mux")
-			w.WriteHeader(http.StatusBadRequest)
-			return
-		}
-
-		numericHobbitID, err := strconv.ParseUint(hobbitID, 10, 32)
-		if err != nil {
-			slog.Error("Failed to parse hobbit id", "err", err)
-			w.WriteHeader(http.StatusBadRequest)
-			return
-		}
-
-		numericRecordID, err := strconv.ParseUint(recordID, 10, 32)
-		if err != nil {
-			slog.Error("Failed to parse record id", "err", err)
+			slog.Error("Can't get id from path")
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
@@ -282,22 +239,15 @@ func BuildHandleAPIGetRecords() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		db := requestcontext.DB(r)
 
-		vars := mux.Vars(r)
-		hobbitID, ok := vars["hobbit_id"]
+		numericHobbitID, ok := httputil.GetUint64PathValue(r, "hobbit_id")
 		if !ok {
-			slog.Error("Can't get id from mux")
-			w.WriteHeader(http.StatusBadRequest)
-			return
-		}
-		numericHobbitID, err := strconv.ParseUint(hobbitID, 10, 32)
-		if err != nil {
-			slog.Error("failed parsing hobbit id", "err", err)
+			slog.Error("Can't get id from path")
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
 
 		var records []models.NumericRecord
-		err = db.Where(models.NumericRecord{
+		err := db.Where(models.NumericRecord{
 			HobbitID: uint(numericHobbitID),
 		}).Find(&records).Error
 		if err != nil {

@@ -6,11 +6,9 @@ require (
 	github.com/charmbracelet/lipgloss v1.1.0
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/handlers v1.5.2
-	github.com/gorilla/mux v1.8.1
 	github.com/gorilla/sessions v1.4.0
 	github.com/gorilla/websocket v1.5.3
 	github.com/sethvargo/go-password v0.3.1
-	github.com/sirupsen/logrus v1.9.4
 	github.com/wader/gormstore/v2 v2.0.4
 	golang.org/x/crypto v0.49.0
 	gorm.io/driver/sqlite v1.6.0

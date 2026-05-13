@@ -16,6 +16,7 @@ import (
 	"github.com/craftamap/hobbit-tracker/models"
 	"github.com/craftamap/hobbit-tracker/routes"
 	"github.com/craftamap/hobbit-tracker/routes/api"
+	"github.com/craftamap/hobbit-tracker/websockets"
 	"github.com/gorilla/handlers"
 	"github.com/wader/gormstore/v2"
 	"gorm.io/driver/sqlite"
@@ -145,10 +146,9 @@ func main() {
 
 	rootRouter.Handle("POST /auth/login", routes.BuildHandleLogin())
 	rootRouter.Handle("POST /auth/logout", routes.BuildHandleLogout())
-	rootRouter.Handle("/api/", http.StripPrefix("/api", api.GetRoutes()))
-
+	rootRouter.Handle("/api/", api.GetRoutes())
 	// routes.GetRoutes(db, log, Store)
-	// websockets.RegisterRoutes(r)
+	rootRouter.Handle("/ws", websockets.GetRoutes())
 
 	frontend, err := frontendHandler()
 	if err != nil {

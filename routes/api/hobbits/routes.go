@@ -5,24 +5,26 @@ import (
 
 	"github.com/craftamap/hobbit-tracker/middleware/auth"
 	"github.com/craftamap/hobbit-tracker/routes/api/records"
-	"github.com/gorilla/mux"
 )
 
-func RegisterRoutes(hobbits *mux.Router) {
+func GetRoutes() http.Handler {
+	hobbitsRouter := http.NewServeMux()
 	authMiddlewareBuilder := auth.Builder()
 
-	hobbits.Handle("/", authMiddlewareBuilder.Build(
+	hobbitsRouter.Handle("GET /api/hobbits/{$}", BuildHandleAPIGetHobbits())
+	hobbitsRouter.Handle("POST /api/hobbits/{$}", authMiddlewareBuilder.Build(
 		http.HandlerFunc(BuildHandleAPIPostHobbit()),
-	)).Methods("POST")
-	hobbits.Handle("/{id:[0-9]+}", authMiddlewareBuilder.Build(
-		http.HandlerFunc(BuildHandleAPIPutHobbit()),
-	)).Methods("PUT")
-	hobbits.Handle("/{id:[0-9]+}", authMiddlewareBuilder.Build(
-		http.HandlerFunc(BuildHandleAPIDeleteHobbit()),
-	)).Methods("DELETE")
-	hobbits.Handle("/{id:[0-9]+}", BuildHandleAPIGetHobbit()).Methods("GET")
-	hobbits.Handle("/", BuildHandleAPIGetHobbits()).Methods("GET")
+	))
 
-	rRecords := hobbits.PathPrefix("/{hobbit_id:[0-9]+}/records").Subrouter()
-	records.RegisterRoutes(rRecords)
+	hobbitsRouter.Handle("GET /api/hobbits/{id}/{$}", BuildHandleAPIGetHobbit())
+	hobbitsRouter.Handle("PUT /api/hobbits/{id}/{$}", authMiddlewareBuilder.Build(
+		http.HandlerFunc(BuildHandleAPIPutHobbit()),
+	))
+	hobbitsRouter.Handle("DELETE /api/hobbits/{id}/{$}", authMiddlewareBuilder.Build(
+		http.HandlerFunc(BuildHandleAPIDeleteHobbit()),
+	))
+
+	hobbitsRouter.Handle("/api/hobbits/{hobbit_id}/records/", records.GetRoutes())
+
+	return hobbitsRouter
 }

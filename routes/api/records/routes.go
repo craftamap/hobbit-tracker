@@ -4,20 +4,22 @@ import (
 	"net/http"
 
 	"github.com/craftamap/hobbit-tracker/middleware/auth"
-	"github.com/gorilla/mux"
 )
 
-func RegisterRoutes(records *mux.Router) {
+func GetRoutes() http.Handler {
+	records := http.NewServeMux()
 	authMiddlewareBuilder := auth.Builder()
 
-	records.Handle("/", BuildHandleAPIGetRecords()).Methods("GET")
-	records.Handle("/", authMiddlewareBuilder.Build(
+	records.Handle("GET /api/hobbits/{hobbit_id}/records/{$}", BuildHandleAPIGetRecords())
+	records.Handle("POST /api/hobbits/{hobbit_id}/records/{$}", authMiddlewareBuilder.Build(
 		http.HandlerFunc(BuildHandleAPIPostRecord()),
-	)).Methods("POST")
-	records.Handle("/{record_id:[0-9]+}", authMiddlewareBuilder.Build(
+	))
+	records.Handle("PUT /api/hobbits/{hobbit_id}/records/{record_id}/{$}", authMiddlewareBuilder.Build(
 		http.HandlerFunc(BuildHandleAPIPutRecord()),
-	)).Methods("PUT")
-	records.Handle("/{record_id:[0-9]+}", authMiddlewareBuilder.Build(
+	))
+	records.Handle("DELETE /api/hobbits/{hobbit_id}/records/{record_id}/{$}", authMiddlewareBuilder.Build(
 		http.HandlerFunc(BuildHandleAPIDeleteRecord()),
-	)).Methods("DELETE")
+	))
+
+	return records
 }

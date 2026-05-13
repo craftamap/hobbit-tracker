@@ -4,14 +4,13 @@ import (
 	"encoding/json"
 	"log/slog"
 	"net/http"
-	"strconv"
 	"strings"
 
+	"github.com/craftamap/hobbit-tracker/httputil"
 	"github.com/craftamap/hobbit-tracker/hub"
 	"github.com/craftamap/hobbit-tracker/middleware/authtocontext"
 	"github.com/craftamap/hobbit-tracker/middleware/requestcontext"
 	"github.com/craftamap/hobbit-tracker/models"
-	"github.com/gorilla/mux"
 )
 
 func BuildHandleAPIPostHobbit() http.HandlerFunc {
@@ -90,23 +89,15 @@ func BuildHandleAPIGetHobbit() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		db := requestcontext.DB(r)
 
-		// TODO: add error handling
-		vars := mux.Vars(r)
-		id, ok := vars["id"]
+		numericID, ok := httputil.GetUint64PathValue(r, "id")
 		if !ok {
-			slog.Error("Can't get id from mux")
-			w.WriteHeader(http.StatusBadRequest)
-			return
-		}
-		numericID, err := strconv.ParseUint(id, 10, 32)
-		if err != nil {
-			slog.Error("failed to parse id", "err", err)
+			slog.Error("Can't get id from path")
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
 
 		hobbit := models.Hobbit{}
-		err = db.Where(models.Hobbit{ID: uint(numericID)}).Joins("User").First(&hobbit).Error
+		err := db.Where(models.Hobbit{ID: uint(numericID)}).Joins("User").First(&hobbit).Error
 		if err != nil {
 			slog.Error("failed to find hobbit", "err", err)
 			w.WriteHeader(http.StatusBadRequest)
@@ -136,17 +127,9 @@ func BuildHandleAPIPutHobbit() http.HandlerFunc {
 			return
 		}
 
-		// TODO: add error handling
-		vars := mux.Vars(r)
-		id, ok := vars["id"]
+		numericID, ok := httputil.GetUint64PathValue(r, "id")
 		if !ok {
-			slog.Error("Can't get id from mux")
-			w.WriteHeader(http.StatusBadRequest)
-			return
-		}
-		numericID, err := strconv.ParseUint(id, 10, 32)
-		if err != nil {
-			slog.Error("failed to parse id", "err", err)
+			slog.Error("Can't get id from path")
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
@@ -211,17 +194,9 @@ func BuildHandleAPIDeleteHobbit() http.HandlerFunc {
 			return
 		}
 
-		// TODO: add error handling
-		vars := mux.Vars(r)
-		id, ok := vars["id"]
+		numericID, ok := httputil.GetUint64PathValue(r, "id")
 		if !ok {
-			slog.Error("Can't get id from mux")
-			w.WriteHeader(http.StatusBadRequest)
-			return
-		}
-		numericID, err := strconv.ParseUint(id, 10, 32)
-		if err != nil {
-			slog.Error("failed to parse hobbit id", "err", err)
+			slog.Error("Can't get id from path")
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}

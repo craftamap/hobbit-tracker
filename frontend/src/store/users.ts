@@ -12,7 +12,7 @@ export const useUsersStore = defineStore('users', {
   },
   actions: {
     async fetchUser({ id }: { id: number }) {
-      const response = await fetch(`/api/profile/${id}/`)
+      const response = await fetch(`/api/profile/${id}`)
       if (!response.ok) {
         throw new Error(response.statusText)
       }

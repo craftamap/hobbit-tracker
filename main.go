@@ -147,7 +147,6 @@ func main() {
 	rootRouter.Handle("POST /auth/login", routes.BuildHandleLogin())
 	rootRouter.Handle("POST /auth/logout", routes.BuildHandleLogout())
 	rootRouter.Handle("/api/", api.GetRoutes())
-	// routes.GetRoutes(db, log, Store)
 	rootRouter.Handle("/ws", websockets.GetRoutes())
 
 	frontend, err := frontendHandler()

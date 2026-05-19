@@ -67,7 +67,7 @@ export const useHobbitsStore = defineStore('hobbits', {
       this.setHobbits(resJson)
     },
     async fetchHobbits() {
-      const res = await fetch('/api/hobbits/')
+      const res = await fetch('/api/hobbits')
       if (!res.ok) {
         throw new Error(res.statusText)
       }
@@ -77,7 +77,7 @@ export const useHobbitsStore = defineStore('hobbits', {
       this.initialLoaded = true
     },
     async fetchHobbit(hobbitId: number) {
-      const res = await fetch(`/api/hobbits/${hobbitId}/`)
+      const res = await fetch(`/api/hobbits/${hobbitId}`)
       if (!res.ok) {
         throw new Error(res.statusText)
       }
@@ -85,7 +85,7 @@ export const useHobbitsStore = defineStore('hobbits', {
       this.setHobbit(resJson)
     },
     async fetchRecords(hobbitId: number) {
-      const res = await fetch(`/api/hobbits/${hobbitId}/records/`)
+      const res = await fetch(`/api/hobbits/${hobbitId}/records`)
       if (!res.ok) {
         throw new Error(res.statusText)
       }
@@ -98,7 +98,7 @@ export const useHobbitsStore = defineStore('hobbits', {
       value: number;
       comment: string
     }) {
-      const res = await fetch(`/api/hobbits/${id}/records/`, {
+      const res = await fetch(`/api/hobbits/${id}/records`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -146,7 +146,7 @@ export const useHobbitsStore = defineStore('hobbits', {
       this.deleteRecordForHobbit({ hobbitId, recordId })
     },
     async postHobbit({ name, description, image }: { name: string; description: string; image: string }) {
-      const res = await fetch('/api/hobbits/', {
+      const res = await fetch('/api/hobbits', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

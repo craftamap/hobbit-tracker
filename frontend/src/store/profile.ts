@@ -104,7 +104,7 @@ export const useAppPasswordStore = defineStore('apppassword', {
       this.removeAppPassword({ appPassword: deletedAppPassword })
     },
     async postAppPassword({ description }: { description: string }) {
-      const newAppPassword: AppPassword = await fetch('/api/profile/me/apppassword/', {
+      const newAppPassword: AppPassword = await fetch('/api/profile/me/apppassword', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

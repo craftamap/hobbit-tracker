@@ -91,7 +91,7 @@ func GetFollowForUser() http.HandlerFunc {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
-		slog.Info("found user", "thisUser", thisUser)
+		slog.Info("found user", "thisUser", thisUser.ID)
 
 		count := db.Model(&thisUser).Where(&otherUser).Association("Follows").Count()
 
@@ -137,7 +137,7 @@ func DeleteFollowForUser() http.HandlerFunc {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
-		slog.Info("found user", "thisUser", thisUser)
+		slog.Info("found user", "thisUser", thisUser.ID)
 
 		if err := db.Model(&thisUser).Association("Follows").Delete(&otherUser); err != nil {
 			slog.Error("failed to unfollow user", "err", err)
@@ -181,7 +181,7 @@ func PutFollowForUser() http.HandlerFunc {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
-		slog.Info("found user", "thisUser", thisUser)
+		slog.Info("found user", "thisUser", thisUser.ID)
 
 		// check if we already follow the other user
 		for _, follow := range thisUser.Follows {

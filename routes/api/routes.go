@@ -41,15 +41,15 @@ func GetRoutes() http.Handler {
 	apiRouter.Handle("GET /api/profile/me/apppassword", authMiddlewareBuilder.Build(profile.BuildHandleGetAppPasswords()))
 	apiRouter.Handle("POST /api/profile/me/apppassword", authMiddlewareBuilder.Build(profile.BuildHandlePostAppPassword()))
 	apiRouter.Handle("DELETE /api/profile/me/apppassword/{id}", authMiddlewareBuilder.Build(profile.BuildHandleDeleteAppPassword()))
-	apiRouter.Handle("GET /api/profile/{id}/", authMiddlewareBuilder.Build(profile.GetOthersUserInfo()))
+	apiRouter.Handle("GET /api/profile/{id}", authMiddlewareBuilder.Build(profile.GetOthersUserInfo()))
 	apiRouter.Handle("GET /api/profile/{id}/follow", authMiddlewareBuilder.Build(profile.GetFollowForUser()))
 	apiRouter.Handle("PUT /api/profile/{id}/follow", authMiddlewareBuilder.Build(profile.PutFollowForUser()))
 	apiRouter.Handle("DELETE /api/profile/{id}/follow", authMiddlewareBuilder.Build(profile.DeleteFollowForUser()))
 	apiRouter.Handle("GET /api/profile/{id}/hobbits", authMiddlewareBuilder.Build(profile.GetOthersHobbits()))
 
-	//f := handlers.ContentTypeHandler(apiRouter, "application/json")
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Add("Content-Type", "application/json")
+		w.Header().Add("Accept", "application/json")
 		apiRouter.ServeHTTP(w, r)
 	})
 	return handler

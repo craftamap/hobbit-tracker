@@ -145,7 +145,7 @@ func main() {
 	rootRouter := http.NewServeMux()
 
 	rootRouter.Handle("POST /auth/login", routes.BuildHandleLogin())
-	rootRouter.Handle("POST /auth/logout", routes.BuildHandleLogout())
+	rootRouter.Handle("GET /auth/logout", routes.BuildHandleLogout())
 	rootRouter.Handle("/api/", api.GetRoutes())
 	rootRouter.Handle("/ws", websockets.GetRoutes())
 

@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"regexp"
 	"strconv"
+	"strings"
 )
 
 func GetUint64PathValue(req *http.Request, name string) (uint64, bool) {
@@ -27,4 +28,11 @@ func GetUuidPathValue(req *http.Request, name string) (string, bool) {
 		return "", false
 	}
 	return value, true
+}
+
+func IsContentType(contentTypeHeader string, contentType string) bool {
+	if i := strings.IndexRune(contentTypeHeader, ';'); i != -1 {
+		contentTypeHeader = contentTypeHeader[0:i]
+	}
+	return contentTypeHeader == contentType
 }

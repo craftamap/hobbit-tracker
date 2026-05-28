@@ -1,8 +1,10 @@
 package api
 
 import (
+	"fmt"
 	"net/http"
 
+	"github.com/craftamap/hobbit-tracker/httputil"
 	"github.com/craftamap/hobbit-tracker/middleware/auth"
 	authApi "github.com/craftamap/hobbit-tracker/routes/api/auth"
 	"github.com/craftamap/hobbit-tracker/routes/api/hobbits"
@@ -49,8 +51,19 @@ func GetRoutes() http.Handler {
 
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Add("Content-Type", "application/json")
-		w.Header().Add("Accept", "application/json")
 		apiRouter.ServeHTTP(w, r)
 	})
-	return handler
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if !(r.Method == http.MethodPut || r.Method == http.MethodPost || r.Method == http.MethodPatch) {
+			handler.ServeHTTP(w, r)
+			return
+		}
+
+		if httputil.IsContentType(r.Header.Get("Content-Type"), "application/json") {
+			handler.ServeHTTP(w, r)
+			return
+		}
+
+		http.Error(w, fmt.Sprintf("Unsupported content type %q; expected application/json", r.Header.Get("Content-Type")), http.StatusUnsupportedMediaType)
+	})
 }

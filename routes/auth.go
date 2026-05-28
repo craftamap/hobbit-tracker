@@ -32,12 +32,7 @@ func BuildHandleLogout() http.HandlerFunc {
 			w.WriteHeader(http.StatusInternalServerError)
 		}
 
-		redirectPath := r.PostForm.Get("redirect")
-		if redirectPath == "" {
-			redirectPath = "/"
-		}
-
-		w.Header().Add("Location", redirectPath)
+		w.Header().Add("Location", "/")
 		w.WriteHeader(http.StatusFound)
 
 		slog.Info("Logged out user", "username", username)
@@ -101,12 +96,7 @@ func BuildHandleLogin() http.HandlerFunc {
 			slog.Warn("failed to save session", "err", err)
 		}
 
-		redirectPath := r.PostForm.Get("redirect")
-		if redirectPath == "" {
-			redirectPath = "/"
-		}
-
-		w.Header().Add("Location", redirectPath)
+		w.Header().Add("Location", "/")
 		w.WriteHeader(http.StatusFound)
 
 		slog.Info("Logged in user", "username", username)

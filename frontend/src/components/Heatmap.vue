@@ -6,20 +6,26 @@
       <text
         x="-30"
         fill="currentColor"
-        y="35"
+        y="15"
       >Mo
       </text>
       <text
         x="-30"
         fill="currentColor"
-        y="75"
+        y="55"
       >We
       </text>
       <text
         x="-30"
         fill="currentColor"
-        y="115"
+        y="95"
       >Fr
+      </text>
+      <text
+        x="-30"
+        fill="currentColor"
+        y="135"
+      >So
       </text>
       <template
         v-for="(date, idx) in dates"
@@ -68,20 +74,7 @@ export default defineComponent({
     const uid = ref(crypto.randomUUID())
     const tz = Temporal.Now.timeZoneId()
 
-    const mappedData = computed(() => {
-      const map = new Map<string, number>();
-      let max = 0;
-      for (const entry of data.value || []) {
-        if (entry.count > max) {
-          max = entry.count;
-        }
-        const dateStr = entry.date.toString();
-        map.set(dateStr, entry.count || 0)
-      }
-      return { map, max }
-    })
-
-    const dates = computed(() => {
+    const dateValues = computed(() => {
       const today = Temporal.Now.plainDateISO(tz)
       // End of this week (Sunday)
       const endDate = today.add({ days: 7 - today.dayOfWeek })
@@ -94,8 +87,27 @@ export default defineComponent({
         dates.push(curr)
         curr = curr.add({ days: 1 })
       }
-      return dates
+      return { dates, startDate, endDate }
+    });
+    const { dates, startDate, endDate } = toRefs(dateValues.value);
+
+    const mappedData = computed(() => {
+      const map = new Map<string, number>();
+      let max = 0;
+      for (const entry of data.value || []) {
+        if (Temporal.PlainDate.compare(entry.date, startDate.value) < 0
+          || Temporal.PlainDate.compare(entry.date, endDate.value) > 0) {
+          continue
+        }
+        if (entry.count > max) {
+          max = entry.count;
+        }
+        const dateStr = entry.date.toString();
+        map.set(dateStr, entry.count || 0)
+      }
+      return { map, max }
     })
+
 
     const prefersDark = ref(window.matchMedia('(prefers-color-scheme: dark)').matches)
 
